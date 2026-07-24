@@ -11,6 +11,20 @@ const manifestPath = path.join(rootDir, manifestRelativePath);
 const readJson = async (relativePath) =>
   JSON.parse(await readFile(path.join(rootDir, relativePath), "utf8"));
 
+const readReleaseNodeVersion = async () => {
+  const rawVersion = await readFile(path.join(rootDir, ".nvmrc"), "utf8");
+  const version = rawVersion.trim();
+
+  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version)) {
+    throw new Error(".nvmrc must contain one exact stable Node.js version");
+  }
+  if (rawVersion !== `${version}\n`) {
+    throw new Error(".nvmrc must contain only the exact Node.js version followed by a newline");
+  }
+
+  return version;
+};
+
 const listIndexEntries = () => {
   const output = execFileSync("git", ["ls-files", "--stage", "-z"], {
     cwd: rootDir,
@@ -79,6 +93,7 @@ const hashReleaseInputs = async (files) => {
 
 const buildManifest = async () => {
   const [
+    releaseNodeVersion,
     rootPackage,
     webPackage,
     desktopPackage,
@@ -88,6 +103,7 @@ const buildManifest = async () => {
     referenceRun,
     visualManifest,
   ] = await Promise.all([
+    readReleaseNodeVersion(),
     readJson("package.json"),
     readJson("apps/web/package.json"),
     readJson("apps/desktop/package.json"),
@@ -103,6 +119,11 @@ const buildManifest = async () => {
   const productionReferenceCaseCount = referenceCases.filter(
     (visualCase) => visualCase.kind !== "source-defect",
   ).length;
+  const nodeEngineCompatibility = rootPackage.engines?.node;
+
+  if (typeof nodeEngineCompatibility !== "string" || nodeEngineCompatibility.length === 0) {
+    throw new Error("package.json#engines.node must declare Node.js compatibility");
+  }
 
   return {
     schema: "dougoos.release-manifest.v1",
@@ -117,7 +138,8 @@ const buildManifest = async () => {
       sha256: await hashReleaseInputs(files),
     },
     runtime: {
-      node: rootPackage.engines.node,
+      node: releaseNodeVersion,
+      nodeEngineCompatibility,
       pnpm: rootPackage.packageManager,
       chromium: referenceRun.browser.version,
     },

@@ -1,6 +1,6 @@
 # DougoOS P0 + P1 Agents 聊天 MVP 交付计划
 
-- 状态：P0/P1 产品实现历史 checkpoint 已验证；当前 RC 离线门禁全绿，Git release baseline 等待独立 release review
+- 状态：P0/P1 产品实现历史 checkpoint 已验证；当前 RC 离线门禁全绿，Git release baseline 的 review 01 修复等待独立复审
 - 日期：2026-07-24
 - Goal 完成边界：`P0 骨架 + P1 ACP 聊天 + prototypes/agentos UI 一比一复刻`
 - 当前事实：P0/P1 产品任务、版本化、clean-checkout CI、release manifest 和 RC 离线门禁均已完成；
@@ -9,8 +9,8 @@
 - 当前 RC 证据：`pnpm check` 的 319 个包级测试、E2E 15/15、visual 9/9
   （156 个 prototype reference、155 个 production reference、16 个 production-only）和
   8 个 build-smoke ESM 入口均通过；没有 visual blocking finding
-- 发布状态：`release-baseline-001` 仍为 `in-progress`，尚未执行独立 release review，也未创建
-  `p0-p1-mvp` tag
+- 发布状态：`release-baseline-001` 仍为 `in-progress`；独立 review 01 因 Node pin 不一致而
+  blocked，当前修复等待独立复审，尚未创建 `p0-p1-mvp` tag
 - 本文件职责：保留 P0/P1 产品 Goal 的范围、任务依赖、实现顺序、验证门禁和最终完成标准；
   不把产品工作区验证等同于可回退的 Git release baseline
 

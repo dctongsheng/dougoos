@@ -6,11 +6,12 @@
   },
   "source": {
     "algorithm": "sha256(path-length:path:type:size:content; git releasable inputs; manifest excluded)",
-    "fileCount": 585,
-    "sha256": "f774fcd24dd8b2961646e734df091764d07fbc111677357b6aa0387199238a1b"
+    "fileCount": 586,
+    "sha256": "2752d5038774ca494b7cd968f42493321fbaeac3328271919ac9edb19e1597d4"
   },
   "runtime": {
-    "node": ">=22.13.0",
+    "node": "22.23.1",
+    "nodeEngineCompatibility": ">=22.13.0",
     "pnpm": "pnpm@11.16.0",
     "chromium": "149.0.7827.55"
   },

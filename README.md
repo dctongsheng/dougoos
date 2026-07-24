@@ -6,11 +6,13 @@ renderer、Core/ACP/provider/storage packages，以及严格的 TypeScript、wor
 
 - 当前项目版本：`0.1.0`
 - P0/P1 产品实现：历史 checkpoint 已验证
-- `p0-p1-mvp` release baseline：`in-progress`；当前 RC 离线门禁全绿，等待独立 release review，未创建 tag
+- `p0-p1-mvp` release baseline：`in-progress`；当前 RC 离线门禁全绿，review 01 的 Node pin
+  修复等待独立复审，未创建 tag
 
 ## 工具链
 
-- Node.js `>=22.13.0`
+- Release/CI Node.js：`.nvmrc` 是 exact version 的唯一真源
+- Node.js package compatibility：`>=22.13.0`
 - pnpm `11.16.0`
 
 ```bash
@@ -135,7 +137,8 @@ README 一起纳入 source hash；正式应用不加载或嵌入这些文件。�
 
 ## Release baseline
 
-轻量 release manifest 记录版本、Git 可发布输入 hash、锁定工具链/关键依赖和通过的测试摘要。
+轻量 release manifest 从 `.nvmrc` 读取 exact Node release version，并另列 package engine
+compatibility；同时记录版本、Git 可发布输入 hash、锁定工具链/关键依赖和通过的测试摘要。
 它不包含 `.artifacts/`、视觉 actual/diff、数据库、日志或 Provider 诊断：
 
 ```bash

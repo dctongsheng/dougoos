@@ -9,8 +9,8 @@ ACP → Agent → Journal → SSE → UI 全链路；Landing 与 health-only Wor
 <https://dougoos.com>。
 
 2026-07-24 的 release candidate 离线门禁现已全绿，视觉修复也通过独立
-`ui-regression-001` review。`release-baseline-001` 仍保持 `in-progress`，等待独立 release
-review；尚未创建 `p0-p1-mvp` tag。
+`ui-regression-001` review。`release-baseline-001` review 01 因 Node pin 不一致而 blocked；
+当前修复等待独立复审，任务保持 `in-progress`，尚未创建 `p0-p1-mvp` tag。
 
 ## 自动化与构建
 
@@ -118,10 +118,12 @@ Provider 完整 Desktop UI 链路的完成下限。
 
 - 项目版本：`0.1.0`
 - release name：`p0-p1-mvp`
+- Release/CI Node：`.nvmrc` 是 exact version 唯一真源；package engine compatibility
+  保持 `>=22.13.0`
 - clean-checkout workflow：已加入 release candidate
 - 轻量 release manifest：已加入 release candidate，可用 `pnpm release:manifest:check` 校验
 - 当前离线门禁：`pnpm check`、E2E、视觉回归和 build smoke 全部通过
-- 独立 release review：待执行
+- 独立 release review：review 01 为 `blocked`；Node pin 修复等待独立复审
 - Git tag：尚未创建；必须在独立 release review 通过后创建
 
 ## 启动
