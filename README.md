@@ -6,8 +6,8 @@ renderer、Core/ACP/provider/storage packages，以及严格的 TypeScript、wor
 
 - 当前项目版本：`0.1.0`
 - P0/P1 产品实现：历史 checkpoint 已验证
-- `p0-p1-mvp` release baseline：`in-progress`；当前 RC 离线门禁全绿，review 01 的 Node pin
-  修复等待独立复审，未创建 tag
+- `p0-p1-mvp` release baseline：`in-progress`；review 02 已通过，clean-checkout `check`
+  顺序修复等待 exact-Node 最终复验，未创建 tag
 
 ## 工具链
 
@@ -96,6 +96,7 @@ pnpm --filter @dougoos/cloud exec wrangler deploy
 ## 常用验证
 
 ```bash
+pnpm check
 pnpm lint
 pnpm format:check
 pnpm check:workspace
@@ -110,6 +111,9 @@ pnpm smoke:build
 pnpm smoke:package
 ```
 
+- `check` 可直接在 frozen clean checkout 运行：lint、format 和 workspace contract 通过后，
+  先按 workspace 拓扑构建 `dist`，再执行全部 typecheck 和 package tests；不依赖旧构建产物，
+  也不跳过类型检查。
 - `test:e2e` 构建正式 Web bundle，并在真实 Chromium 中验证键盘、审批、响应式、持久状态、
   本地副作用边界与 release URL 安全。
 - `test:desktop` 通过 Playwright 启动 Electron，验证 renderer 与安全配置。

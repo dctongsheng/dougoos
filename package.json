@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "check": "pnpm lint && pnpm format:check && pnpm check:workspace && pnpm -r typecheck && pnpm -r test && pnpm -r build",
+    "check": "pnpm lint && pnpm format:check && pnpm check:workspace && pnpm -r build && pnpm -r typecheck && pnpm -r test",
     "check:workspace": "node tooling/check-workspace.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

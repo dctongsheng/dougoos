@@ -9,8 +9,9 @@ ACP → Agent → Journal → SSE → UI 全链路；Landing 与 health-only Wor
 <https://dougoos.com>。
 
 2026-07-24 的 release candidate 离线门禁现已全绿，视觉修复也通过独立
-`ui-regression-001` review。`release-baseline-001` review 01 因 Node pin 不一致而 blocked；
-当前修复等待独立复审，任务保持 `in-progress`，尚未创建 `p0-p1-mvp` tag。
+`ui-regression-001` review，release review 02 也已通过。随后 final exact-Node clean checkout
+暴露根 `check` 在首次 build 前 typecheck 的顺序缺陷；当前修复等待 exact-Node 最终复验，
+任务保持 `in-progress`，尚未创建 `p0-p1-mvp` tag。
 
 ## 自动化与构建
 
@@ -35,7 +36,8 @@ pnpm --filter @dougoos/providers run doctor all
 pnpm --filter @dougoos/core run smoke:providers all
 ```
 
-- `pnpm check`：lint、format、workspace 拓扑、8 个包 typecheck、319 个包级测试和所有包构建通过。
+- `pnpm check`：可从无 `dist` 的 frozen clean checkout 直接运行；lint、format、workspace
+  contract 后先按拓扑构建，再执行 8 个包 typecheck 和 319 个包级测试，不依赖旧构建产物。
 - Chromium E2E：完整 15/15 通过。
 - Electron E2E：3/3 离线门禁通过；真实 Provider case 默认跳过，并由独立在线命令 1/1 通过。
 - build smoke：8 个编译后 ESM 入口全部可导入。
@@ -122,8 +124,9 @@ Provider 完整 Desktop UI 链路的完成下限。
   保持 `>=22.13.0`
 - clean-checkout workflow：已加入 release candidate
 - 轻量 release manifest：已加入 release candidate，可用 `pnpm release:manifest:check` 校验
-- 当前离线门禁：`pnpm check`、E2E、视觉回归和 build smoke 全部通过
-- 独立 release review：review 01 为 `blocked`；Node pin 修复等待独立复审
+- 当前离线门禁：当前 Node 的全新 clone 已直接验证 `pnpm check`；exact Node 22.23.1
+  全门禁最终复验待 orchestrator 执行
+- 独立 release review：review 02 为 `pass`；后续 clean-checkout 顺序修复等待最终复验
 - Git tag：尚未创建；必须在独立 release review 通过后创建
 
 ## 启动

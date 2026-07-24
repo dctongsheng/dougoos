@@ -31,7 +31,9 @@
 
 ## 集成关系
 
-1. `package.json` scripts 被 CI workflow 和本地 clean-checkout 共同调用。
+1. `package.json` scripts 被 CI workflow 和本地 clean-checkout 共同调用；根 `check` 在
+   workspace contract 后先按拓扑构建各包 `dist`，再运行全部 typecheck 和 package tests，
+   确保首次 clean checkout 不依赖旧构建产物。
 2. `tests/visual/reference/` 是视觉回归输入；`tests/visual/production/actual` 与 `diff` 只是可再生输出。
 3. release manifest 对 Git 可发布输入计算 SHA-256；manifest 自身不参与该 hash，避免自引用。
 4. `docs/plan/tasks/release-baseline-001.md` 定义范围；独立 reviewer 将结论写入 `docs/plan/reviews/`。
