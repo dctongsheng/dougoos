@@ -182,11 +182,20 @@ test("approval is single-use and notification click marks read while navigating"
   await expect(page.locator('[data-screen-label="Agent 会话"]')).toBeVisible();
   await expect(notification).toContainText("1");
 
+  const command = "npx prisma migrate deploy";
+  await expect(page.locator(".approval-message > code")).toHaveText(`$ ${command}`);
   await page.getByRole("button", { exact: true, name: "批准执行" }).click();
   await expect(page.getByText("✓ 已批准,执行中", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { exact: true, name: "批准执行" })).toHaveCount(0);
   await expect(page.getByRole("button", { exact: true, name: "拒绝" })).toHaveCount(0);
-  await expect(page.getByText("npx prisma migrate deploy", { exact: false })).toHaveCount(2);
+  const approvedTool = page.locator("details.tool-message").filter({
+    has: page.locator(".tool-message-preview", { hasText: command }),
+  });
+  await expect(approvedTool.locator(".tool-message-preview")).toBeVisible();
+  const toolInput = approvedTool.locator('[data-tool-detail="input"]');
+  await expect(toolInput).toBeHidden();
+  await approvedTool.locator("summary").click();
+  await expect(toolInput).toBeVisible();
 });
 
 test("constrained sidebar remains reachable and Settings visibility changes the live shell", async ({

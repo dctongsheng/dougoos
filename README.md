@@ -4,6 +4,10 @@ DougoOS 是一个本地优先的桌面 AgentOS monorepo。仓库包含 Electron 
 renderer、Core/ACP/provider/storage packages，以及严格的 TypeScript、workspace、构建、E2E
 和视觉证据门禁。
 
+- 当前项目版本：`0.1.0`
+- P0/P1 产品实现：历史 checkpoint 已验证
+- `p0-p1-mvp` release baseline：当前视觉门禁 blocked，尚未通过独立 review，未创建 tag
+
 ## 工具链
 
 - Node.js `>=22.13.0`
@@ -109,8 +113,9 @@ pnpm smoke:package
 - `test:desktop` 通过 Playwright 启动 Electron，验证 renderer 与安全配置。
 - `test:desktop:real` 调用本机已认证的 Claude Code，验证可见 UI → Core → ACP → Agent →
   Journal → SSE → UI，并覆盖持久化、审批和取消；它不是离线 CI 门禁。
-- `test:visual` 先构建正式与 visual-only 两个隔离输出，再验证 140 个
-  prototype-to-production reference case 和 15 个 production-only 语义 case。
+- `test:visual` 先构建正式与 visual-only 两个隔离输出，再验证 156 个 prototype
+  reference case、155 个 production reference case 和 16 个 production-only
+  语义/副作用 case，共 171 个生产 case。
 - `smoke:build` 验证 workspace TypeScript 产物可作为 ESM 导入。
 - `smoke:package` 验证 Electron 打包产物合同。
 
@@ -127,6 +132,26 @@ stopReason、消息种类和结构化错误码。
 视觉真源位于 `prototypes/agentos/`。reference evidence 会把两个原型 HTML、`support.js` 和原型
 README 一起纳入 source hash；正式应用不加载或嵌入这些文件。生产页面源码在
 `apps/web/src/saas/`，visual-only 驱动在 `apps/web/src/visual/`，两者通过构建与静态门禁隔离。
+
+## Release baseline
+
+轻量 release manifest 记录版本、Git 可发布输入 hash、锁定工具链/关键依赖和通过的测试摘要。
+它不包含 `.artifacts/`、视觉 actual/diff、数据库、日志或 Provider 诊断：
+
+```bash
+pnpm release:manifest:check
+```
+
+需要在有意改变发布输入后重建 manifest 时运行：
+
+```bash
+pnpm release:manifest
+pnpm release:manifest:check
+```
+
+`.github/workflows/clean-checkout.yml` 从 checkout 和 frozen lockfile 安装开始，仅运行无凭据
+门禁：manifest check、`pnpm check`、E2E、视觉回归和 build smoke。真实 Provider、
+Cloudflare deploy、桌面签名与公证不进入该 CI。
 
 完整的 P0 + P1 自动化、视觉、真实 Provider、打包与生产 Cloud 证据见
 [最终验证报告](./docs/VALIDATION_REPORT.md)。

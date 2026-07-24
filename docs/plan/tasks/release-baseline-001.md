@@ -1,7 +1,7 @@
 ---
 id: release-baseline-001
 scope: release
-status: ready
+status: in-progress
 depends-on: []
 ---
 
@@ -33,6 +33,7 @@ depends-on: []
 - `docs/VALIDATION_REPORT.md`
 - `docs/plan/`
 - `release/`
+- `tests/e2e/saas-ui.spec.ts`
 - `tooling/release-manifest.mjs`
 
 ## requirements
@@ -55,6 +56,7 @@ depends-on: []
    - package tests、E2E、视觉案例和 build smoke 摘要。
 8. hash 只覆盖 Git 可发布输入，并排除 manifest 自身；clean checkout 中重新计算必须一致。
 9. 实现完成时任务保持 `in-progress`，由独立 review 和最终 clean-checkout 门禁决定是否转为 `done`。
+10. 若完整门禁暴露任务开始前已存在且可确定复现的测试合同漂移，可以在本任务内做最小测试修复；不得删除断言或改弱产品合同。审批场景必须分别验证可见的 approval command、折叠态 tool preview，以及展开前不可见、展开后可见的 tool input，禁止再用跨层级文本总数作为合同。
 
 ## verification
 
@@ -75,4 +77,3 @@ docs/plan/reviews/release-baseline-001-01.md
 ```
 
 Review 记录必须逐条区分 blocking/non-blocking finding，并给出 `pass` 或 `blocked` 结论。
-

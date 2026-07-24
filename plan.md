@@ -1,10 +1,16 @@
 # DougoOS P0 + P1 Agents 聊天 MVP 交付计划
 
-- 状态：Ready
-- 日期：2026-07-23
+- 状态：P0/P1 产品实现历史 checkpoint 已验证；Git release baseline 因当前视觉门禁失败保持进行中
+- 日期：2026-07-24
 - Goal 完成边界：`P0 骨架 + P1 ACP 聊天 + prototypes/agentos UI 一比一复刻`
-- 当前起点：仓库尚未初始化，现有内容只有架构文档、ADR、开发规范、HTML 原型和参考代码
-- 本文件职责：规定本 Goal 的范围、任务依赖、实现顺序、验证门禁和最终完成标准
+- 当前事实：P0/P1 产品任务与本机门禁均已完成；版本化、clean-checkout CI、release
+  manifest、独立 release review 和 tag 由
+  [`release-baseline-001`](docs/plan/tasks/release-baseline-001.md) 单独收口
+- 当前 release blocker：`pnpm test:visual` 的 reference stability 通过，但 production
+  evidence 因 8-provider UI 与已提交 6-agent prototype baseline 漂移、production-only
+  七类消息缺少 `think` 而失败；不得通过更新 reference 或放宽阈值掩盖
+- 本文件职责：保留 P0/P1 产品 Goal 的范围、任务依赖、实现顺序、验证门禁和最终完成标准；
+  不把产品工作区验证等同于可回退的 Git release baseline
 
 ## 1. Goal 结果
 
@@ -323,12 +329,9 @@ planned → in_development → awaiting_verification
 
 若执行环境允许且权限策略允许，可把 Develop 与 Verify 交给不同 Agent；否则也必须串行执行两个独立 pass，不能用“代码已写完”代替审查。
 
-当前目录不是 Git 仓库，因此：
-
-- 不依赖 branch/worktree/commit 才能推进；
-- 同一时刻只允许一个写任务，避免共享目录路径冲突；
-- 未经用户明确要求，不初始化远程仓库、不 commit、不 push、不发 PR；
-- 如果后续初始化 Git，可在路径无重叠时并行开发，但验证门禁不变。
+仓库现已初始化 Git。后续任务使用 `docs/plan/` 的 develop/verify/review 流程；路径有重叠时
+仍须串行，未经用户明确要求不 push、不发 PR。P0/P1 产品任务的 `verified` 只说明本节
+验证合同已经满足，不代表 release commit、tag 或 clean-checkout review 已完成。
 
 ### 7.3 依赖和版本
 
@@ -383,9 +386,11 @@ planned → in_development → awaiting_verification
 | `chat-ui-001` | 原型 Agent 会话页的真实聊天闭环 | `web-001`, `chat-integration-001`, `saas-ui-001` | verified |
 | `real-e2e-001` | 真实 Agent 与恢复场景验收 | `desktop-001`, `chat-ui-001` | verified |
 | `cloud-001` | Landing 托管、Cloud health 桩与 device_id 边界 | `repo-001`, `shared-001`, `landing-ui-001` | verified |
-| `release-001` | 全量验证、打包 smoke、文档收口 | 以上全部 | verified |
+| `release-001` | P0/P1 工作区全量验证、打包 smoke、文档收口 | 以上全部 | verified |
 
-无 Git/worktree 隔离时按依赖顺序串行执行。`saas-ui-001` 与 `landing-ui-001`、`web-001` 与 `desktop-001`、`acp-001` 与前端工作在理论上可并行，但只有在路径隔离且无共享配置写冲突时才允许。
+本表记录的是 P0/P1 产品实现。Git/CI/manifest/review/tag 发布基线不在本表中，其状态以
+[`docs/plan/tasks/release-baseline-001.md`](docs/plan/tasks/release-baseline-001.md)
+为准。
 
 ## 10. 任务说明
 
@@ -686,7 +691,7 @@ planned → in_development → awaiting_verification
 - health smoke 通过。
 - 搜索构建产物和日志，确认无 prompt/cwd/token 被构造成云端 payload。
 
-### `release-001` — 全量验证、打包 smoke、文档收口
+### `release-001` — P0/P1 工作区全量验证、打包 smoke、文档收口
 
 范围：
 
@@ -699,6 +704,8 @@ planned → in_development → awaiting_verification
 验证：
 
 - 只有第 12 节全部勾选后，`release-001` 才能为 `verified`。
+- 该状态不替代 clean checkout、独立 release review 或 `p0-p1-mvp` tag；这些由
+  `release-baseline-001` 完成。
 
 ## 11. 验证矩阵
 
@@ -737,6 +744,9 @@ pnpm smoke:package
 具体包可以增加更窄的测试命令，但不能删减上述全量门禁。若某命令名称在 `repo-001` 中合理调整，必须同步更新本节和根 README，且保留等价覆盖。
 
 ## 12. Definition of Done
+
+本节是 P0/P1 产品 Goal 的完成标准。可回退发布版本还必须通过
+`release-baseline-001` 的 manifest、clean-checkout CI、独立 review 与 tag 门禁。
 
 ### 12.1 构建与质量
 

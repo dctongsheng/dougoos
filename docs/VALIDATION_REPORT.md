@@ -4,30 +4,39 @@
 
 ## 结论
 
-`plan.md` 定义的 P0 + P1 已完成。真实 Claude Code 已通过
-Desktop UI → Core → ACP → Agent → Journal → SSE → UI 全链路；Landing 与 health-only
-Worker 已发布到
-<https://dougoos-agent-os.piaoya192.workers.dev>。当前没有 blocking finding。
+P0/P1 功能实现的历史 checkpoint 已完成，真实 Claude Code 已通过 Desktop UI → Core →
+ACP → Agent → Journal → SSE → UI 全链路；Landing 与 health-only Worker 已发布到
+<https://dougoos.com>。
+
+2026-07-24 的 release baseline 重验发现当前 production UI 与已提交视觉合同存在
+blocking drift。因此本报告不再声称当前 release candidate 全绿；`release-baseline-001`
+保持 `in-progress`，尚未通过独立 review，也没有创建 `p0-p1-mvp` tag。
 
 ## 自动化与构建
 
-以下命令在当前 workspace 通过：
+Release baseline 本轮实际执行：
 
 ```bash
 pnpm check
 pnpm test:e2e
-pnpm test:desktop
-pnpm test:desktop:real
 pnpm test:visual
 pnpm smoke:build
+```
+
+其中 `pnpm check`、E2E 和 build smoke 通过，视觉结果见下一节。历史 checkpoint 还保存了
+以下本机/在线验证记录，本轮 release baseline 不把它们加入无凭据 CI：
+
+```bash
+pnpm test:desktop
+pnpm test:desktop:real
 pnpm smoke:package
 pnpm smoke:package:provider
 pnpm --filter @dougoos/providers run doctor all
 pnpm --filter @dougoos/core run smoke:providers all
 ```
 
-- `pnpm check`：lint、format、workspace 拓扑、8 个包 typecheck、287 个包级测试和所有包构建通过。
-- Chromium E2E：14/14 通过。
+- `pnpm check`：lint、format、workspace 拓扑、8 个包 typecheck、317 个包级测试和所有包构建通过。
+- Chromium E2E：旧的跨层文本计数合同已按可见性语义修复；focused 1/1、完整 14/14 通过。
 - Electron E2E：3/3 离线门禁通过；真实 Provider case 默认跳过，并由独立在线命令 1/1 通过。
 - build smoke：8 个编译后 ESM 入口全部可导入。
 - package smoke：macOS arm64、Electron 43.2.0；正式 unsigned app 启动、Core ready、
@@ -35,13 +44,23 @@ pnpm --filter @dougoos/core run smoke:providers all
 
 ## 视觉回归
 
-`pnpm test:visual` 最终运行 9/9 通过：
+保存的 reference 清单与案例规模：
 
 - 156 个 prototype reference case；
 - 155 个 production reference case；
 - 16 个 production-only 语义/副作用 case；
 - Chromium 149.0.7827.55；
 - SSIM 下限 0.995、最大差异像素比例 0.005、几何容差 1 px、单通道颜色容差 1。
+
+Release baseline 当前重验为 7/9，通过的项目包含 committed reference 的两次 live
+stability check；失败的 2 项是 production full evidence 与 production-only probes：
+
+- 8-provider 当前 UI 相对 6-agent prototype baseline 发生大范围布局漂移；Dashboard
+  screen height 偏差 166 px，Settings 多页偏差 134 px，伴随 SSIM/diff 超阈值；
+- `saas-production-seven-message-types` 实际为
+  `approval/diff/note/text/tool/user`，缺少合同要求的 `think`。
+
+这是 release blocking finding。不得更新 reference、扩大阈值或删除断言来规避。
 
 证据保存在：
 
@@ -51,6 +70,9 @@ pnpm --filter @dougoos/core run smoke:providers all
 - `tests/visual/production/metadata/`
 - `tests/visual/reference/run.json`
 - `tests/visual/production/run.json`
+
+其中 reference screenshots/metadata 与 reference run 是 clean-checkout 的已提交输入；
+production actual/diff/metadata/run 是本地可再生证据，受 `.gitignore` 保护，不进入 release。
 
 ## 真实 Provider
 
@@ -77,7 +99,8 @@ Provider 完整 Desktop UI 链路的完成下限。
 
 ## Cloud 与隐私边界
 
-Cloudflare Worker version：`527ecb65-f694-4ff0-aa32-0e16a11389ee`。
+当前自定义域名配置：`dougoos.com`。最近一次绑定域名后的 Worker version：
+`13058080-1268-42fe-833f-d90bdc57502a`。
 
 生产 smoke：
 
@@ -91,6 +114,16 @@ Cloudflare Worker version：`527ecb65-f694-4ff0-aa32-0e16a11389ee`。
 发布产物断言拒绝 ingest 路由、请求体读取、prompt/cwd/token/deviceId/message/toolContent
 字段以及 D1/KV/Queue/R2 绑定。本期没有账号、真实 Cloud Sync、遥测、业务 payload 或
 后台上报调度；本地 device_id 是可重置的伪匿名标识。
+
+## Release baseline 状态
+
+- 项目版本：`0.1.0`
+- release name：`p0-p1-mvp`
+- clean-checkout workflow：已加入 release candidate
+- 轻量 release manifest：已加入 release candidate，可用 `pnpm release:manifest:check` 校验
+- 当前离线门禁：`pnpm check`、E2E、build smoke 通过；视觉回归 blocked
+- 独立 release review：待执行
+- Git tag：必须在独立 review 与 clean-checkout 门禁通过后创建
 
 ## 启动
 

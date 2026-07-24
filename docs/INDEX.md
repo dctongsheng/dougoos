@@ -22,4 +22,4 @@
 - [Release Baseline 任务](./plan/tasks/release-baseline-001.md)
 - [Backlog](./plan/backlog.md)：已接受的非阻塞事项。
 - [P0/P1 验证报告](./VALIDATION_REPORT.md)
-
+- [P0/P1 Release Manifest](../release/p0-p1-mvp.json)：版本、发布输入 hash、锁定工具链与测试摘要。

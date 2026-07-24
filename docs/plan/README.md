@@ -31,7 +31,7 @@ pending -> ready -> in-progress -> done
 
 | ID | 目标 | 状态 |
 |---|---|---|
-| [`release-baseline-001`](./tasks/release-baseline-001.md) | 建立 P0/P1 可复现、可回退的发布基线 | ready |
+| [`release-baseline-001`](./tasks/release-baseline-001.md) | 建立 P0/P1 可复现、可回退的发布基线 | in-progress |
 
 ## Release Baseline 门禁
 
@@ -42,4 +42,3 @@ pending -> ready -> in-progress -> done
 3. `pnpm check`、`pnpm test:e2e`、`pnpm test:visual`、`pnpm smoke:build` 通过。
 4. clean-checkout CI 覆盖相同离线门禁。
 5. 独立 release review 结论为 `pass`，且没有 blocking finding。
-

@@ -1,6 +1,7 @@
 {
   "name": "dougoos",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Local-first desktop AgentOS MVP with Electron, ACP providers, SQLite recovery, and deterministic visual regression gates.",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.16.0",
@@ -16,6 +17,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
     "package:desktop": "pnpm --filter @dougoos/web build && pnpm --filter @dougoos/desktop... build && node tooling/package-desktop.mjs",
+    "release:manifest": "node tooling/release-manifest.mjs --write",
+    "release:manifest:check": "node tooling/release-manifest.mjs --check",
     "smoke:build": "pnpm -r build && node tests/build-smoke/smoke.mjs",
     "smoke:package": "pnpm package:desktop && node tests/package-smoke/smoke.mjs",
     "smoke:package:provider": "pnpm package:desktop && node tests/package-smoke/provider-smoke.mjs claude-code",

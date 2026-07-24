@@ -1,0 +1,54 @@
+name: Clean checkout
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clean-checkout-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-gates:
+    name: P0/P1 offline gates
+    runs-on: macos-14
+    timeout-minutes: 45
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.20.0
+
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.16.0 --activate
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install pinned Chromium
+        run: pnpm exec playwright install chromium
+
+      - name: Verify release manifest
+        run: pnpm release:manifest:check
+
+      - name: Check workspace
+        run: pnpm check
+
+      - name: Run browser E2E
+        run: pnpm test:e2e
+
+      - name: Run deterministic visual regression
+        run: pnpm test:visual
+
+      - name: Run build smoke
+        run: pnpm smoke:build
