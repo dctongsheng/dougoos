@@ -6,8 +6,8 @@
   },
   "source": {
     "algorithm": "sha256(path-length:path:type:size:content; git releasable inputs; manifest excluded)",
-    "fileCount": 582,
-    "sha256": "84dd76bd3b276a7cac38d0a18fd95f463dad4c4634447c1b7aa7997b996b54ae"
+    "fileCount": 585,
+    "sha256": "f774fcd24dd8b2961646e734df091764d07fbc111677357b6aa0387199238a1b"
   },
   "runtime": {
     "node": ">=22.13.0",
@@ -29,27 +29,24 @@
     "packageTests": {
       "command": "pnpm check",
       "packageCount": 8,
-      "passed": 317,
+      "passed": 319,
       "status": "passed"
     },
     "e2e": {
       "command": "pnpm test:e2e",
-      "passed": 14,
+      "passed": 15,
       "status": "passed"
     },
     "visual": {
       "command": "pnpm test:visual",
-      "blockingFindings": {
-        "productionReferenceDrift": true,
-        "productionSevenMessageTypesMissingThink": true
-      },
-      "playwrightTestsFailed": 2,
-      "playwrightTestsPassed": 7,
+      "blockingFindings": [],
+      "playwrightTestsFailed": 0,
+      "playwrightTestsPassed": 9,
       "playwrightTestsTotal": 9,
       "prototypeReferenceCases": 156,
       "productionReferenceCases": 155,
       "productionOnlyCases": 16,
-      "status": "blocked",
+      "status": "passed",
       "totalProductionCases": 171
     },
     "buildSmoke": {

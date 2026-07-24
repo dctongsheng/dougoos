@@ -136,27 +136,24 @@ const buildManifest = async () => {
       packageTests: {
         command: "pnpm check",
         packageCount: 8,
-        passed: 317,
+        passed: 319,
         status: "passed",
       },
       e2e: {
         command: "pnpm test:e2e",
-        passed: 14,
+        passed: 15,
         status: "passed",
       },
       visual: {
         command: "pnpm test:visual",
-        blockingFindings: {
-          productionReferenceDrift: true,
-          productionSevenMessageTypesMissingThink: true,
-        },
-        playwrightTestsFailed: 2,
-        playwrightTestsPassed: 7,
+        blockingFindings: [],
+        playwrightTestsFailed: 0,
+        playwrightTestsPassed: 9,
         playwrightTestsTotal: 9,
         prototypeReferenceCases: referenceRun.caseCount,
         productionReferenceCases: productionReferenceCaseCount,
         productionOnlyCases: productionOnlyCases.length,
-        status: "blocked",
+        status: "passed",
         totalProductionCases: productionReferenceCaseCount + productionOnlyCases.length,
       },
       buildSmoke: {

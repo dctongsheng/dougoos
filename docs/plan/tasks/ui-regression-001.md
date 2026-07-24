@@ -1,7 +1,7 @@
 ---
 id: ui-regression-001
 scope: web-visual
-status: in-progress
+status: done
 depends-on: []
 ---
 

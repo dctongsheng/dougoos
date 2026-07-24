@@ -8,9 +8,9 @@ P0/P1 功能实现的历史 checkpoint 已完成，真实 Claude Code 已通过 
 ACP → Agent → Journal → SSE → UI 全链路；Landing 与 health-only Worker 已发布到
 <https://dougoos.com>。
 
-2026-07-24 的 release baseline 重验发现当前 production UI 与已提交视觉合同存在
-blocking drift。因此本报告不再声称当前 release candidate 全绿；`release-baseline-001`
-保持 `in-progress`，尚未通过独立 review，也没有创建 `p0-p1-mvp` tag。
+2026-07-24 的 release candidate 离线门禁现已全绿，视觉修复也通过独立
+`ui-regression-001` review。`release-baseline-001` 仍保持 `in-progress`，等待独立 release
+review；尚未创建 `p0-p1-mvp` tag。
 
 ## 自动化与构建
 
@@ -23,8 +23,8 @@ pnpm test:visual
 pnpm smoke:build
 ```
 
-其中 `pnpm check`、E2E 和 build smoke 通过，视觉结果见下一节。历史 checkpoint 还保存了
-以下本机/在线验证记录，本轮 release baseline 不把它们加入无凭据 CI：
+四项离线门禁均通过，视觉结果见下一节。历史 checkpoint 还保存了以下本机/在线验证记录，
+本轮 release baseline 不把它们加入无凭据 CI：
 
 ```bash
 pnpm test:desktop
@@ -35,8 +35,8 @@ pnpm --filter @dougoos/providers run doctor all
 pnpm --filter @dougoos/core run smoke:providers all
 ```
 
-- `pnpm check`：lint、format、workspace 拓扑、8 个包 typecheck、317 个包级测试和所有包构建通过。
-- Chromium E2E：旧的跨层文本计数合同已按可见性语义修复；focused 1/1、完整 14/14 通过。
+- `pnpm check`：lint、format、workspace 拓扑、8 个包 typecheck、319 个包级测试和所有包构建通过。
+- Chromium E2E：完整 15/15 通过。
 - Electron E2E：3/3 离线门禁通过；真实 Provider case 默认跳过，并由独立在线命令 1/1 通过。
 - build smoke：8 个编译后 ESM 入口全部可导入。
 - package smoke：macOS arm64、Electron 43.2.0；正式 unsigned app 启动、Core ready、
@@ -52,15 +52,14 @@ pnpm --filter @dougoos/core run smoke:providers all
 - Chromium 149.0.7827.55；
 - SSIM 下限 0.995、最大差异像素比例 0.005、几何容差 1 px、单通道颜色容差 1。
 
-Release baseline 当前重验为 7/9，通过的项目包含 committed reference 的两次 live
-stability check；失败的 2 项是 production full evidence 与 production-only probes：
+Release candidate 当前视觉重验为 9/9，通过 committed reference 的两次 live stability
+check、production full evidence 和 production-only probes。156 个 prototype reference
+输入保持不变；155 个 production reference 与 16 个 production-only case 全部通过。当前
+没有 visual blocking finding，修复过程没有更新 reference、扩大阈值或删除断言。
 
-- 8-provider 当前 UI 相对 6-agent prototype baseline 发生大范围布局漂移；Dashboard
-  screen height 偏差 166 px，Settings 多页偏差 134 px，伴随 SSIM/diff 超阈值；
-- `saas-production-seven-message-types` 实际为
-  `approval/diff/note/text/tool/user`，缺少合同要求的 `think`。
-
-这是 release blocking finding。不得更新 reference、扩大阈值或删除断言来规避。
+独立视觉 review 记录在
+[`ui-regression-001-01.md`](./plan/reviews/ui-regression-001-01.md)，其 P3 Desktop 补充证据限制
+已归档到 [backlog](./plan/backlog.md)，不影响当前离线发布门禁。
 
 证据保存在：
 
@@ -121,9 +120,9 @@ Provider 完整 Desktop UI 链路的完成下限。
 - release name：`p0-p1-mvp`
 - clean-checkout workflow：已加入 release candidate
 - 轻量 release manifest：已加入 release candidate，可用 `pnpm release:manifest:check` 校验
-- 当前离线门禁：`pnpm check`、E2E、build smoke 通过；视觉回归 blocked
+- 当前离线门禁：`pnpm check`、E2E、视觉回归和 build smoke 全部通过
 - 独立 release review：待执行
-- Git tag：必须在独立 review 与 clean-checkout 门禁通过后创建
+- Git tag：尚未创建；必须在独立 release review 通过后创建
 
 ## 启动
 
