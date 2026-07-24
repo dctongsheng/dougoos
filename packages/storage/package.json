@@ -1,0 +1,35 @@
+{
+  "name": "@dougoos/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "debug": "pnpm run build && node dist/debug.js",
+    "inspect": "pnpm run build && node dist/db-inspect.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint src --max-warnings 0",
+    "test": "pnpm run build && vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@dougoos/shared": "workspace:*",
+    "better-sqlite3": "13.0.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13"
+  }
+}

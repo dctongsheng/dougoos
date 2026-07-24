@@ -1,0 +1,37 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+
+# Build and test output
+dist/
+coverage/
+.turbo/
+playwright-report/
+test-results/
+tests/visual/production/
+.cache/
+.artifacts/
+
+# Local runtime state
+.dev-token
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.log
+logs/
+
+# Provider diagnostics can contain machine-specific metadata.
+provider-diagnostics/
+diagnostics/provider-*.json
+
+# Local environment and editor state
+.claude/settings.local.json
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
+.vscode/

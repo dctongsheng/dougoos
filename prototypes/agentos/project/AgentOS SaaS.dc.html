@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    html,body{margin:0;padding:0;background:#0a0d0c;overflow:hidden}
+    *{box-sizing:border-box}
+    a{color:#3ddc84;text-decoration:none}
+    a:hover{color:#8df0b8}
+    ::selection{background:rgba(61,220,132,.25)}
+    ::-webkit-scrollbar{width:8px;height:8px}
+    ::-webkit-scrollbar-thumb{background:rgba(140,160,150,.28);border-radius:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    input::placeholder{color:#818f87}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+    @keyframes risein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  </style>
+</helmet>
+<div ref="{{ rootRef }}" style="position:fixed;inset:0;display:flex;background:var(--bg,#0a0d0c);color:var(--text2,#dfe8e2);font-family:'Instrument Sans','PingFang SC','Microsoft YaHei',sans-serif">
+
+  <div style="width:240px;flex:none;display:flex;flex-direction:column;background:var(--side,#0d1110);border-right:1px solid var(--bd,rgba(255,255,255,.06))">
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 16px 14px">
+      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, var(--accent,#3ddc84), color-mix(in oklab, var(--accent,#3ddc84) 55%, #0a0d0c));display:grid;place-items:center;color:#05130b;font-weight:700;font-size:14px">◈</div>
+      <div>
+        <div style="font-weight:700;font-size:15px;letter-spacing:.02em;color:var(--text,#f2f7f3)">AgentOS</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint,#66736b)">workspace / local</div>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:4px 10px 10px;display:flex;flex-direction:column;gap:2px">
+      <sc-if value="{{ showHome }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;background:{{ homeNavBg }};color:{{ homeNavCl }};font-weight:600;font-size:13.5px;user-select:none" style-hover="background:var(--hov)">
+        <span style="width:16px;text-align:center;font-size:14px">＋</span> 新建任务
+      </div>
+      </sc-if>
+      <sc-if value="{{ showDash }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ goDash }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;background:{{ dashBg }};color:{{ dashCl }};font-weight:600;font-size:13.5px;user-select:none" style-hover="background:var(--hov)">
+        <span style="width:16px;text-align:center;font-size:13px">▦</span> 总览
+      </div>
+      </sc-if>
+      <sc-if value="{{ showQueue }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ toggleQueueSec }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;background:{{ queueBg }};color:{{ queueCl }};font-weight:600;font-size:13.5px;user-select:none" style-hover="background:var(--hov)">
+        <span style="width:16px;text-align:center;font-size:13px">▤</span>
+        <span style="flex:1">任务编排</span>
+        <sc-if value="{{ queueBadge }}" hint-placeholder-val="{{ false }}">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mut,#8a968e);background:var(--hov);border-radius:10px;padding:1px 7px">{{ queueBadge }}</span>
+        </sc-if>
+        <span style="font-size:7px;color:var(--faint);transform:rotate({{ queueSecRot }});transition:transform .15s">▶</span>
+      </div>
+      <sc-if value="{{ queueSecOpen }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ queueNav }}" as="n" hint-placeholder-count="2">
+          <div onClick="{{ n.on }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px 7px 36px;border-radius:8px;cursor:pointer;background:{{ n.bg }};color:{{ n.cl }};font-weight:600;font-size:13px;user-select:none" style-hover="background:var(--hov)">
+            <span style="width:14px;text-align:center;font-size:11px">{{ n.glyph }}</span>{{ n.name }}
+          </div>
+        </sc-for>
+      </sc-if>
+      </sc-if>
+      <sc-for list="{{ navApps }}" as="n" hint-placeholder-count="5">
+        <div onClick="{{ n.on }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;background:{{ n.bg }};color:{{ n.cl }};font-weight:600;font-size:13.5px;user-select:none" style-hover="background:var(--hov)">
+        <span style="width:16px;text-align:center;font-size:13px">{{ n.glyph }}</span>
+        <span style="flex:1">{{ n.name }}</span>
+        <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mut,#8a968e);background:var(--hov);border-radius:10px;padding:1px 7px">{{ n.badge }}</span>
+        </sc-if>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ showProjSection }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ toggleProjSec }}" style="display:flex;align-items:center;gap:6px;padding:14px 10px 6px;cursor:pointer;user-select:none">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--faint,#66736b)">PROJECTS</span>
+        <span style="font-size:7px;color:var(--faint);transform:rotate({{ projSecRot }});transition:transform .15s">▶</span>
+      </div>
+      <sc-if value="{{ projSecOpen }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ showPinned }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ togglePinSec }}" style="display:flex;align-items:center;gap:5px;padding:6px 10px 2px 12px;cursor:pointer;user-select:none" style-hover="color:var(--mut)">
+          <span style="font-size:11px;font-weight:600;color:var(--faint)">置顶</span>
+          <span style="font-size:7px;color:var(--faint);transform:rotate({{ pinSecRot }});transition:transform .15s">▶</span>
+        </div>
+        <sc-if value="{{ pinSecOpen }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ pinnedItems }}" as="p" hint-placeholder-count="2">
+            <div onClick="{{ p.on }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 12px;border-radius:8px;cursor:pointer;user-select:none" style-hover="background:var(--hov)">
+              <span style="width:14px;text-align:center;font-size:10px;color:var(--faint)">⚑</span>
+              <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;color:var(--mut)">{{ p.name }}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+        </sc-if>
+        <sc-if value="{{ showProjList }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:10px 10px 2px 12px;font-size:11px;font-weight:600;color:var(--faint);user-select:none">项目</div>
+        <sc-for list="{{ projItems }}" as="p" hint-placeholder-count="4">
+          <div onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 12px;border-radius:8px;cursor:pointer;user-select:none" style-hover="background:var(--hov)">
+            <span style="width:14px;text-align:center;font-size:11px;color:var(--mut)">❒</span>
+            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;color:var(--mut)">{{ p.name }}</span>
+            <span style="font-size:7px;color:var(--faint);transform:rotate({{ p.rot }});transition:transform .15s">▶</span>
+          </div>
+          <sc-if value="{{ p.open }}" hint-placeholder-val="{{ true }}">
+            <sc-for list="{{ p.sessions }}" as="c" hint-placeholder-count="2">
+              <div onClick="{{ c.on }}" title="{{ c.sum }}" style="display:flex;align-items:center;gap:7px;padding:4px 10px 4px 34px;border-radius:8px;cursor:pointer;user-select:none" style-hover="background:var(--hov)">
+                <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--mut)">{{ c.sum }}</span>
+                <span style="width:14px;height:14px;flex:none;display:grid;place-items:center;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:{{ c.hue }};background:color-mix(in srgb, {{ c.hue }} 12%, transparent)">{{ c.glyph }}</span>
+              </div>
+            </sc-for>
+          </sc-if>
+        </sc-for>
+        </sc-if>
+        <sc-if value="{{ showConv }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ toggleConvSec }}" style="display:flex;align-items:center;gap:5px;padding:10px 10px 2px 12px;cursor:pointer;user-select:none" style-hover="color:var(--mut)">
+          <span style="font-size:11px;font-weight:600;color:var(--faint)">对话</span>
+          <span style="font-size:7px;color:var(--faint);transform:rotate({{ convSecRot }});transition:transform .15s">▶</span>
+        </div>
+        <sc-if value="{{ convSecOpen }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ convGroups }}" as="g" hint-placeholder-count="3">
+          <div onClick="{{ g.toggle }}" style="display:flex;align-items:center;gap:5px;padding:6px 10px 2px 12px;cursor:pointer;user-select:none" style-hover="color:var(--mut)">
+            <span style="font-size:10px;color:var(--faint);letter-spacing:.06em">{{ g.label }}</span>
+            <span style="font-size:6px;color:var(--faint);transform:rotate({{ g.rot }});transition:transform .15s">▶</span>
+          </div>
+          <sc-if value="{{ g.open }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="2">
+            <div onClick="{{ c.on }}" title="{{ c.sum }}" style="display:flex;align-items:center;gap:7px;padding:4px 10px 4px 12px;border-radius:8px;cursor:pointer;user-select:none" style-hover="background:var(--hov)">
+              <span style="width:14px;height:14px;flex:none;display:grid;place-items:center;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:{{ c.hue }};background:color-mix(in srgb, {{ c.hue }} 12%, transparent)">{{ c.glyph }}</span>
+              <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--mut)">{{ c.sum }}</span>
+            </div>
+          </sc-for>
+          </sc-if>
+        </sc-for>
+        </sc-if>
+        </sc-if>
+      </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ showAgentsSection }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ toggleAgentsSec }}" style="display:flex;align-items:center;gap:6px;padding:14px 10px 6px;cursor:pointer;user-select:none" style-hover="color:var(--mut)">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--faint,#66736b)">AGENTS</span>
+        <span style="font-size:7px;color:var(--faint);transform:rotate({{ agentsSecRot }});transition:transform .15s">▶</span>
+      </div>
+      <sc-if value="{{ agentsSecOpen }}" hint-placeholder-val="{{ true }}">
+      <sc-for list="{{ navAgents }}" as="n" hint-placeholder-count="6">
+        <div onClick="{{ n.on }}" style="display:flex;align-items:center;gap:7px;padding:7px 10px 7px 5px;border-radius:8px;cursor:pointer;background:{{ n.bg }};opacity:{{ n.op }};user-select:none" style-hover="background:var(--hov)">
+          <span onClick="{{ n.toggle }}" style="width:14px;height:20px;flex:none;display:grid;place-items:center;font-size:8px;color:{{ n.chevCl }};transform:rotate({{ n.rot }});transition:transform .15s">▶</span>
+          <span style="width:20px;height:20px;flex:none;border-radius:6px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ n.hue }};background:color-mix(in srgb, {{ n.hue }} 12%, transparent)">{{ n.glyph }}</span>
+          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;font-weight:600;color:{{ n.cl }}">{{ n.name }}</span>
+          <sc-if value="{{ n.waiting }}" hint-placeholder-val="{{ false }}">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#0f0a02;background:var(--wait);border-radius:8px;padding:1px 6px;font-weight:700">!</span>
+          </sc-if>
+          <span style="width:7px;height:7px;flex:none;border-radius:50%;background:{{ n.dot }};box-shadow:0 0 6px {{ n.dotGlow }};animation:{{ n.anim }}"></span>
+        </div>
+        <sc-if value="{{ n.open }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ n.sessions }}" as="ss" hint-placeholder-count="2">
+            <div onClick="{{ ss.on }}" title="{{ ss.sum }}" style="display:flex;align-items:center;gap:7px;padding:4px 10px 4px 39px;border-radius:8px;cursor:pointer;background:{{ ss.bg }};user-select:none" style-hover="background:var(--hov)">
+              <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:{{ ss.cl }}">{{ ss.sum }}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:0 4px;flex:none">{{ ss.proj }}</span>
+              <sc-if value="{{ ss.live }}" hint-placeholder-val="{{ false }}">
+                <span style="width:5px;height:5px;flex:none;border-radius:50%;background:{{ ss.dot }};animation:{{ ss.anim }}"></span>
+              </sc-if>
+              <sc-if value="{{ ss.isHist }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--faint);flex:none">{{ ss.when }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ n.noSess }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:2px 10px 4px 39px;font-size:11px;color:var(--faint)">暂无会话</div>
+          </sc-if>
+        </sc-if>
+      </sc-for>
+      </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ showHzSection }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ toggleHzSec }}" style="display:flex;align-items:center;gap:6px;padding:14px 10px 6px;cursor:pointer;user-select:none">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--faint,#66736b)">HARNESS</span>
+        <span style="font-size:7px;color:var(--faint);transform:rotate({{ hzSecRot }});transition:transform .15s">▶</span>
+      </div>
+      <sc-if value="{{ hzSecOpen }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ hzNav }}" as="n" hint-placeholder-count="5">
+          <div onClick="{{ n.on }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px 7px 12px;border-radius:8px;cursor:pointer;background:{{ n.bg }};color:{{ n.cl }};font-weight:600;font-size:13px;user-select:none" style-hover="background:var(--hov)">
+            <span style="width:16px;text-align:center;font-size:12px">{{ n.glyph }}</span>{{ n.name }}
+          </div>
+        </sc-for>
+      </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ showSmSection }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ toggleSmSec }}" style="display:flex;align-items:center;gap:6px;padding:14px 10px 6px;cursor:pointer;user-select:none">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--faint,#66736b)">SESSIONS MANAGER</span>
+        <span style="font-size:7px;color:var(--faint);transform:rotate({{ smSecRot }});transition:transform .15s">▶</span>
+      </div>
+      <sc-if value="{{ smSecOpen }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ smNav }}" as="n" hint-placeholder-count="7">
+          <div onClick="{{ n.on }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px 7px 12px;border-radius:8px;cursor:pointer;background:{{ n.bg }};color:{{ n.cl }};font-weight:600;font-size:13px;user-select:none" style-hover="background:var(--hov)">
+            <span style="width:16px;text-align:center;font-size:12px">{{ n.glyph }}</span>{{ n.name }}
+          </div>
+        </sc-for>
+      </sc-if>
+      </sc-if>
+
+    </div>
+
+    <div style="padding:12px 14px;border-top:1px solid var(--bd,rgba(255,255,255,.06));display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut,#8a968e)"><span>今日预算</span><span style="font-family:'JetBrains Mono',monospace;color:var(--wait)">78%</span></div>
+      <div style="height:5px;border-radius:3px;background:var(--hov);overflow:hidden"><div style="width:78%;height:100%;border-radius:3px;background:linear-gradient(90deg, var(--accent,#3ddc84), var(--wait,#ffb454))"></div></div>
+      <div style="display:flex;align-items:center;gap:9px;padding-top:4px">
+        <div style="width:26px;height:26px;border-radius:50%;background:color-mix(in srgb, var(--accent,#3ddc84) 15%, transparent);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--acFg)">R</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:600;color:var(--text2)">Ryo</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint)">Pro · 6 agents linked</div>
+        </div>
+        <div onClick="{{ goSettings }}" style="color:var(--faint);font-size:13px;cursor:pointer" style-hover="color:var(--text)">⚙</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:54px;flex:none;display:flex;align-items:center;gap:14px;padding:0 20px;border-bottom:1px solid var(--bd);background:var(--top);backdrop-filter:blur(10px)">
+      <div style="font-size:15px;font-weight:700;color:var(--text)">{{ viewTitle }}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint)">{{ viewSub }}</div>
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut)">
+        <div>活跃 <span style="color:var(--acFg)">{{ activeLabel }}</span></div>
+        <div>今日 <span style="color:var(--text)">{{ costTotal }}</span></div>
+        <div>{{ tokTotal }} tok</div>
+      </div>
+      <div onClick="{{ toggleNotif }}" style="position:relative;width:32px;height:32px;border-radius:8px;border:1px solid var(--bd2);display:grid;place-items:center;cursor:pointer;color:var(--mut);font-size:14px;user-select:none" style-hover="border-color:var(--accent,#3ddc84);color:var(--text)">
+        ◍
+        <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}">
+          <span style="position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;display:grid;place-items:center;background:var(--wait);color:#1a1206;font-weight:700;font-size:9.5px;border-radius:8px;padding:0 4px;font-family:'JetBrains Mono',monospace">{{ unreadLabel }}</span>
+        </sc-if>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut)">{{ clock }}</div>
+    </div>
+
+    <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;top:58px;right:16px;width:360px;z-index:900;background:var(--panel);border:1px solid var(--bd2);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:risein .16s ease-out">
+        <div style="display:flex;align-items:center;padding:11px 14px">
+          <div style="font-weight:700;font-size:13px;color:var(--text)">通知</div>
+          <div style="flex:1"></div>
+          <div onClick="{{ markAll }}" style="font-size:11.5px;color:var(--mut);cursor:pointer" style-hover="color:var(--acFg)">全部已读</div>
+        </div>
+        <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3">
+          <div onClick="{{ n.click }}" style="display:flex;gap:10px;padding:10px 14px;border-top:1px solid var(--bd);cursor:pointer;align-items:center;opacity:{{ n.op }}" style-hover="background:var(--hov)">
+            <div style="width:26px;height:26px;flex:none;border-radius:8px;color:{{ n.hue }};background:color-mix(in srgb, {{ n.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px">{{ n.glyph }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;color:var(--text2)">{{ n.title }}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ n.text }}</div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);white-space:nowrap">{{ n.time }}</div>
+            <sc-if value="{{ n.unread }}" hint-placeholder-val="{{ false }}">
+              <div style="width:6px;height:6px;border-radius:50%;background:var(--wait);flex:none"></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="flex:1;min-height:0;overflow-y:auto;background:radial-gradient(900px 500px at 70% -10%, var(--glow), transparent 70%)">
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="新建任务" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative">
+          <div style="position:absolute;inset:0;background:radial-gradient(560px 300px at 50% 40%, color-mix(in oklab, var(--accent,#3ddc84) 7%, transparent), transparent 70%);pointer-events:none"></div>
+          <div style="width:100%;max-width:760px;display:flex;flex-direction:column;gap:22px;position:relative;margin-top:-40px">
+            <div style="text-align:center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);letter-spacing:.12em">{{ homeGreet }}</div>
+              <div style="font-size:30px;font-weight:700;color:var(--text);margin-top:8px">有什么可以帮你的?</div>
+            </div>
+            <div style="background:var(--panel);border:1px solid var(--bd2);border-radius:18px;box-shadow:var(--shadow);padding:18px 18px 14px;display:flex;flex-direction:column;gap:14px">
+              <textarea value="{{ homeDraft }}" onChange="{{ onHomeDraft }}" onKeyDown="{{ onHomeKey }}" placeholder="交给我一个任务,或问我任何问题" rows="3" style="width:100%;resize:none;background:transparent;border:none;outline:none;color:var(--text2);font-family:'Instrument Sans','PingFang SC','Microsoft YaHei',sans-serif;font-size:15px;line-height:1.6"></textarea>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="display:flex;gap:2px;background:var(--hov);border-radius:9px;padding:3px;user-select:none;flex:none">
+                  <div onClick="{{ modeManual }}" style="padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;color:{{ mmCl }};background:{{ mmBg }}">指定 Agent</div>
+                  <div onClick="{{ modeAuto }}" style="padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;color:{{ maCl }};background:{{ maBg }}">智能路由</div>
+                </div>
+                <sc-if value="{{ isAutoMode }}" hint-placeholder-val="{{ false }}">
+                  <div title="AgentOS 根据任务内容自动选择最合适的 Agent" style="display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;border:1px dashed color-mix(in oklab, var(--accent,#3ddc84) 50%, transparent);color:var(--acFg);font-size:12.5px;font-weight:600;user-select:none">◈ 由 AgentOS 判断</div>
+                </sc-if>
+                <sc-if value="{{ isManualMode }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ toggleAgentMenu }}" style="position:relative;display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;border:1px solid var(--bd2);cursor:pointer;user-select:none" style-hover="border-color:var(--accent,#3ddc84)">
+                  <span style="width:20px;height:20px;flex:none;border-radius:6px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ homeAgentHue }};background:color-mix(in srgb, {{ homeAgentHue }} 12%, transparent)">{{ homeAgentGlyph }}</span>
+                  <span style="font-size:13px;font-weight:700;color:var(--text)">{{ homeAgentName }}</span>
+                  <span style="font-size:9px;color:var(--faint)">▼</span>
+                  <sc-if value="{{ agentMenuOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;top:calc(100% + 8px);left:0;min-width:230px;z-index:60;background:var(--panel);border:1px solid var(--bd2);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:risein .15s ease-out">
+                      <sc-for list="{{ homeAgentOpts }}" as="op" hint-placeholder-count="6">
+                        <div onClick="{{ op.pick }}" style="display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;background:{{ op.bg }}" style-hover="background:var(--hov)">
+                          <span style="width:20px;height:20px;flex:none;border-radius:6px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ op.hue }};background:color-mix(in srgb, {{ op.hue }} 12%, transparent)">{{ op.glyph }}</span>
+                          <span style="flex:1;font-size:13px;font-weight:600;color:var(--text2)">{{ op.name }}</span>
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint)">{{ op.st }}</span>
+                          <span style="width:6px;height:6px;flex:none;border-radius:50%;background:{{ op.dot }}"></span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+                </sc-if>
+                <div onClick="{{ togglePathMenu }}" style="position:relative;display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;border:1px solid var(--bd2);cursor:pointer;user-select:none;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--body)" style-hover="border-color:var(--accent,#3ddc84)">
+                  <span style="color:var(--faint)">⌂</span>{{ homePath }}<span style="font-size:9px;color:var(--faint)">▼</span>
+                  <sc-if value="{{ pathMenuOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;top:calc(100% + 8px);left:0;min-width:220px;z-index:60;background:var(--panel);border:1px solid var(--bd2);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:risein .15s ease-out">
+                      <sc-for list="{{ homePathOpts }}" as="op" hint-placeholder-count="4">
+                        <div onClick="{{ op.pick }}" style="display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;background:{{ op.bg }};font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)" style-hover="background:var(--hov)">
+                          <span style="color:var(--faint)">⌂</span><span style="flex:1">{{ op.path }}</span>
+                          <sc-if value="{{ op.tag }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:0 5px">{{ op.tag }}</span></sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+                <div style="flex:1"></div>
+                <div style="font-size:12.5px;color:var(--faint)">模型由 Agent 管理</div>
+                <div onClick="{{ homeSend }}" title="发送 (⌘+Enter)" style="width:42px;height:42px;flex:none;border-radius:50%;background:var(--accent,#3ddc84);display:grid;place-items:center;cursor:pointer;color:#05130b;font-size:15px" style-hover="filter:brightness(1.12)" style-active="transform:scale(.95)">➤</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+              <sc-for list="{{ homeSuggestions }}" as="sg" hint-placeholder-count="4">
+                <div onClick="{{ sg.on }}" style="padding:7px 14px;border-radius:20px;border:1px solid var(--bd2);font-size:12.5px;color:var(--mut);cursor:pointer;user-select:none;background:var(--panel)" style-hover="border-color:var(--accent,#3ddc84);color:var(--text)">{{ sg.t }}</div>
+              </sc-for>
+            </div>
+            <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--faint)">{{ homeStatusLine }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDash }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="总览" style="padding:20px;display:flex;flex-direction:column;gap:16px;max-width:1240px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+              <div style="background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
+                <div style="font-size:11.5px;color:var(--mut);font-weight:600">{{ k.label }}</div>
+                <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:{{ k.color }}">{{ k.value }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint)">{{ k.sub }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px">
+            <sc-for list="{{ cards }}" as="c" hint-placeholder-count="6">
+              <div onClick="{{ c.open }}" style="background:var(--panel);border:1px solid {{ c.bd }};border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;opacity:{{ c.op }};transition:border-color .15s, transform .15s" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent);transform:translateY(-1px)">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;color:{{ c.hue }};background:color-mix(in srgb, {{ c.hue }} 12%, transparent)">{{ c.glyph }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:14.5px;font-weight:700;color:var(--text)">{{ c.name }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint)">{{ c.model }} · {{ c.cwd }}</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;border:1px solid {{ c.pillBd }};background:{{ c.pillBg }};border-radius:20px;padding:3px 10px">
+                    <span style="width:6px;height:6px;border-radius:50%;background:{{ c.stColor }};animation:{{ c.anim }}"></span>
+                    <span style="font-size:10.5px;font-weight:700;letter-spacing:.06em;color:{{ c.stColor }}">{{ c.stLabel }}</span>
+                  </div>
+                </div>
+                <div style="font-size:13px;color:var(--body);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.task }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut);background:var(--code2);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.last }}</div>
+                <div style="display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mut)">
+                  <span>⏱ {{ c.runtime }}</span><span>{{ c.tok }} tok</span><span style="color:var(--text2)">{{ c.cost }}</span>
+                  <span style="flex:1"></span>
+                  <span style="color:var(--acFg);font-weight:700">打开 →</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px;padding-bottom:20px">
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px">
+              <div style="display:flex;align-items:center;margin-bottom:10px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text)">任务队列</div>
+                <div style="flex:1"></div>
+                <div onClick="{{ goQueue }}" style="font-size:11.5px;color:var(--acFg);cursor:pointer;font-weight:600">全部 →</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ queuePeek }}" as="t" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px;font-size:12.5px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:{{ t.stColor }};border:1px solid color-mix(in srgb, {{ t.stColor }} 40%, transparent);border-radius:6px;padding:2px 7px;flex:none">{{ t.stLabel }}</span>
+                    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--body)">{{ t.title }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint)">{{ t.proj }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px">
+              <div style="display:flex;align-items:center;margin-bottom:10px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text)">最近通知</div>
+                <div style="flex:1"></div>
+                <div onClick="{{ goUsage }}" style="font-size:11.5px;color:var(--acFg);cursor:pointer;font-weight:600">用量 →</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ notifPeek }}" as="n" hint-placeholder-count="3">
+                  <div onClick="{{ n.click }}" style="display:flex;gap:9px;align-items:center;cursor:pointer;opacity:{{ n.op }}" style-hover="opacity:1">
+                    <span style="width:22px;height:22px;flex:none;border-radius:7px;color:{{ n.hue }};background:color-mix(in srgb, {{ n.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px">{{ n.glyph }}</span>
+                    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;color:var(--body)">{{ n.title }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint)">{{ n.time }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAgent }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Agent 会话" style="height:100%;display:flex;flex-direction:column;max-width:980px;margin:0 auto">
+          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:16px 20px 0">
+            <div style="width:36px;height:36px;flex:none;border-radius:10px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:16px;color:{{ agHue }};background:color-mix(in srgb, {{ agHue }} 12%, transparent)">{{ agGlyph }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:17px;font-weight:700;color:var(--text)">{{ agName }}</div>
+                <div style="display:flex;align-items:center;gap:6px;border:1px solid {{ agPillBd }};background:{{ agPillBg }};border-radius:20px;padding:3px 10px">
+                  <span style="width:6px;height:6px;border-radius:50%;background:{{ agStColor }};animation:{{ agAnim }}"></span>
+                  <span style="font-size:10.5px;font-weight:700;letter-spacing:.06em;color:{{ agStColor }}">{{ agStLabel }}</span>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);margin-top:2px">⌂ {{ agProj }} · {{ agModel }} · {{ agCwd }} · ⏱ {{ agRuntime }} · {{ agTok }} tok · <span style="color:var(--text2)">{{ agCost }}</span></div>
+            </div>
+            <sc-if value="{{ agNoModules }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:2px;background:var(--hov);border-radius:9px;padding:3px">
+                <div onClick="{{ tabS }}" style="padding:5px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;color:{{ tabSC }};background:{{ tabSB }};user-select:none">会话</div>
+                <div onClick="{{ tabH }}" style="padding:5px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;color:{{ tabHC }};background:{{ tabHB }};user-select:none">历史</div>
+              </div>
+            </sc-if>
+            <div onClick="{{ agConfig }}" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--bd2);color:var(--mut);font-size:12.5px;font-weight:600;cursor:pointer;user-select:none" style-hover="border-color:var(--accent,#3ddc84);color:var(--text)">⚙ 配置</div>
+          </div>
+
+          <sc-if value="{{ agHasModules }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:none;display:flex;gap:8px;padding:12px 20px 0;flex-wrap:wrap">
+              <sc-for list="{{ agModules }}" as="md" hint-placeholder-count="5">
+                <div onClick="{{ md.on }}" style="display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:1px solid {{ md.bd }};background:{{ md.bg }};color:{{ md.cl }};font-size:12.5px;font-weight:600;cursor:pointer;user-select:none" style-hover="border-color:var(--accent,#3ddc84)">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px">{{ md.glyph }}</span>{{ md.name }}
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tabSession }}" hint-placeholder-val="{{ true }}">
+            <div ref="{{ listRef }}" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:16px 20px">
+              <sc-if value="{{ agEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="margin:auto;text-align:center;color:var(--faint);font-size:12.5px;line-height:2">会话为空<br><span style="font-family:'JetBrains Mono',monospace;font-size:11px">输入任务并回车,派发给 {{ agName }}</span></div>
+              </sc-if>
+              <sc-for list="{{ agMsgs }}" as="m" hint-placeholder-count="5">
+                <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;align-self:flex-end;max-width:82%;padding:9px 13px;background:color-mix(in oklab, var(--accent,#3ddc84) 14%, var(--panel));border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 30%, transparent);border-radius:12px 12px 3px 12px;font-size:13.5px;line-height:1.55;color:var(--text2);animation:risein .18s ease-out">{{ m.body }}</div>
+                </sc-if>
+                <sc-if value="{{ m.isText }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;align-self:flex-start;max-width:86%;padding:9px 13px;background:var(--panel2);border:1px solid var(--bd);border-radius:12px 12px 12px 3px;font-size:13.5px;line-height:1.6;color:var(--body);animation:risein .18s ease-out">{{ m.body }}</div>
+                </sc-if>
+                <sc-if value="{{ m.isNote }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut);padding:0 4px">{{ m.body }}</div>
+                </sc-if>
+                <sc-if value="{{ m.isThink }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--think);animation:pulse 1.4s ease-in-out infinite;padding:0 4px">▚ {{ m.body }}</div>
+                </sc-if>
+                <sc-if value="{{ m.isTool }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;display:flex;gap:8px;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:11.5px;border:1px solid var(--bd);background:var(--code);border-radius:9px;padding:7px 11px;max-width:86%">
+                    <span style="color:var(--acFg)">▸</span>
+                    <span style="color:var(--text2);font-weight:700">{{ m.tool }}</span>
+                    <span style="color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">{{ m.arg }}</span>
+                    <span style="color:var(--faint);white-space:nowrap">{{ m.res }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ m.isDiff }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;border:1px solid var(--bd2);border-radius:10px;overflow:hidden;background:var(--code);font-family:'JetBrains Mono',monospace;font-size:11.5px;max-width:92%">
+                    <div style="display:flex;gap:10px;padding:7px 11px;border-bottom:1px solid var(--bd);color:var(--mut);background:var(--hov)">
+                      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.file }}</span>
+                      <span style="color:var(--add)">+{{ m.add }}</span><span style="color:var(--del)">−{{ m.del }}</span>
+                    </div>
+                    <sc-for list="{{ m.lines }}" as="ln" hint-placeholder-count="3">
+                      <div style="padding:2px 11px;white-space:pre;overflow:hidden;text-overflow:ellipsis;color:{{ ln.c }};background:{{ ln.bg }}">{{ ln.s }}</div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ m.isApproval }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;border:1px solid color-mix(in srgb, var(--wait) 45%, transparent);background:color-mix(in srgb, var(--wait) 6%, transparent);border-radius:12px;padding:11px 13px;display:flex;flex-direction:column;gap:8px;max-width:92%">
+                    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--wait)">⚠ 权限请求 — 需要你确认</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);background:var(--code2);padding:7px 10px;border-radius:7px;border:1px solid color-mix(in srgb, var(--wait) 20%, transparent)">$ {{ m.body }}</div>
+                    <div style="font-size:12.5px;color:var(--waitBody)">{{ m.note }}</div>
+                    <sc-if value="{{ m.pending }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;gap:8px">
+                        <div onClick="{{ m.approve }}" style="padding:6px 16px;border-radius:8px;background:var(--accent,#3ddc84);color:#05130b;font-weight:700;font-size:12.5px;cursor:pointer;user-select:none" style-hover="filter:brightness(1.12)">批准执行</div>
+                        <div onClick="{{ m.deny }}" style="padding:6px 16px;border-radius:8px;border:1px solid var(--bd2);color:var(--mut);font-size:12.5px;font-weight:600;cursor:pointer;user-select:none" style-hover="border-color:var(--del);color:var(--del)">拒绝</div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ m.decided }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ m.decColor }}">{{ m.decLabel }}</div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </sc-for>
+            </div>
+            <div style="flex:none;display:flex;gap:8px;padding:12px 20px 16px">
+              <input value="{{ agDraft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" placeholder="向 {{ agName }} 派发任务 · Enter 发送" style="flex:1;min-width:0;background:var(--input);border:1px solid var(--bd2);border-radius:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:10px 13px;outline:none" style-focus="border-color:var(--accent,#3ddc84);box-shadow:0 0 0 3px color-mix(in oklab, var(--accent,#3ddc84) 18%, transparent)">
+              <div onClick="{{ agSend }}" style="padding:10px 20px;border-radius:10px;background:var(--accent,#3ddc84);color:#05130b;font-weight:700;font-size:13px;cursor:pointer;display:grid;place-items:center;user-select:none" style-hover="filter:brightness(1.12)">发送</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tabHistory }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:9px">
+              <sc-if value="{{ agNoHist }}" hint-placeholder-val="{{ false }}">
+                <div style="margin:auto;color:var(--faint);font-size:12.5px">暂无历史会话</div>
+              </sc-if>
+              <sc-for list="{{ agHist }}" as="h" hint-placeholder-count="2">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13.5px;font-weight:600;color:var(--text2)">{{ h.sum }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:3px">{{ h.sid }} · ⌂ {{ h.proj }} · {{ h.date }} · {{ h.n }} 条消息 · {{ h.tok }} tok</div>
+                  </div>
+                  <div onClick="{{ h.resume }}" style="padding:5px 14px;border-radius:8px;border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent);color:var(--acFg);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;user-select:none" style-hover="background:color-mix(in oklab, var(--accent,#3ddc84) 12%, transparent)">↺ 恢复</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tabSkills }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow-y:auto;padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;align-content:start">
+              <sc-for list="{{ agSkills }}" as="sk" hint-placeholder-count="6">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:8px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:{{ agHue }}">{{ sk.glyph }}</span>
+                    <span style="font-size:13.5px;font-weight:700;color:var(--text)">{{ sk.name }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ sk.runs }} 次</span>
+                  </div>
+                  <div style="font-size:12px;line-height:1.55;color:var(--body);flex:1">{{ sk.desc }}</div>
+                  <div onClick="{{ sk.run }}" style="align-self:flex-start;padding:4px 12px;border-radius:8px;border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent);color:var(--acFg);font-size:11.5px;font-weight:700;cursor:pointer;user-select:none" style-hover="background:color-mix(in oklab, var(--accent,#3ddc84) 12%, transparent)">▸ 运行</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tabKanban }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow-y:auto;padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-content:start">
+              <sc-for list="{{ agKanban }}" as="col" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.1em;color:{{ col.cl }}">{{ col.name }} <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ col.count }}</span></div>
+                  <sc-for list="{{ col.cards }}" as="cd" hint-placeholder-count="2">
+                    <div style="border:1px solid var(--bd);background:var(--panel);border-radius:11px;padding:10px 12px;display:flex;flex-direction:column;gap:6px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 35%, transparent)">
+                      <div style="font-size:12.5px;font-weight:600;color:var(--text2);line-height:1.45">{{ cd.title }}</div>
+                      <div style="display:flex;gap:6px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint)"><span style="border:1px solid var(--bd);border-radius:5px;padding:0 5px">⌂ {{ cd.proj }}</span><span style="flex:1"></span><span>{{ cd.when }}</span></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tabMcps }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;max-width:640px">
+              <sc-for list="{{ agMcps }}" as="mc" hint-placeholder-count="4">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:11px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 35%, transparent)">
+                  <span style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ mc.dot }};box-shadow:0 0 6px {{ mc.dot }}"></span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:700;color:var(--text2)">{{ mc.name }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:2px">{{ mc.desc }}</div>
+                  </div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mut)">{{ mc.tools }} tools</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:{{ mc.stCl }};border:1px solid color-mix(in srgb, {{ mc.stCl }} 40%, transparent);border-radius:6px;padding:2px 8px">{{ mc.st }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCron }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="定时任务" style="padding:20px;display:flex;flex-direction:column;gap:10px;max-width:860px">
+          <div style="font-size:12px;color:var(--mut)">按计划自动派发 · 与 Workflows 联动</div>
+          <sc-for list="{{ cronTasks }}" as="c" hint-placeholder-count="4">
+            <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;align-items:center;gap:12px">
+              <span style="width:26px;height:26px;flex:none;border-radius:8px;color:{{ c.hue }};background:color-mix(in srgb, {{ c.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px">{{ c.glyph }}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13.5px;font-weight:600;color:var(--text2)">{{ c.title }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:2px">{{ c.agentName }} · {{ c.sched }} · 下次 {{ c.next }}</div>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:{{ c.lastCl }}">{{ c.last }}</span>
+              <div onClick="{{ c.toggle }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ c.tgBd }};position:relative;cursor:pointer;background:{{ c.tgBg }}">
+                <div style="position:absolute;top:2px;left:{{ c.tgX }}px;width:14px;height:14px;border-radius:50%;background:{{ c.tgKnob }};transition:left .15s"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="长程任务" style="padding:20px;display:flex;flex-direction:column;gap:10px;max-width:860px">
+          <div style="font-size:12px;color:var(--mut)">点选 Agent 后派发任务;运行完成后自动回报</div>
+          <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="3">
+            <div style="border:1px solid {{ t.bd }};background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="flex:1;font-size:14px;font-weight:600;color:var(--text2)">{{ t.title }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mut);border:1px solid var(--bd2);border-radius:6px;padding:2px 7px">{{ t.proj }}</div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:{{ t.stColor }};border:1px solid color-mix(in srgb, {{ t.stColor }} 40%, transparent);border-radius:6px;padding:2px 8px">{{ t.stLabel }}</span>
+              </div>
+              <sc-if value="{{ t.isQueued }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <sc-for list="{{ t.chips }}" as="ch" hint-placeholder-count="6">
+                    <div onClick="{{ ch.pick }}" title="{{ ch.name }}" style="width:28px;height:28px;display:grid;place-items:center;border-radius:8px;border:1px solid {{ ch.bd }};color:{{ ch.hue }};background:{{ ch.bg }};font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;user-select:none" style-hover="border-color:{{ ch.hue }}">{{ ch.glyph }}</div>
+                  </sc-for>
+                  <div style="flex:1"></div>
+                  <div onClick="{{ t.dispatch }}" style="padding:6px 16px;border-radius:8px;color:{{ t.dpCl }};background:{{ t.dpBg }};border:1px solid {{ t.dpBd }};font-weight:700;font-size:12.5px;cursor:{{ t.dpCur }};user-select:none">派发 →</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ t.isRunning }}" hint-placeholder-val="{{ false }}">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--think);animation:pulse 1.4s ease-in-out infinite">▸ {{ t.assigneeName }} 执行中 …</div>
+              </sc-if>
+              <sc-if value="{{ t.isDone }}" hint-placeholder-val="{{ false }}">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--acFg)">{{ t.result }} · {{ t.assigneeName }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSM }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Sessions Manager" style="padding:20px;display:flex;flex-direction:column;gap:14px;max-width:1080px">
+
+          <sc-if value="{{ smIsDash }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+              <sc-for list="{{ smKpis }}" as="k" hint-placeholder-count="4">
+                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
+                  <div style="font-size:11.5px;color:var(--mut);font-weight:600">{{ k.label }}</div>
+                  <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:{{ k.color }}">{{ k.value }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint)">{{ k.sub }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px">
+              <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text)">近 7 天会话活动</div>
+                <div style="display:flex;align-items:stretch;gap:8px;height:110px">
+                  <sc-for list="{{ smBars }}" as="b" hint-placeholder-count="7">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:5px;justify-content:flex-end">
+                      <div title="{{ b.n }} 场会话" style="height:{{ b.h }}%;border-radius:5px 5px 2px 2px;background:{{ b.fill }}"></div>
+                      <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:{{ b.lc }}">{{ b.d }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text)">来源工具</div>
+                <sc-for list="{{ smSources }}" as="r" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px">
+                    <span style="width:20px;height:20px;flex:none;border-radius:6px;color:{{ r.hue }};background:color-mix(in srgb, {{ r.hue }} 12%, transparent);display:grid;place-items:center">{{ r.glyph }}</span>
+                    <span style="width:88px;color:var(--body);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{ r.name }}</span>
+                    <div style="flex:1;height:5px;border-radius:3px;background:var(--hov);overflow:hidden"><div style="width:{{ r.w }}%;height:100%;background:{{ r.hue }};opacity:.8"></div></div>
+                    <span style="width:26px;text-align:right;color:var(--mut)">{{ r.n }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ smIsSessions }}" hint-placeholder-val="{{ false }}">
+            <input value="{{ smQ }}" onChange="{{ onSmQ }}" placeholder="搜索会话标题、项目…" style="max-width:400px;background:var(--input);border:1px solid var(--bd2);border-radius:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:9px 13px;outline:none" style-focus="border-color:var(--accent,#3ddc84);box-shadow:0 0 0 3px color-mix(in oklab, var(--accent,#3ddc84) 18%, transparent)">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ smSessions }}" as="s" hint-placeholder-count="6">
+                <div onClick="{{ s.on }}" style="border:1px solid var(--bd);background:var(--panel);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:11px;cursor:pointer" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <span style="width:26px;height:26px;flex:none;border-radius:8px;color:{{ s.hue }};background:color-mix(in srgb, {{ s.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px">{{ s.glyph }}</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13.5px;font-weight:600;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.title }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:2px">{{ s.agent }} · {{ s.date }} · {{ s.dur }} · {{ s.tok }} tok</div>
+                  </div>
+                  <span style="font-size:10px;font-weight:700;color:{{ s.clsCl }};border:1px solid color-mix(in srgb, {{ s.clsCl }} 40%, transparent);border-radius:20px;padding:2px 9px;flex:none">{{ s.cls }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:1px 6px;flex:none">⌂ {{ s.proj }}</span>
+                  <sc-if value="{{ s.live }}" hint-placeholder-val="{{ false }}"><span style="width:6px;height:6px;flex:none;border-radius:50%;background:var(--acFg);animation:pulse 1.6s ease-in-out infinite"></span></sc-if>
+                </div>
+              </sc-for>
+              <sc-if value="{{ smSessEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:26px;text-align:center;color:var(--faint);font-size:12.5px">没有匹配的会话</div></sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ smIsInsights }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ smCats }}" as="c" hint-placeholder-count="6">
+                <div onClick="{{ c.on }}" style="padding:5px 13px;border-radius:20px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.cl }};font-size:12px;font-weight:600;cursor:pointer;user-select:none">{{ c.name }}</div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+              <sc-for list="{{ smInsights }}" as="i" hint-placeholder-count="6">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:9px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:10px;font-weight:700;color:{{ i.catCl }};border:1px solid color-mix(in srgb, {{ i.catCl }} 40%, transparent);border-radius:6px;padding:1px 8px">{{ i.cat }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint)">{{ i.date }}</span>
+                  </div>
+                  <div style="font-size:12.5px;line-height:1.6;color:var(--body);flex:1">{{ i.text }}</div>
+                  <div style="display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">
+                    <span style="color:{{ i.hue }}">{{ i.glyph }}</span><span>{{ i.src }}</span><span style="flex:1"></span><span style="border:1px solid var(--bd);border-radius:5px;padding:0 5px">⌂ {{ i.proj }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ smIsAnalytics }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+              <sc-for list="{{ smStats }}" as="k" hint-placeholder-count="4">
+                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:13px 15px">
+                  <div style="font-size:11px;color:var(--mut);font-weight:600">{{ k.label }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;color:var(--text);margin-top:5px">{{ k.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text)">费用趋势 · 7 天</div>
+                <div style="display:flex;align-items:stretch;gap:8px;height:110px">
+                  <sc-for list="{{ usageBars }}" as="b" hint-placeholder-count="7">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:5px;justify-content:flex-end">
+                      <div style="height:{{ b.h }}%;border-radius:5px 5px 2px 2px;background:{{ b.fill }}"></div>
+                      <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:{{ b.lc }}">{{ b.d }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text)">Token · 按模型</div>
+                <sc-for list="{{ smModels }}" as="r" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px">
+                    <span style="width:130px;color:var(--body);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{ r.name }}</span>
+                    <div style="flex:1;height:5px;border-radius:3px;background:var(--hov);overflow:hidden"><div style="width:{{ r.w }}%;height:100%;background:{{ r.hue }};opacity:.8"></div></div>
+                    <span style="width:40px;text-align:right;color:var(--mut)">{{ r.tok }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ smIsPatterns }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">从多场会话中提炼的重复模式 · 出现次数越多越值得沉淀为规则</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+              <sc-for list="{{ smPatterns }}" as="p" hint-placeholder-count="5">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:8px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:13.5px;font-weight:700;color:var(--text)">✧ {{ p.name }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:{{ p.trCl }}">{{ p.trend }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--acFg)">×{{ p.n }}</span>
+                  </div>
+                  <div style="font-size:12px;line-height:1.55;color:var(--body);flex:1">{{ p.desc }}</div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <sc-for list="{{ p.tags }}" as="tg" hint-placeholder-count="2">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:1px 6px">{{ tg.t }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ smIsExport }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">跨会话综合导出 · LLM 去重合并后生成可执行产物</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+              <sc-for list="{{ smFmts }}" as="f" hint-placeholder-count="4">
+                <div onClick="{{ f.on }}" style="border:1px solid {{ f.bd }};background:{{ f.bg }};border-radius:12px;padding:13px 14px;cursor:pointer;user-select:none;display:flex;flex-direction:column;gap:6px">
+                  <div style="font-size:13px;font-weight:700;color:var(--text)">{{ f.name }}</div>
+                  <div style="font-size:11px;line-height:1.5;color:var(--mut)">{{ f.desc }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:12px;font-weight:600;color:var(--mut)">深度</span>
+              <div style="display:flex;gap:2px;background:var(--hov);border-radius:9px;padding:3px">
+                <sc-for list="{{ smDepths }}" as="d" hint-placeholder-count="3">
+                  <div onClick="{{ d.on }}" style="padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;color:{{ d.cl }};background:{{ d.bg }};user-select:none">{{ d.name }}</div>
+                </sc-for>
+              </div>
+              <div style="flex:1"></div>
+              <div onClick="{{ smExport }}" style="padding:9px 22px;border-radius:10px;background:var(--accent,#3ddc84);color:#05130b;font-weight:700;font-size:13px;cursor:pointer;user-select:none" style-hover="filter:brightness(1.12)">{{ smExportLabel }}</div>
+            </div>
+            <sc-if value="{{ smExportNote }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent);background:color-mix(in oklab, var(--accent,#3ddc84) 7%, transparent);border-radius:10px;padding:9px 13px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--acFg)">{{ smExportNote }}</div>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ smIsSync }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:13px;max-width:640px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="flex:1">
+                  <div style="font-size:13.5px;font-weight:700;color:var(--text)">本地优先 · 云端同步</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--faint);margin-top:3px">~/.agentos/data.db · 全部数据在本机,同步仅传加密快照</div>
+                </div>
+                <div onClick="{{ smToggleSync }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ syBd }};position:relative;cursor:pointer;background:{{ syBg }}">
+                  <div style="position:absolute;top:2px;left:{{ syX }}px;width:14px;height:14px;border-radius:50%;background:{{ syKnob }};transition:left .15s"></div>
+                </div>
+              </div>
+              <sc-for list="{{ smDevices }}" as="d" hint-placeholder-count="2">
+                <div style="border:1px solid var(--bd);border-radius:11px;padding:10px 13px;display:flex;align-items:center;gap:11px">
+                  <span style="font-size:14px;color:var(--mut)">{{ d.glyph }}</span>
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:600;color:var(--text2)">{{ d.name }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ d.meta }}</div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:{{ d.stCl }}">{{ d.st }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--faint)">上次同步 {{ smLastSync }}</span>
+                <div style="flex:1"></div>
+                <div onClick="{{ smSyncNow }}" style="padding:7px 18px;border-radius:9px;border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent);color:var(--acFg);font-weight:700;font-size:12.5px;cursor:pointer;user-select:none" style-hover="background:color-mix(in oklab, var(--accent,#3ddc84) 12%, transparent)">{{ smSyncLabel }}</div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHz }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Harness" style="padding:20px;display:flex;flex-direction:column;gap:14px;max-width:1080px">
+
+          <sc-if value="{{ hzIsPrompt }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:12px;color:var(--mut)">每个 Agent 的系统提示词按模块拆成色段 · 条带总长 = 字符数 · 点击色段读真实片段</div>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:10px">
+              <sc-for list="{{ hzLegend }}" as="lg" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:5px;color:var(--mut)"><span style="width:9px;height:9px;border-radius:2px;background:{{ lg.c }}"></span>{{ lg.name }}</div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ hzGenomes }}" as="g" hint-placeholder-count="4">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <span style="width:24px;height:24px;flex:none;border-radius:7px;color:{{ g.hue }};background:color-mix(in srgb, {{ g.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px">{{ g.glyph }}</span>
+                    <span style="font-size:13.5px;font-weight:700;color:var(--text)">{{ g.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint)">{{ g.file }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mut)">{{ g.chars }} 字符</span>
+                  </div>
+                  <div style="display:flex;height:22px;border-radius:6px;overflow:hidden;width:{{ g.wpct }}%">
+                    <sc-for list="{{ g.segs }}" as="sg" hint-placeholder-count="5">
+                      <div onClick="{{ sg.on }}" title="{{ sg.name }} · {{ sg.mass }} 字符" style="width:{{ sg.w }}%;background:{{ sg.c }};cursor:pointer;opacity:{{ sg.op }};transition:opacity .12s" style-hover="opacity:1"></div>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ g.openSeg }}" hint-placeholder-val="{{ false }}">
+                    <div style="border:1px solid var(--bd);background:var(--code);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;animation:risein .15s ease-out">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="width:8px;height:8px;border-radius:2px;background:{{ g.openC }}"></span>
+                        <span style="font-size:11px;font-weight:700;color:var(--text2)">{{ g.openName }}</span>
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ g.openMass }} 字符 · {{ g.openPct }}%</span>
+                      </div>
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;color:var(--body)">{{ g.openEx }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hzIsSkills }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">挂载到各 Agent 的技能包 · 点击查看引用</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+              <sc-for list="{{ hzSkills }}" as="sk" hint-placeholder-count="6">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:8px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:13.5px;font-weight:700;color:var(--text)">{{ sk.name }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint)">v{{ sk.ver }}</span>
+                  </div>
+                  <div style="font-size:12px;line-height:1.55;color:var(--body);flex:1">{{ sk.desc }}</div>
+                  <div style="display:flex;align-items:center;gap:5px">
+                    <sc-for list="{{ sk.users }}" as="u" hint-placeholder-count="3">
+                      <span title="{{ u.name }}" style="width:18px;height:18px;border-radius:6px;color:{{ u.hue }};background:color-mix(in srgb, {{ u.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:9px">{{ u.glyph }}</span>
+                    </sc-for>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ sk.calls }} 次调用</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hzIsMcp }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">MCP Server 注册表 · 一处配置,多 Agent 共享</div>
+            <div style="display:flex;flex-direction:column;gap:8px;max-width:760px">
+              <sc-for list="{{ hzMcps }}" as="mc" hint-placeholder-count="5">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 35%, transparent)">
+                  <span style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ mc.dot }};box-shadow:0 0 6px {{ mc.dot }}"></span>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span style="font-size:13px;font-weight:700;color:var(--text2)">{{ mc.name }}</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:0 5px">{{ mc.transport }}</span>
+                    </div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:2px">{{ mc.desc }}</div>
+                  </div>
+                  <div style="display:flex;gap:4px">
+                    <sc-for list="{{ mc.users }}" as="u" hint-placeholder-count="3">
+                      <span title="{{ u.name }}" style="width:18px;height:18px;border-radius:6px;color:{{ u.hue }};background:color-mix(in srgb, {{ u.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:9px">{{ u.glyph }}</span>
+                    </sc-for>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mut);width:52px;text-align:right">{{ mc.tools }} tools</span>
+                  <div onClick="{{ mc.toggle }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ mc.tgBd }};position:relative;cursor:pointer;background:{{ mc.tgBg }}">
+                    <div style="position:absolute;top:2px;left:{{ mc.tgX }}px;width:14px;height:14px;border-radius:50%;background:{{ mc.tgKnob }};transition:left .15s"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hzIsHooks }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">生命周期钩子 · 在会话事件点注入自动化</div>
+            <div style="display:flex;flex-direction:column;gap:8px;max-width:760px">
+              <sc-for list="{{ hzHooks }}" as="hk" hint-placeholder-count="4">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:{{ hk.evCl }};border:1px solid color-mix(in srgb, {{ hk.evCl }} 40%, transparent);border-radius:6px;padding:2px 8px;flex:none">{{ hk.event }}</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600;color:var(--text2)">{{ hk.name }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:2px">$ {{ hk.cmd }}</div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ hk.runs }} 次触发</span>
+                  <div onClick="{{ hk.toggle }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ hk.tgBd }};position:relative;cursor:pointer;background:{{ hk.tgBg }}">
+                    <div style="position:absolute;top:2px;left:{{ hk.tgX }}px;width:14px;height:14px;border-radius:50%;background:{{ hk.tgKnob }};transition:left .15s"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hzIsSub }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">子代理编队 · 主 Agent 可派生的专职分身,各带独立提示词与工具白名单</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+              <sc-for list="{{ hzSubs }}" as="sb" hint-placeholder-count="5">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:9px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <span style="width:24px;height:24px;flex:none;border-radius:7px;color:{{ sb.hue }};background:color-mix(in srgb, {{ sb.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px">{{ sb.glyph }}</span>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:13.5px;font-weight:700;color:var(--text)">{{ sb.name }}</div>
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">宿主 {{ sb.host }} · {{ sb.model }}</div>
+                    </div>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ sb.spawns }} 次派生</span>
+                  </div>
+                  <div style="font-size:12px;line-height:1.55;color:var(--body);flex:1">{{ sb.desc }}</div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <sc-for list="{{ sb.tools }}" as="tl" hint-placeholder-count="3">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--mut);border:1px solid var(--bd);border-radius:5px;padding:1px 6px">{{ tl.t }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hzIsGoal }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">长期目标 · Agent 持续在后台推进,进度由完成的子任务累积</div>
+            <div style="display:flex;flex-direction:column;gap:10px;max-width:760px">
+              <sc-for list="{{ hzGoals }}" as="gl" hint-placeholder-count="3">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <span style="font-size:14px;font-weight:700;color:var(--text)">◎ {{ gl.name }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:{{ gl.stCl }};border:1px solid color-mix(in srgb, {{ gl.stCl }} 40%, transparent);border-radius:6px;padding:2px 8px">{{ gl.st }}</span>
+                  </div>
+                  <div style="font-size:12.5px;line-height:1.55;color:var(--body)">{{ gl.desc }}</div>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="flex:1;height:6px;border-radius:3px;background:var(--hov);overflow:hidden"><div style="width:{{ gl.pct }}%;height:100%;border-radius:3px;background:var(--accent)"></div></div>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--acFg);width:38px;text-align:right">{{ gl.pct }}%</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint)">
+                    <sc-for list="{{ gl.owners }}" as="ow" hint-placeholder-count="2">
+                      <span title="{{ ow.name }}" style="width:18px;height:18px;border-radius:6px;color:{{ ow.hue }};background:color-mix(in srgb, {{ ow.hue }} 12%, transparent);display:grid;place-items:center;font-size:9px">{{ ow.glyph }}</span>
+                    </sc-for>
+                    <span>{{ gl.done }}/{{ gl.total }} 子任务</span>
+                    <span style="flex:1"></span>
+                    <span>下一步:{{ gl.next }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hzIsWorkflow }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">多 Agent 工作流 · 节点串联成流水线,可手动触发或由事件驱动</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ hzFlows }}" as="fl" hint-placeholder-count="3">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <span style="font-size:13.5px;font-weight:700;color:var(--text)">⧉ {{ fl.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:1px 6px">{{ fl.trigger }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ fl.runs }} 次运行 · 上次 {{ fl.last }}</span>
+                    <div onClick="{{ fl.run }}" style="padding:4px 13px;border-radius:8px;border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent);color:var(--acFg);font-size:11.5px;font-weight:700;cursor:pointer;user-select:none" style-hover="background:color-mix(in oklab, var(--accent,#3ddc84) 12%, transparent)">{{ fl.runLabel }}</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:8px">
+                    <sc-for list="{{ fl.steps }}" as="stp" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center">
+                        <div style="display:flex;align-items:center;gap:7px;border:1px solid {{ stp.bd }};background:{{ stp.bg }};border-radius:10px;padding:7px 11px">
+                          <span style="width:18px;height:18px;flex:none;border-radius:6px;color:{{ stp.hue }};background:color-mix(in srgb, {{ stp.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:9px">{{ stp.glyph }}</span>
+                          <div>
+                            <div style="font-size:11.5px;font-weight:700;color:var(--text2);white-space:nowrap">{{ stp.name }}</div>
+                            <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:{{ stp.stCl }};white-space:nowrap">{{ stp.st }}</div>
+                          </div>
+                        </div>
+                        <sc-if value="{{ stp.arrow }}" hint-placeholder-val="{{ true }}">
+                          <span style="color:var(--faint);font-size:11px;padding:0 7px">→</span>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hzIsRules }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mut)">项目级规则文件 · 派发任务时自动注入对应 Agent 的上下文</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+              <sc-for list="{{ hzRules }}" as="rl" hint-placeholder-count="4">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:8px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--acFg)">§</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--text)">{{ rl.file }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:1px 6px">⌂ {{ rl.proj }}</span>
+                  </div>
+                  <div style="font-size:12px;line-height:1.55;color:var(--body);flex:1">{{ rl.desc }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">{{ rl.n }} 条规则 · {{ rl.date }} 更新 · 来源 {{ rl.src }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMemory }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Memory" style="padding:20px;display:flex;flex-direction:column;gap:12px;max-width:1240px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <input value="{{ memQ }}" onChange="{{ onMemQ }}" placeholder="搜索记忆与笔记…" style="flex:1;max-width:420px;background:var(--input);border:1px solid var(--bd2);border-radius:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:9px 13px;outline:none" style-focus="border-color:var(--accent,#3ddc84);box-shadow:0 0 0 3px color-mix(in oklab, var(--accent,#3ddc84) 18%, transparent)">
+            <div style="flex:1"></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mut);border:1px solid var(--bd2);border-radius:20px;padding:4px 12px">{{ memCounts }}</div>
+          </div>
+          <div style="display:flex;gap:2px;background:var(--hov);border-radius:9px;padding:3px;align-self:flex-start">
+            <sc-for list="{{ memTabs }}" as="mt" hint-placeholder-count="4">
+              <div onClick="{{ mt.on }}" style="display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;color:{{ mt.cl }};background:{{ mt.bg }};user-select:none">{{ mt.name }}<sc-if value="{{ mt.count }}" hint-placeholder-val="{{ false }}"><span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;opacity:.75">{{ mt.count }}</span></sc-if></div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ memIsGraph }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative;height:480px;border-radius:14px;overflow:hidden;border:1px solid var(--bd);background:radial-gradient(700px 420px at 55% 45%, #2a1f4d 0%, #17122e 45%, #0b0918 100%)">
+              <div style="position:absolute;top:14px;left:16px;z-index:3;pointer-events:none">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:#b7a8e8">✦ MEMORY GALAXY</div>
+                <div style="font-size:11.5px;color:#8d81c0;margin-top:4px"><span style="color:#e8e2ff;font-weight:700">{{ memStarCount }}</span> 颗星 · {{ memLinkCount }} 条关联</div>
+                <div style="font-size:10.5px;color:#6f649e;margin-top:2px">悬停查看 · 点击打开记忆 · 更亮 = 最近更新</div>
+              </div>
+              <svg style="position:absolute;inset:0;width:100%;height:100%;z-index:1" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <sc-for list="{{ memLinks }}" as="lk" hint-placeholder-count="4">
+                  <line x1="{{ lk.x1 }}" y1="{{ lk.y1 }}" x2="{{ lk.x2 }}" y2="{{ lk.y2 }}" stroke="rgba(150,130,220,.28)" stroke-width="0.18"></line>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ memStars }}" as="st" hint-placeholder-count="10">
+                <div onClick="{{ st.on }}" title="{{ st.title }}" style="position:absolute;left:{{ st.x }}%;top:{{ st.y }}%;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+                  <div style="width:{{ st.size }}px;height:{{ st.size }}px;border-radius:50%;background:#fff;opacity:{{ st.op }};box-shadow:0 0 {{ st.glow }}px {{ st.glowC }};transition:transform .15s" style-hover="transform:scale(1.5)"></div>
+                  <sc-if value="{{ st.showLabel }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#a396d8;white-space:nowrap">{{ st.label }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ memIsList }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px;max-width:860px">
+              <sc-for list="{{ memList }}" as="m" hint-placeholder-count="5">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:11px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="width:26px;height:26px;flex:none;border-radius:8px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ m.hue }};background:color-mix(in srgb, {{ m.hue }} 12%, transparent)">{{ m.glyph }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13.5px;font-weight:600;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.title }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:2px">{{ m.meta }}</div>
+                  </div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:1px 6px;flex:none">⌂ {{ m.proj }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint);flex:none">{{ m.date }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ memEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:30px;text-align:center;color:var(--faint);font-size:12.5px">没有匹配的记忆</div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ memIsNotes }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
+              <sc-for list="{{ memNotes }}" as="n" hint-placeholder-count="4">
+                <div style="border:1px solid var(--bd);background:var(--panel);border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:8px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent)">
+                  <div style="font-size:13.5px;font-weight:700;color:var(--text)">{{ n.title }}</div>
+                  <div style="font-size:12px;line-height:1.6;color:var(--body);flex:1">{{ n.body }}</div>
+                  <div style="display:flex;gap:8px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--faint)">
+                    <span style="border:1px solid var(--bd);border-radius:5px;padding:1px 6px">⌂ {{ n.proj }}</span>
+                    <span style="flex:1"></span><span>{{ n.date }}</span>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ memEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:30px;color:var(--faint);font-size:12.5px">没有匹配的笔记</div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="设置" style="padding:20px;display:flex;flex-direction:column;gap:14px;max-width:860px">
+
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px">
+            <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:12px">外观</div>
+            <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:12.5px;color:var(--mut);font-weight:600">主题</div>
+                <div style="display:flex;gap:2px;background:var(--hov);border-radius:9px;padding:3px">
+                  <div onClick="{{ setDark }}" style="padding:5px 16px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;color:{{ darkCl }};background:{{ darkBg }};user-select:none">深色</div>
+                  <div onClick="{{ setLight }}" style="padding:5px 16px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;color:{{ lightCl }};background:{{ lightBg }};user-select:none">浅色</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:12.5px;color:var(--mut);font-weight:600">主题色</div>
+                <div style="display:flex;gap:8px">
+                  <sc-for list="{{ swatches }}" as="sw" hint-placeholder-count="4">
+                    <div onClick="{{ sw.pick }}" style="width:24px;height:24px;border-radius:50%;background:{{ sw.c }};cursor:pointer;border:2px solid {{ sw.ring }};box-shadow:0 0 0 2px {{ sw.halo }}" style-hover="transform:scale(1.1)"></div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div style="font-size:13.5px;font-weight:700;color:var(--text)">界面自定义</div>
+              <div style="font-size:11.5px;color:var(--faint);margin-top:3px">勾选侧边栏中显示的模块 —— 主导航、PROJECTS、Agent、HARNESS 与 Sessions Manager</div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--faint);margin-bottom:8px">主导航</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ visNavRows }}" as="v" hint-placeholder-count="4">
+                  <div onClick="{{ v.on }}" style="display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;border:1px solid {{ v.bd }};background:{{ v.bg }};cursor:pointer;user-select:none;opacity:{{ v.op }}" style-hover="border-color:var(--accent,#3ddc84)">
+                    <span style="font-size:12px;color:{{ v.cl }}">{{ v.glyph }}</span>
+                    <span style="font-size:12.5px;font-weight:600;color:{{ v.cl }}">{{ v.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ v.markCl }}">{{ v.mark }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--faint);margin-bottom:8px">PROJECTS 模块</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ visProjRows }}" as="v" hint-placeholder-count="3">
+                  <div onClick="{{ v.on }}" style="display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;border:1px solid {{ v.bd }};background:{{ v.bg }};cursor:pointer;user-select:none;opacity:{{ v.op }}" style-hover="border-color:var(--accent,#3ddc84)">
+                    <span style="font-size:12px;color:{{ v.cl }}">{{ v.glyph }}</span>
+                    <span style="font-size:12.5px;font-weight:600;color:{{ v.cl }}">{{ v.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ v.markCl }}">{{ v.mark }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--faint);margin-bottom:8px">AGENTS</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ visAgents }}" as="v" hint-placeholder-count="6">
+                  <div onClick="{{ v.on }}" style="display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;border:1px solid {{ v.bd }};background:{{ v.bg }};cursor:pointer;user-select:none;opacity:{{ v.op }}" style-hover="border-color:{{ v.hue }}">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ v.hue }}">{{ v.glyph }}</span>
+                    <span style="font-size:12.5px;font-weight:600;color:{{ v.cl }}">{{ v.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ v.markCl }}">{{ v.mark }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--faint);margin-bottom:8px">HARNESS 模块</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ visHzRows }}" as="v" hint-placeholder-count="8">
+                  <div onClick="{{ v.on }}" style="display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;border:1px solid {{ v.bd }};background:{{ v.bg }};cursor:pointer;user-select:none;opacity:{{ v.op }}" style-hover="border-color:var(--accent,#3ddc84)">
+                    <span style="font-size:12px;color:{{ v.cl }}">{{ v.glyph }}</span>
+                    <span style="font-size:12.5px;font-weight:600;color:{{ v.cl }}">{{ v.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ v.markCl }}">{{ v.mark }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--faint);margin-bottom:8px">SESSIONS MANAGER 模块</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ visSm }}" as="v" hint-placeholder-count="7">
+                  <div onClick="{{ v.on }}" style="display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;border:1px solid {{ v.bd }};background:{{ v.bg }};cursor:pointer;user-select:none;opacity:{{ v.op }}" style-hover="border-color:var(--accent,#3ddc84)">
+                    <span style="font-size:12px;color:{{ v.cl }}">{{ v.glyph }}</span>
+                    <span style="font-size:12.5px;font-weight:600;color:{{ v.cl }}">{{ v.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ v.markCl }}">{{ v.mark }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px">
+            <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:4px">Agent 配置</div>
+            <div style="font-size:11.5px;color:var(--faint);margin-bottom:12px">接入的 CLI Agent 的模型、密钥、工作目录与审批策略</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+              <sc-for list="{{ setChips }}" as="ch" hint-placeholder-count="6">
+                <div onClick="{{ ch.pick }}" style="display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;border:1px solid {{ ch.bd }};background:{{ ch.bg }};cursor:pointer;user-select:none" style-hover="border-color:{{ ch.hue }}">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ ch.hue }}">{{ ch.glyph }}</span>
+                  <span style="font-size:12.5px;font-weight:600;color:{{ ch.cl }}">{{ ch.name }}</span>
+                  <span style="width:6px;height:6px;border-radius:50%;background:{{ ch.dot }}"></span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="border:1px solid var(--bd2);border-radius:12px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--hov)">
+                <div style="width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:{{ selHue }};background:color-mix(in srgb, {{ selHue }} 12%, transparent)">{{ selGlyph }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14.5px;font-weight:700;color:var(--text)">{{ selName }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint)">{{ selBin }}</div>
+                </div>
+                <div style="font-size:11.5px;color:{{ selEnCl }};font-weight:600">{{ selEnLabel }}</div>
+                <div onClick="{{ selToggleEn }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ selEnBd }};position:relative;cursor:pointer;background:{{ selEnBg }}">
+                  <div style="position:absolute;top:2px;left:{{ selEnX }}px;width:14px;height:14px;border-radius:50%;background:{{ selEnKnob }};transition:left .15s"></div>
+                </div>
+              </div>
+              <div style="padding:14px 16px;display:flex;flex-direction:column;gap:13px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:76px;flex:none;font-size:12px;font-weight:600;color:var(--mut)">模型</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ selModels }}" as="mo" hint-placeholder-count="3">
+                      <div onClick="{{ mo.pick }}" style="padding:4px 11px;border-radius:8px;border:1px solid {{ mo.bd }};color:{{ mo.cl }};background:{{ mo.bg }};font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;user-select:none">{{ mo.name }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:76px;flex:none;font-size:12px;font-weight:600;color:var(--mut)">API Key</div>
+                  <div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--body);border:1px solid var(--bd2);border-radius:8px;padding:7px 11px;background:var(--input)">{{ selKey }}</div>
+                  <div style="font-size:11.5px;color:var(--acFg);font-weight:600;cursor:pointer" style-hover="text-decoration:underline">更换</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:76px;flex:none;font-size:12px;font-weight:600;color:var(--mut)">工作目录</div>
+                  <div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--body);border:1px solid var(--bd2);border-radius:8px;padding:7px 11px;background:var(--input)">{{ selCwd }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:76px;flex:none;font-size:12px;font-weight:600;color:var(--mut)">审批策略</div>
+                  <div onClick="{{ selToggleAuto }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ selAutoBd }};position:relative;cursor:pointer;background:{{ selAutoBg }}">
+                    <div style="position:absolute;top:2px;left:{{ selAutoX }}px;width:14px;height:14px;border-radius:50%;background:{{ selAutoKnob }};transition:left .15s"></div>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:12.5px;font-weight:600;color:var(--text2)">自动批准低风险操作</div>
+                    <div style="font-size:11px;color:var(--faint)">读取、检索、测试类命令免确认;写库与部署仍需人工批准</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:13px">
+            <div style="display:flex;align-items:baseline;gap:10px">
+              <div style="font-size:13.5px;font-weight:700;color:var(--text)">用量统计</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut)">今日 {{ costTotal }} · {{ tokTotal }} tok</div>
+              <div style="flex:1"></div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wait)">预算 78%</div>
+            </div>
+            <div style="display:flex;align-items:stretch;gap:10px;height:120px">
+              <sc-for list="{{ usageBars }}" as="b" hint-placeholder-count="7">
+                <div style="flex:1;display:flex;flex-direction:column;gap:6px;justify-content:flex-end">
+                  <div style="height:{{ b.h }}%;border-radius:6px 6px 2px 2px;background:{{ b.fill }}"></div>
+                  <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:{{ b.lc }}">{{ b.d }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ usageRows }}" as="r" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11.5px">
+                  <div style="width:22px;height:22px;flex:none;border-radius:7px;color:{{ r.hue }};background:color-mix(in srgb, {{ r.hue }} 12%, transparent);display:grid;place-items:center;font-size:11px">{{ r.glyph }}</div>
+                  <div style="width:100px;color:var(--body);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{ r.name }}</div>
+                  <div style="flex:1;height:6px;border-radius:3px;background:var(--hov);overflow:hidden"><div style="width:{{ r.w }}%;height:100%;border-radius:3px;background:{{ r.hue }};opacity:.8"></div></div>
+                  <div style="width:56px;text-align:right;color:var(--mut)">{{ r.tok }}</div>
+                  <div style="width:52px;text-align:right;color:var(--text)">{{ r.cost }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:13px">
+            <div style="font-size:13.5px;font-weight:700;color:var(--text)">通知与预算</div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:76px;flex:none;font-size:12px;font-weight:600;color:var(--mut)">每日预算</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);font-weight:700">$25.00</div>
+              <div style="flex:1;height:6px;border-radius:3px;background:var(--hov);overflow:hidden"><div style="width:78%;height:100%;border-radius:3px;background:linear-gradient(90deg, var(--accent,#3ddc84), var(--wait))"></div></div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wait)">已用 78%</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div onClick="{{ toggleNotifyDone }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ ndBd }};position:relative;cursor:pointer;background:{{ ndBg }}">
+                <div style="position:absolute;top:2px;left:{{ ndX }}px;width:14px;height:14px;border-radius:50%;background:{{ ndKnob }};transition:left .15s"></div>
+              </div>
+              <div style="font-size:12.5px;font-weight:600;color:var(--text2)">任务完成时推送通知</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div onClick="{{ toggleNotifyWait }}" style="width:36px;height:20px;flex:none;border-radius:11px;border:1px solid {{ nwBd }};position:relative;cursor:pointer;background:{{ nwBg }}">
+                <div style="position:absolute;top:2px;left:{{ nwX }}px;width:14px;height:14px;border-radius:50%;background:{{ nwKnob }};transition:left .15s"></div>
+              </div>
+              <div style="font-size:12.5px;font-weight:600;color:var(--text2)">Agent 等待确认时提醒</div>
+            </div>
+          </div>
+
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:13.5px;font-weight:700;color:var(--text)">项目</div>
+            <sc-for list="{{ projects }}" as="p" hint-placeholder-count="4">
+              <div style="border:1px solid var(--bd);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:12px" style-hover="border-color:color-mix(in oklab, var(--accent,#3ddc84) 35%, transparent)">
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;gap:9px;align-items:center">
+                    <div style="font-size:14px;font-weight:700;color:var(--text)">{{ p.name }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mut);border:1px solid var(--bd2);border-radius:6px;padding:1px 7px">⎇ {{ p.branch }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:{{ p.chColor }}">{{ p.changes }}</div>
+                  </div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);margin-top:3px">{{ p.path }} · {{ p.last }}</div>
+                </div>
+                <div style="display:flex;gap:5px">
+                  <sc-for list="{{ p.dots }}" as="d" hint-placeholder-count="2">
+                    <div title="{{ d.name }}" style="width:22px;height:22px;border-radius:7px;color:{{ d.hue }};background:color-mix(in srgb, {{ d.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px">{{ d.glyph }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+              <div style="font-size:13.5px;font-weight:700;color:var(--text)">结果对比</div>
+              <div style="font-size:11.5px;color:var(--mut)">同一 prompt 派给 3 个 Agent · 滑动窗口 rate limiter</div>
+            </div>
+            <sc-if value="{{ adoptedNote }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 40%, transparent);background:color-mix(in oklab, var(--accent,#3ddc84) 7%, transparent);border-radius:10px;padding:8px 12px;font-size:12.5px;color:var(--acFg);font-weight:600">{{ adoptedNote }}</div>
+            </sc-if>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:stretch">
+              <sc-for list="{{ compareCols }}" as="c" hint-placeholder-count="3">
+                <div style="border:1px solid {{ c.bd }};background:{{ c.bg }};border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:24px;height:24px;flex:none;border-radius:7px;color:{{ c.hue }};background:color-mix(in srgb, {{ c.hue }} 12%, transparent);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px">{{ c.glyph }}</div>
+                    <div style="font-weight:700;font-size:13px;color:var(--text)">{{ c.name }}</div>
+                    <div style="flex:1"></div>
+                    <sc-if value="{{ c.isAdopted }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:10px;font-weight:700;color:var(--acFg)">✓ 已采纳</div>
+                    </sc-if>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px">
+                    <div style="background:var(--code2);border-radius:7px;padding:5px 8px"><div style="color:var(--faint);font-size:8.5px;letter-spacing:.1em">用时</div><div style="color:var(--body);margin-top:2px">{{ c.time }}</div></div>
+                    <div style="background:var(--code2);border-radius:7px;padding:5px 8px"><div style="color:var(--faint);font-size:8.5px;letter-spacing:.1em">费用</div><div style="color:var(--body);margin-top:2px">{{ c.cost }}</div></div>
+                    <div style="background:var(--code2);border-radius:7px;padding:5px 8px"><div style="color:var(--faint);font-size:8.5px;letter-spacing:.1em">TOKENS</div><div style="color:var(--body);margin-top:2px">{{ c.tok }}</div></div>
+                    <div style="background:var(--code2);border-radius:7px;padding:5px 8px"><div style="color:var(--faint);font-size:8.5px;letter-spacing:.1em">测试</div><div style="color:{{ c.testColor }};margin-top:2px">{{ c.tests }}</div></div>
+                  </div>
+                  <div style="font-size:12px;line-height:1.55;color:var(--body);flex:1">{{ c.note }}</div>
+                  <div onClick="{{ c.adopt }}" style="padding:6px 0;text-align:center;border-radius:8px;border:1px solid color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent);color:var(--acFg);font-weight:700;font-size:12px;cursor:pointer;user-select:none" style-hover="background:color-mix(in oklab, var(--accent,#3ddc84) 12%, transparent)">采纳此实现</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;外观&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#3ddc84&quot;,&quot;#4fd8e0&quot;,&quot;#ffb454&quot;,&quot;#b48cff&quot;],&quot;default&quot;:&quot;#3ddc84&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;外观&quot;},&quot;liveSim&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;行为&quot;}}">
+class Component extends DCLogic {
+  constructor(p){
+    super(p);
+    this.seq=400; this.timers=[]; this.listEl=null; this.msgCount=0; this.tickN=0;
+    this.rootRefFn=el=>{ this.rootEl=el; this.applyTheme(); };
+    const hist=(sid,date,sum,n,tok,proj)=>({sid,date,sum,n,tok,proj});
+    this.state={
+      clock:this.now(), view:{kind:'home'}, notifOpen:false, adopted:null, drafts:{}, tabs:{}, collapsed:{}, memTab:'graph', memQ:'',
+      homeDraft:'', homeAgent:'claude', homePath:'~', homeMenu:null, homeMode:'manual', agentsSecOpen:true, projSecOpen:true, pinSecOpen:false, projOpen:{}, convSecOpen:true, convOpen:{},
+      smSecOpen:true, smQ:'', smCat:'all', smFmt:'rules', smDepth:'standard', smExporting:false, smExportNote:null, smSync:true, smSyncing:false, smLastSync:'3 分钟前',
+      visAgents:{codex:true,claude:true,grok:true,cursor:true,pi:true,hermes:true},
+      queueSecOpen:true, cronOn:{c1:true,c2:true,c3:false,c4:true},
+      hzSecOpen:true, hzOpenSeg:{}, hzMcpOn:{fs:true,browser:true,gmail:true,notion:true,analytics:false},
+      hzHookOn:{h1:true,h2:true,h3:false,h4:true},
+      visSm:{dash:true,sessions:true,insights:true,analytics:true,patterns:true,export:true,sync:true},
+      visNav:{home:true,dash:true,queue:true,memory:true,pinned:true,projList:true,conv:true},
+      visHz:{prompt:true,skills:true,mcp:true,sub:true,goal:true,workflow:true,hooks:true,rules:true},
+      theme:null, accent:null, settingsAgent:'codex', prefs:{notifyDone:true,notifyWait:true},
+      agents:{
+        codex:{id:'codex',name:'Codex CLI',glyph:'❯',hue:'#4fd8e0',bin:'/usr/local/bin/codex · v3.4.1',enabled:true,model:'gpt-5-codex',models:['gpt-5-codex','o4','o4-mini'],cwd:'~/dev/api-server',status:'executing',task:'重构 auth 中间件为策略模式',tok:182400,cost:4.21,secs:1380,last:'▸ 重写 middleware/auth.ts',auto:true,key:'sk-cx-••••••••7f21',hist:[hist('#c2e8','07-20 21:02','修复 CI 缓存键漂移',22,'188k','api-server'),hist('#b011','07-18 10:33','gRPC 网关脚手架',41,'520k','api-server')]},
+        claude:{id:'claude',name:'Claude Code',glyph:'◆',hue:'#ff9d66',bin:'/usr/local/bin/claude · v2.8.0',enabled:true,model:'claude-4.5-sonnet',models:['claude-4.5-opus','claude-4.5-sonnet','claude-4-haiku'],cwd:'~/dev/webapp',status:'waiting',task:'迁移 users 表到新 schema',tok:96300,cost:1.84,secs:660,last:'⚠ 等待确认: prisma migrate deploy',auto:false,key:'sk-ant-••••••••a4f2',hist:[hist('#a3f2','07-20 22:14','重构支付 webhook 重试逻辑',34,'412k','webapp'),hist('#98c1','07-19 16:40','修复 SSR hydration 报错',18,'156k','webapp')]},
+        grok:{id:'grok',name:'Grok CLI',glyph:'◭',hue:'#b48cff',bin:'~/.grok/bin/grok · v1.9.2',enabled:true,model:'grok-4',models:['grok-4','grok-4-fast'],cwd:'~/dev/ml-pipeline',status:'thinking',task:'分析生产环境 crash 日志',tok:54100,cost:0.63,secs:240,last:'…扫描 log/2026-07-21.gz',auto:false,key:'xai-••••••••90bd',hist:[hist('#77de','07-17 09:12','训练数据去重脚本',26,'302k','ml-pipeline')]},
+        cursor:{id:'cursor',name:'Cursor CLI',glyph:'⌖',hue:'#6aa5ff',bin:'/usr/local/bin/cursor-agent · v0.52',enabled:true,model:'composer-2',models:['composer-2','auto'],cwd:'~/dev/webapp',status:'executing',task:'为 parser 补全单元测试',tok:77800,cost:0.94,secs:1020,last:'✓ tests/parser.spec.ts 14/14',auto:true,key:'cur-••••••••11c8',hist:[hist('#61aa','07-20 15:27','抽离表单校验 hooks',15,'98k','webapp')]},
+        pi:{id:'pi',name:'Pi',glyph:'π',hue:'#49e0c0',bin:'~/.pi/bin/pi · v0.9.4',enabled:true,model:'pi-3',models:['pi-3'],cwd:'~',status:'idle',task:'待命',tok:0,cost:0,secs:0,last:'—',auto:false,key:'pi-••••••••3e60',hist:[]},
+        hermes:{id:'hermes',name:'Hermes',glyph:'☿',hue:'#ffd166',bin:'/opt/hermes/hermes · v4.0.1',enabled:true,model:'hermes-4-405b',models:['hermes-4-405b','hermes-4-70b'],cwd:'~/dev/api-server',status:'idle',task:'待命',tok:12400,cost:0.12,secs:0,last:'✓ OpenAPI 文档已生成',auto:false,key:'hm-••••••••5aa1',hist:[hist('#4f02','07-21 09:05','生成 OpenAPI 文档',9,'64k','api-server')]}
+      },
+      sessions:{
+        claude:[
+          {id:'m1',t:'user',body:'把 users 表迁移到新 schema,写好迁移脚本并先跑 dry-run'},
+          {id:'m2',t:'tool',tool:'Read',arg:'prisma/schema.prisma',res:'2.1k tok'},
+          {id:'m3',t:'tool',tool:'Bash',arg:'npx prisma migrate diff --preview',res:'exit 0'},
+          {id:'m4',t:'text',body:'差异已确认:users 表新增 tenant_id 与软删除字段,需要回填数据。迁移分两阶段:先扩列回填,再收紧约束。dry-run 通过。'},
+          {id:'m5',t:'diff',file:'migrations/20260721_users_v2.sql',add:48,del:12,lines:[
+            {k:'+',s:'ALTER TABLE users ADD COLUMN tenant_id uuid;'},
+            {k:'+',s:'ALTER TABLE users ADD COLUMN deleted_at timestamptz;'},
+            {k:'+',s:'UPDATE users SET tenant_id = o.tenant_id FROM orgs o ...;'},
+            {k:'-',s:'DROP INDEX users_email_key;'},
+            {k:'+',s:'CREATE UNIQUE INDEX users_email_tenant_key ON users(email, tenant_id);'}
+          ]},
+          {id:'m6',t:'approval',body:'npx prisma migrate deploy',note:'将对 webapp 生产数据库执行结构变更,不可自动回滚',approved:null}
+        ],
+        codex:[
+          {id:'x1',t:'user',body:'把 auth 中间件重构成可插拔的策略模式,保持现有行为不变'},
+          {id:'x2',t:'tool',tool:'Grep',arg:'"authMiddleware" src/',res:'14 处引用'},
+          {id:'x3',t:'text',body:'计划:① 抽出 AuthStrategy 接口 ② JWT / ApiKey / Session 三个实现 ③ 引用点切换到工厂函数。开始执行。'},
+          {id:'x4',t:'tool',tool:'Edit',arg:'middleware/auth.ts',res:'+120 −86'},
+          {id:'x5',t:'note',body:'▸ 运行 tests/auth.spec.ts … 9/14 通过'}
+        ],
+        grok:[
+          {id:'g1',t:'user',body:'分析昨晚生产环境的 crash 日志,找出根因'},
+          {id:'g2',t:'think',body:'正在扫描 log/2026-07-21.gz (1.2 GB) …'}
+        ],
+        cursor:[
+          {id:'u1',t:'user',body:'为 parser 补全单元测试,目标覆盖率 90%'},
+          {id:'u2',t:'tool',tool:'Edit',arg:'tests/parser.spec.ts',res:'+214 −0'},
+          {id:'u3',t:'text',body:'14 个用例全部通过,分支覆盖率 91.4%,已在工作区待提交。'},
+          {id:'u4',t:'note',body:'✓ 任务完成 · 用时 17m'}
+        ],
+        pi:[], hermes:[]
+      },
+      notifs:[
+        {id:'n1',agent:'claude',title:'Claude Code 等待确认',text:'请求执行 prisma migrate deploy',time:'刚刚',read:false},
+        {id:'n2',agent:'cursor',title:'Cursor CLI 任务完成',text:'parser 单元测试 14/14 通过',time:'6 分钟前',read:false},
+        {id:'n3',agent:null,title:'预算提醒',text:'今日费用已达预算 78%',time:'1 小时前',read:true}
+      ],
+      tasks:[
+        {id:'t1',title:'修复 flaky 的 e2e 登录用例',proj:'webapp',assignee:null,status:'queued'},
+        {id:'t2',title:'React 19 依赖升级审计',proj:'webapp',assignee:'codex',status:'queued'},
+        {id:'t3',title:'REST API 生成 OpenAPI 文档',proj:'api-server',assignee:'hermes',status:'done',result:'✓ 已完成 · $0.12'}
+      ]
+    };
+    this.codexFeed=['▸ 运行 tests/auth.spec.ts … 12/14 通过','▸ 修复 token 刷新竞态 (auth.ts:88)','✓ tests/auth.spec.ts 14/14 通过','✓ 重构完成,变更待提交 (+248 −131)'];
+    this.feedIdx=0;
+    this.memories=[
+      {id:'me1',kind:'omi',title:'webapp 的 e2e 测试偶发超时,根因是 CI 上共享 redis 端口冲突',agent:'cursor',proj:'webapp',date:'07-21',rec:.95,x:62,y:38},
+      {id:'me2',kind:'omi',title:'users 表迁移采用两阶段方案:先扩列回填,再收紧约束',agent:'claude',proj:'webapp',date:'07-21',rec:.9,x:40,y:55},
+      {id:'me3',kind:'omi',title:'auth 中间件已切换为策略模式,新增 strategy 需在工厂注册',agent:'codex',proj:'api-server',date:'07-20',rec:.8,x:55,y:64},
+      {id:'me4',kind:'note',title:'发布清单 v3',body:'staging 验证 → 数据库备份 → 灰度 10% → 观察 30min → 全量。回滚脚本在 ops/rollback.sh。',proj:'api-server',date:'07-20',rec:.75,agent:'hermes',x:66,y:20},
+      {id:'me5',kind:'omi',title:'crash 根因:worker 池重连时复用已关闭句柄,已加存活检查',agent:'grok',proj:'ml-pipeline',date:'07-19',rec:.7,x:30,y:40},
+      {id:'me6',kind:'omi',title:'rate limiter 最终采纳滑动窗口 + Redis sorted set 实现',agent:'claude',proj:'api-server',date:'07-18',rec:.6,x:70,y:50},
+      {id:'me7',kind:'note',title:'新同学 onboarding',body:'Agent 权限申请流程、常用 prompt 模板、审批策略约定(写库/部署必须人工批准)。',proj:'其他',date:'07-17',rec:.5,agent:'pi',x:35,y:74},
+      {id:'me8',kind:'omi',title:'k6 压测脚本位于 scripts/load/,基准 100 req/min',agent:'grok',proj:'api-server',date:'07-16',rec:.45,x:20,y:62},
+      {id:'me9',kind:'omi',title:'生产部署窗口:工作日 14:00–17:00,周五冻结',agent:'hermes',proj:'api-server',date:'07-15',rec:.4,x:48,y:25},
+      {id:'me10',kind:'note',title:'Q3 技术债清单',body:'parser 重写、废弃 v1 API、统一 CI 缓存策略、补齐 webhook 重试监控。',proj:'webapp',date:'07-14',rec:.35,agent:'cursor',x:78,y:74},
+      {id:'me11',kind:'omi',title:'OpenAPI 文档由 Hermes 每晚 02:00 自动重新生成',agent:'hermes',proj:'api-server',date:'07-13',rec:.3,x:82,y:32},
+      {id:'me12',kind:'note',title:'Prompt 模板:代码审查',body:'按 diff 审查:安全 → 性能 → 可读性,输出分级建议(blocker/major/minor)。',proj:'其他',date:'07-11',rec:.3,agent:'claude',x:25,y:82},
+      {id:'me13',kind:'omi',title:'训练数据去重用 minhash,相似度阈值 0.86',agent:'grok',proj:'ml-pipeline',date:'07-10',rec:.25,x:14,y:26},
+      {id:'me14',kind:'omi',title:'Pi 仅用于快速问答,不授予仓库写权限',agent:'pi',proj:'其他',date:'07-08',rec:.2,x:88,y:66}
+    ];
+    this.memLinkPairs=[['me1','me2'],['me2','me10'],['me3','me6'],['me6','me8'],['me4','me9'],['me9','me11'],['me5','me13'],['me7','me12']];
+    this.hermesSkills=[
+      {glyph:'⌕',name:'行业调研',desc:'检索近 7 天 AI 自动化动态,输出带来源的摘要简报',runs:18},
+      {glyph:'✉',name:'外联邮件',desc:'按品牌语气为目标客户生成 3 封个性化 outreach 邮件',runs:42},
+      {glyph:'¶',name:'SEO 长文',desc:'围绕关键词生成结构化博客文章,含标题矩阵与内链建议',runs:11},
+      {glyph:'◫',name:'社媒内容',desc:'一稿多发:Twitter/X、LinkedIn 帖子与配图脚本',runs:27},
+      {glyph:'⧉',name:'API 文档',desc:'扫描路由与 schema,重新生成 OpenAPI 文档并校验示例',runs:9},
+      {glyph:'✦',name:'写入 Memory',desc:'把产出摘要沉淀到共享记忆,供其他 Agent 检索',runs:63}
+    ];
+    this.hermesKanban=[
+      {name:'待办',cl:'var(--mut)',cards:[{title:'为新功能页写 landing 文案',proj:'webapp',when:'今天'},{title:'整理 Q3 客户访谈引用',proj:'其他',when:'明天'}]},
+      {name:'进行中',cl:'var(--think)',cards:[{title:'AI 自动化行业周报 #12',proj:'其他',when:'刚刚'}]},
+      {name:'已完成',cl:'var(--acFg)',cards:[{title:'OpenAPI 文档重新生成',proj:'api-server',when:'09:05'},{title:'欢迎邮件序列 3 封',proj:'其他',when:'昨天'}]}
+    ];
+    this.hzCats=[
+      {k:'identity',name:'身份人设',c:'oklch(62% 0.145 161)'},
+      {k:'tools',name:'工具能力',c:'oklch(60% 0.105 245)'},
+      {k:'rules',name:'行为规则',c:'oklch(55% 0.03 255)'},
+      {k:'tone',name:'语气风格',c:'oklch(70% 0.105 75)'},
+      {k:'forbidden',name:'禁忌约束',c:'oklch(60% 0.14 27)'},
+      {k:'safety',name:'安全保密',c:'oklch(56% 0.105 305)'}
+    ];
+    this.hzGenomeData=[
+      {agent:'claude',file:'~/.claude/CLAUDE.md + system',chars:6062,mods:[
+        {k:'identity',mass:420,ex:'You are Claude Code, an agentic coding assistant operating in the user\u2019s terminal.'},
+        {k:'tools',mass:3300,ex:'5 个子代理(Explore / general-purpose / Plan …)+ 13 项技能;并发派发时放同一条消息里并行运行。'},
+        {k:'rules',mass:1900,ex:'Keep edits minimal; never commit unless asked; prefer str_replace over rewrites.'},
+        {k:'tone',mass:260,ex:'Be concise. Avoid preamble. Answer in ≤4 lines unless detail is requested.'},
+        {k:'safety',mass:182,ex:'Never exfiltrate secrets; refuse to write malware; redact API keys in output.'}
+      ]},
+      {agent:'codex',file:'~/.codex/instructions.md',chars:4180,mods:[
+        {k:'identity',mass:350,ex:'You are Codex CLI, a precise coding agent that plans before it edits.'},
+        {k:'tools',mass:1800,ex:'shell / apply_patch / read_file;patch 必须是最小 diff,禁止整文件重写。'},
+        {k:'rules',mass:1600,ex:'Always run tests after edits; if 3 consecutive failures, stop and report.'},
+        {k:'forbidden',mass:430,ex:'Never push to remote; never modify .git; never touch prod configs.'}
+      ]},
+      {agent:'grok',file:'~/.grok/system.txt',chars:2900,mods:[
+        {k:'identity',mass:300,ex:'You are Grok CLI, a root-cause analyst. Think in hypotheses, verify with evidence.'},
+        {k:'tools',mass:900,ex:'bash / grep / tail;大文件先采样再全量,输出必须附证据行号。'},
+        {k:'rules',mass:1300,ex:'每个结论标注置信度;无法复现时给出三个最可能假设并排序。'},
+        {k:'tone',mass:400,ex:'直接、量化、不修饰。用数据说话,结论先行。'}
+      ]},
+      {agent:'pi',file:'~/.pi/prompt.md',chars:2450,mods:[
+        {k:'identity',mass:90,ex:'You are an expert coding assistant operating inside pi, a coding agent harness.'},
+        {k:'tools',mass:360,ex:'read · bash · edit · write —— 四个原子工具,外加项目里可能挂载的自定义工具。'},
+        {k:'rules',mass:880,ex:'Keep edits[].oldText as small as possible while still being unique in the file.'},
+        {k:'docs',mass:1090,ex:'Pi 文档:仅当用户问到 pi 本身(SDK / 扩展 / 主题 / 技能)时才去读取。'},
+        {k:'tone',mass:30,ex:'Be concise in your responses.'}
+      ]},
+      {agent:'hermes',file:'/opt/hermes/persona.yaml',chars:9800,mods:[
+        {k:'identity',mass:2200,ex:'Hermes 是外联与知识型 Agent:调研、写作、文档、邮件,人格稳定、署名一致。'},
+        {k:'tools',mass:3800,ex:'browser / gmail / notion / image_gen;发送类动作(邮件、发帖)一律先出草稿等确认。'},
+        {k:'rules',mass:1900,ex:'所有引用必须带来源链接;数据超过 30 天标注"可能过时"。'},
+        {k:'tone',mass:1200,ex:'品牌语气:专业但不生硬;中文内容禁用翻译腔;标题不超过 18 字。'},
+        {k:'safety',mass:700,ex:'客户名单与报价保密;外发内容不得包含内部路径与代号。'}
+      ]}
+    ];
+    this.hzCats.push({k:'docs',name:'文档引用',c:'oklch(63% 0.075 118)'});
+    this.hzSkillsData=[
+      {name:'行业调研',ver:'1.4',desc:'检索近 7 天动态,输出带来源的摘要简报',users:['hermes','pi'],calls:38},
+      {name:'代码审查',ver:'2.1',desc:'按 diff 审查:安全 → 性能 → 可读性,输出分级建议',users:['claude','codex'],calls:57},
+      {name:'两阶段迁移',ver:'1.0',desc:'数据库迁移拆为扩列回填 + 收紧约束两步,自动生成回滚脚本',users:['claude'],calls:12},
+      {name:'压测基准',ver:'1.2',desc:'生成 k6 脚本与基准数据,回归对比自动标红',users:['grok','codex'],calls:9},
+      {name:'SEO 长文',ver:'3.0',desc:'关键词矩阵 + 结构化博客文章 + 内链建议',users:['hermes'],calls:11},
+      {name:'Flaky 猎手',ver:'1.1',desc:'循环运行失败用例,定位共享资源冲突',users:['cursor'],calls:16}
+    ];
+    this.hzMcpData=[
+      {id:'fs',name:'filesystem',transport:'stdio',desc:'受限工作区读写 · 白名单 ~/dev',tools:8,users:['claude','codex','cursor']},
+      {id:'browser',name:'browser',transport:'stdio',desc:'playwright 无头浏览器',tools:12,users:['hermes','grok']},
+      {id:'gmail',name:'gmail',transport:'http',desc:'邮件草稿与发送(发送需确认)',tools:6,users:['hermes']},
+      {id:'notion',name:'notion',transport:'http',desc:'知识库读写',tools:9,users:['hermes','claude']},
+      {id:'analytics',name:'analytics',transport:'stdio',desc:'GA4 查询',tools:4,users:['hermes']}
+    ];
+    this.hzHookData=[
+      {id:'h1',event:'SessionEnd',name:'自动提炼洞察写入 Memory',cmd:'agentos insights extract --session $ID',runs:96,ev:'var(--acFg)'},
+      {id:'h2',event:'PreToolUse',name:'写库/部署命令拦截审批',cmd:'agentos guard --match "deploy|migrate|drop"',runs:23,ev:'var(--wait)'},
+      {id:'h3',event:'Notification',name:'桌面通知转发到手机',cmd:'ntfy publish agentos "$MSG"',runs:141,ev:'var(--think)'},
+      {id:'h4',event:'SessionStart',name:'注入项目规则与相关记忆',cmd:'agentos context inject --proj $CWD',runs:128,ev:'var(--acFg)'}
+    ];
+    this.cronData=[
+      {id:'c1',title:'夜间质量流水线',agent:'claude',sched:'每日 02:00',next:'今晚 02:00',last:'✓ 昨晚成功'},
+      {id:'c2',title:'重新生成 OpenAPI 文档',agent:'hermes',sched:'每日 02:30',next:'今晚 02:30',last:'✓ 昨晚成功'},
+      {id:'c3',title:'依赖安全审计',agent:'codex',sched:'每周一 09:00',next:'07-27 09:00',last:'— 已暂停'},
+      {id:'c4',title:'AI 行业周报',agent:'hermes',sched:'每周五 17:00',next:'07-24 17:00',last:'✓ 上周五'}
+    ];
+    this.hzSubData=[
+      {name:'Explore',host:'Claude Code',agent:'claude',model:'claude-4-haiku',desc:'只读侦察兵:快速扫仓库结构与关键实现,产出摘要供主 Agent 规划。',tools:['read','grep','ls'],spawns:214},
+      {name:'Plan',host:'Claude Code',agent:'claude',model:'claude-4.5-sonnet',desc:'先出实施计划与风险点,主 Agent 确认后才动手改代码。',tools:['read','grep'],spawns:87},
+      {name:'Reviewer',host:'Codex CLI',agent:'codex',model:'o4-mini',desc:'diff 审查分身:安全 → 性能 → 可读性,输出分级意见。',tools:['read','diff'],spawns:63},
+      {name:'Repro',host:'Grok CLI',agent:'grok',model:'grok-4-fast',desc:'专职复现:循环运行失败用例并采集最小复现命令。',tools:['bash','tail'],spawns:41},
+      {name:'Drafter',host:'Hermes',agent:'hermes',model:'hermes-4-70b',desc:'低成本初稿分身:邮件/文案先出 3 版草稿,主体只做终审。',tools:['notion','browser'],spawns:52}
+    ];
+    this.hzGoalData=[
+      {name:'测试覆盖率 → 85%',desc:'webapp 分支覆盖率从 71% 提升到 85%,优先补 parser 与表单校验。',pct:64,done:16,total:25,owners:['cursor','claude'],st:'进行中',stCl:'var(--think)',next:'补 checkout 流程分支用例'},
+      {name:'v1 API 全量下线',desc:'12 个 v1 端点迁移到 v2 并下线,调用方全部切换。',pct:42,done:5,total:12,owners:['codex','hermes'],st:'进行中',stCl:'var(--think)',next:'迁移 /v1/orders 调用方'},
+      {name:'技术债清零 · Q3',desc:'Q3 技术债清单 8 项:CI 缓存统一、webhook 监控、parser 重写…',pct:25,done:2,total:8,owners:['claude'],st:'落后',stCl:'var(--wait)',next:'webhook 重试监控接入'}
+    ];
+    this.hzFlowData=[
+      {id:'f1',name:'夜间质量流水线',trigger:'cron · 每日 02:00',runs:31,last:'昨晚',steps:[
+        {agent:'hermes',name:'重新生成 API 文档',st:'✓ 成功'},
+        {agent:'cursor',name:'全量测试 + 覆盖率',st:'✓ 14/14'},
+        {agent:'grok',name:'扫描错误日志',st:'✓ 无新增'},
+        {agent:'claude',name:'汇总晨报写入 Memory',st:'✓ 已写入'}
+      ]},
+      {id:'f2',name:'CI 失败自愈',trigger:'事件 · CI failed',runs:12,last:'07-21',steps:[
+        {agent:'grok',name:'定位失败根因',st:'✓ 根因'},
+        {agent:'codex',name:'生成修复 patch',st:'✓ +38 −6'},
+        {agent:'cursor',name:'回归测试',st:'✓ 通过'},
+        {agent:'claude',name:'等待人工批准合入',st:'⚠ 待确认'}
+      ]},
+      {id:'f3',name:'发布内容套件',trigger:'手动',runs:7,last:'07-18',steps:[
+        {agent:'hermes',name:'changelog 草稿',st:'—'},
+        {agent:'hermes',name:'博客 + 社媒帖',st:'—'},
+        {agent:'pi',name:'FAQ 问答对',st:'—'}
+      ]}
+    ];
+    this.hzRulesData=[
+      {file:'CLAUDE.md',proj:'webapp',desc:'先 dry-run 后执行;组件一律函数式;禁用 any;提交信息用中文。',n:23,date:'07-21',src:'Export'},
+      {file:'.cursorrules',proj:'webapp',desc:'测试文件与实现同目录;mock 只在 __fixtures__;快照测试禁用。',n:14,date:'07-20',src:'手写'},
+      {file:'AGENTS.md',proj:'api-server',desc:'API 变更必须同步 OpenAPI;错误码集中在 errors.ts;禁止裸 SQL。',n:19,date:'07-21',src:'Export'},
+      {file:'CLAUDE.md',proj:'ml-pipeline',desc:'数据处理脚本必须可断点续跑;随机种子固定 42;产物写 artifacts/。',n:11,date:'07-17',src:'手写'}
+    ];
+    this.smSessionsData=[
+      {title:'重构 auth 中间件为策略模式',agent:'codex',proj:'api-server',cls:'重构',date:'今天',dur:'23m',tok:'182k',live:true},
+      {title:'迁移 users 表到新 schema',agent:'claude',proj:'webapp',cls:'功能构建',date:'今天',dur:'11m',tok:'96k',live:true},
+      {title:'分析生产环境 crash 日志',agent:'grok',proj:'ml-pipeline',cls:'Bug 排查',date:'今天',dur:'4m',tok:'54k',live:true},
+      {title:'为 parser 补全单元测试',agent:'cursor',proj:'webapp',cls:'测试',date:'今天',dur:'17m',tok:'78k',live:true},
+      {title:'重构支付 webhook 重试逻辑',agent:'claude',proj:'webapp',cls:'深度专注',date:'07-20',dur:'42m',tok:'412k',live:false},
+      {title:'修复 CI 缓存键漂移',agent:'codex',proj:'api-server',cls:'Bug 排查',date:'07-20',dur:'31m',tok:'188k',live:false},
+      {title:'抽离表单校验 hooks',agent:'cursor',proj:'webapp',cls:'重构',date:'07-20',dur:'18m',tok:'98k',live:false},
+      {title:'REST API 生成 OpenAPI 文档',agent:'hermes',proj:'api-server',cls:'文档',date:'07-21',dur:'9m',tok:'64k',live:false},
+      {title:'修复 SSR hydration 报错',agent:'claude',proj:'webapp',cls:'Bug 排查',date:'07-19',dur:'26m',tok:'156k',live:false},
+      {title:'gRPC 网关脚手架',agent:'codex',proj:'api-server',cls:'功能构建',date:'07-18',dur:'55m',tok:'520k',live:false}
+    ];
+    this.smInsightsData=[
+      {cat:'决策',text:'users 表迁移采用两阶段方案:先扩列回填,再收紧约束 — 避免锁表与不可回滚风险。',agent:'claude',proj:'webapp',date:'07-21',src:'#a3f2'},
+      {cat:'决策',text:'rate limiter 最终采纳滑动窗口 + Redis sorted set,兼顾精度与降级路径。',agent:'claude',proj:'api-server',date:'07-18',src:'#98c1'},
+      {cat:'经验',text:'e2e 偶发超时的根因是 CI 上共享 redis 端口冲突 — 隔离资源后 flaky 消失。',agent:'cursor',proj:'webapp',date:'07-21',src:'#61aa'},
+      {cat:'经验',text:'worker 池重连时复用已关闭句柄会在并发下触发空指针,acquire 前必须做存活检查。',agent:'grok',proj:'ml-pipeline',date:'07-19',src:'#77de'},
+      {cat:'技巧',text:'训练数据去重用 minhash,相似度阈值 0.86 时误杀率与召回率平衡最佳。',agent:'grok',proj:'ml-pipeline',date:'07-10',src:'#77de'},
+      {cat:'摘要',text:'auth 中间件重构为可插拔策略模式,JWT/ApiKey/Session 三实现,14/14 测试通过。',agent:'codex',proj:'api-server',date:'今天',src:'#c2e8'},
+      {cat:'Prompt 质量',text:'Bug 类 prompt 普遍缺少复现步骤 — 附最小复现命令可平均减少 2 轮往返。',agent:'pi',proj:'其他',date:'07-15',src:'—'}
+    ];
+    this.smPatternsData=[
+      {name:'先 dry-run 后执行',n:9,trend:'↑ 上升',up:true,desc:'所有写库/部署操作先跑预演,确认差异后再真实执行。',tags:['数据库','部署']},
+      {name:'两阶段数据库迁移',n:6,trend:'↑ 上升',up:true,desc:'扩列回填与收紧约束分两次上线,保证每一步可回滚。',tags:['数据库','webapp']},
+      {name:'测试先行修 flaky',n:5,trend:'→ 平稳',up:false,desc:'先固定失败用例再改实现,避免掩盖真实根因。',tags:['测试','CI']},
+      {name:'策略模式抽象',n:4,trend:'→ 平稳',up:false,desc:'多实现共存的模块抽出接口 + 工厂注册,新增实现零侵入。',tags:['重构','api-server']},
+      {name:'压测脚本随实现交付',n:3,trend:'↑ 上升',up:true,desc:'性能敏感改动同时提交 k6 脚本与基准数据。',tags:['性能','k6']}
+    ];
+    this.hermesMcps=[
+      {name:'browser',desc:'stdio · playwright 无头浏览器',tools:12,on:true},
+      {name:'gmail',desc:'http · 邮件草稿与发送(发送需确认)',tools:6,on:true},
+      {name:'notion',desc:'http · 知识库读写',tools:9,on:true},
+      {name:'analytics',desc:'stdio · GA4 查询',tools:4,on:false}
+    ];
+  }
+  now(){ const d=new Date(),z=n=>String(n).padStart(2,'0'); return z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds()); }
+  componentDidMount(){ this.applyTheme(); this.iv=setInterval(()=>this.tick(),1000); }
+  componentWillUnmount(){ clearInterval(this.iv); this.timers.forEach(clearTimeout); }
+  componentDidUpdate(){ this.applyTheme(); if(this.listEl){ const n=this.listEl.childElementCount; if(this.msgCount!==n){ this.msgCount=n; this.listEl.scrollTop=this.listEl.scrollHeight; } } }
+  theme(){ return this.state.theme ?? this.props.theme ?? 'dark'; }
+  accent(){ return this.state.accent ?? this.props.accent ?? '#3ddc84'; }
+  applyTheme(){
+    if(!this.rootEl) return;
+    const ac=this.accent(), light=this.theme()==='light';
+    const t=light?{
+      bg:'#eef1ee',side:'#f7f9f7',top:'rgba(247,249,247,.75)',panel:'#ffffff',panel2:'#f1f4f1',input:'#ffffff',code:'#f6f8f6',code2:'rgba(10,30,20,.045)',
+      bd:'rgba(15,35,25,.1)',bd2:'rgba(15,35,25,.17)',text:'#141d17',text2:'#243029',body:'#37453c',mut:'#5f6d64',faint:'#84918a',hov:'rgba(15,35,25,.055)',
+      acFg:'color-mix(in oklab, '+ac+' 55%, #0c4426)',add:'#15803d',del:'#c02636',addBg:'rgba(21,128,61,.08)',delBg:'rgba(192,38,54,.07)',
+      think:'#0e7c8c',wait:'#a16207',idle:'#84918a',dotOff:'#c3ccc6',waitBody:'#7a6236',bar:'rgba(60,90,75,.18)',
+      glow:'color-mix(in oklab, '+ac+' 8%, transparent)',shadow:'0 24px 60px rgba(30,50,40,.18)'
+    }:{
+      bg:'#0a0d0c',side:'#0d1110',top:'rgba(13,17,16,.7)',panel:'#111614',panel2:'#141a17',input:'#121815',code:'#0a0f0d',code2:'rgba(0,0,0,.28)',
+      bd:'rgba(255,255,255,.07)',bd2:'rgba(255,255,255,.12)',text:'#f2f7f3',text2:'#dfe8e2',body:'#c9d4cc',mut:'#8a968e',faint:'#66736b',hov:'rgba(255,255,255,.05)',
+      acFg:ac,add:'#7defb0',del:'#ff8892',addBg:'rgba(61,220,132,.07)',delBg:'rgba(255,95,107,.07)',
+      think:'#4fd8e0',wait:'#ffb454',idle:'#5b6862',dotOff:'#39433e',waitBody:'#b8a68c',bar:'rgba(140,160,150,.25)',
+      glow:'color-mix(in oklab, '+ac+' 5%, transparent)',shadow:'0 24px 60px rgba(0,0,0,.55)'
+    };
+    const st=this.rootEl.style;
+    st.setProperty('--accent',ac);
+    Object.keys(t).forEach(k=>st.setProperty('--'+k,t[k]));
+  }
+  after(ms,fn){ this.timers.push(setTimeout(fn,ms)); }
+  setAgent(id,patch){ this.setState(s=>({agents:{...s.agents,[id]:{...s.agents[id],...patch}}})); }
+  visChip(m,key){const on=this.state[key][m.k];return {...m,op:on?1:.55,bd:on?'color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent)':'var(--bd2)',bg:on?'color-mix(in oklab, var(--accent,#3ddc84) 8%, transparent)':'transparent',cl:on?'var(--text)':'var(--faint)',mark:on?'✓':'—',markCl:on?'var(--acFg)':'var(--faint)',on:()=>this.setState(s=>({[key]:{...s[key],[m.k]:!s[key][m.k]}}))};}
+  pushMsg(aid,m){ const id='q'+(++this.seq); this.setState(s=>({sessions:{...s.sessions,[aid]:[...(s.sessions[aid]||[]),{id,...m}]}})); }
+  addNotif(n){
+    if(n.title.indexOf('任务完成')>=0&&!this.state.prefs.notifyDone) return;
+    if(n.title.indexOf('等待确认')>=0&&!this.state.prefs.notifyWait) return;
+    const id='q'+(++this.seq); this.setState(s=>({notifs:[{id,read:false,time:'刚刚',...n},...s.notifs]}));
+  }
+  go(view){ this.setState({view,notifOpen:false}); }
+  setTab(aid,t){ this.setState(s=>({tabs:{...s.tabs,[aid]:t}})); }
+  routeAgent(text){
+    const t=text.toLowerCase();
+    const rules=[
+      {re:/(测试|test|覆盖率|e2e|flaky)/,aid:'cursor',why:'测试类任务'},
+      {re:/(日志|crash|崩溃|根因|分析|排查)/,aid:'grok',why:'日志与根因分析'},
+      {re:/(迁移|schema|数据库|表|sql)/,aid:'claude',why:'数据库与迁移类任务'},
+      {re:/(重构|refactor|中间件|架构)/,aid:'codex',why:'重构类任务'},
+      {re:/(文档|openapi|邮件|调研|外联|博客|seo)/,aid:'hermes',why:'文档与外联类任务'},
+      {re:/(问答|解释|是什么|为什么)/,aid:'pi',why:'快速问答'}
+    ];
+    for(const r of rules){ if(r.re.test(t)) return {aid:r.aid,why:'匹配'+r.why}; }
+    return {aid:'claude',why:'通用编码任务(默认)'};
+  }
+  homeSend(){
+    const text=(this.state.homeDraft||'').trim(); if(!text) return;
+    const path=this.state.homePath;
+    let aid=this.state.homeAgent, why=null;
+    if(this.state.homeMode==='auto'){ const r=this.routeAgent(text); aid=r.aid; why=r.why; }
+    if(path!=='~') this.setAgent(aid,{cwd:path});
+    this.setState({homeDraft:'',homeMenu:null,view:{kind:'agent',id:aid}});
+    this.setTab(aid,'session');
+    this.send(aid,text);
+    if(why) this.pushMsg(aid,{t:'note',body:'◈ AgentOS 智能路由 → '+this.state.agents[aid].name+' · '+why});
+  }
+  send(aid,override){
+    const text=(override!=null?override:(this.state.drafts[aid]||'')).trim(); if(!text) return;
+    this.pushMsg(aid,{t:'user',body:text});
+    this.setState(s=>({drafts:{...s.drafts,[aid]:''}}));
+    this.setAgent(aid,{status:'thinking',task:text,last:'…分析任务'});
+    this.after(700,()=>this.pushMsg(aid,{t:'think',body:'正在分析仓库上下文与依赖 …'}));
+    this.after(1900,()=>{ this.pushMsg(aid,{t:'tool',tool:'Plan',arg:'拆解为 3 个子步骤',res:'ok'}); this.setAgent(aid,{status:'executing'}); });
+    this.after(3100,()=>this.pushMsg(aid,{t:'tool',tool:'Edit',arg:'src/… (工作区)',res:'+64 −9'}));
+    this.after(4300,()=>this.pushMsg(aid,{t:'text',body:'已完成初版实现,本地测试通过。变更保留在工作区,可打开 diff 审阅后提交。'}));
+    this.after(5200,()=>{
+      this.pushMsg(aid,{t:'note',body:'✓ 任务完成'});
+      const ag=this.state.agents[aid], dt=Math.round(2600+Math.random()*4000);
+      this.setAgent(aid,{status:'idle',tok:ag.tok+dt,cost:ag.cost+dt*0.000018,last:'✓ '+text.slice(0,24)});
+      this.addNotif({agent:aid,title:ag.name+' 任务完成',text:text.slice(0,32)});
+    });
+  }
+  decide(aid,msgId,ok){
+    this.setState(s=>({sessions:{...s.sessions,[aid]:s.sessions[aid].map(m=>m.id===msgId?{...m,approved:ok}:m)}}));
+    if(ok){
+      this.setAgent(aid,{status:'executing',last:'▸ prisma migrate deploy'});
+      this.pushMsg(aid,{t:'tool',tool:'Bash',arg:'npx prisma migrate deploy',res:'运行中…'});
+      this.after(2400,()=>{
+        this.pushMsg(aid,{t:'note',body:'✓ 迁移完成:users_v2 已上线,2 个阶段全部成功'});
+        this.setAgent(aid,{status:'idle',last:'✓ users_v2 迁移完成'});
+        this.addNotif({agent:aid,title:'Claude Code 任务完成',text:'users_v2 迁移已部署'});
+      });
+    } else {
+      this.pushMsg(aid,{t:'note',body:'✕ 已拒绝执行,任务挂起等待新指示'});
+      this.setAgent(aid,{status:'idle',last:'✕ 部署被拒绝'});
+    }
+    this.setState(s=>({notifs:s.notifs.map(n=>n.agent===aid&&!n.read?{...n,read:true}:n)}));
+  }
+  assign(tid,aid){ this.setState(s=>({tasks:s.tasks.map(t=>t.id===tid?{...t,assignee:t.assignee===aid?null:aid}:t)})); }
+  dispatch(tid){
+    const t=this.state.tasks.find(x=>x.id===tid); if(!t||!t.assignee||t.status!=='queued') return;
+    const aid=t.assignee, ag=this.state.agents[aid];
+    this.setState(s=>({tasks:s.tasks.map(x=>x.id===tid?{...x,status:'running'}:x)}));
+    this.pushMsg(aid,{t:'user',body:t.title});
+    this.setAgent(aid,{status:'executing',task:t.title,last:'▸ '+t.title});
+    this.after(1200,()=>this.pushMsg(aid,{t:'tool',tool:'Plan',arg:t.title,res:'ok'}));
+    this.after(4200,()=>{
+      this.pushMsg(aid,{t:'note',body:'✓ 任务完成'});
+      this.setAgent(aid,{status:'idle',last:'✓ '+t.title.slice(0,20)});
+      this.setState(s=>({tasks:s.tasks.map(x=>x.id===tid?{...x,status:'done',result:'✓ 已完成'}:x)}));
+      this.addNotif({agent:aid,title:ag.name+' 任务完成',text:t.title});
+    });
+  }
+  runSkill(aid,name){
+    this.setTab(aid,'session');
+    this.pushMsg(aid,{t:'user',body:'运行技能:'+name});
+    this.setAgent(aid,{status:'thinking',task:'技能 · '+name,last:'…准备技能 '+name});
+    this.after(800,()=>{this.pushMsg(aid,{t:'tool',tool:'Skill',arg:name,res:'加载 ok'});this.setAgent(aid,{status:'executing'});});
+    this.after(2200,()=>this.pushMsg(aid,{t:'text',body:'技能「'+name+'」执行完成,产出已保存到工作区并同步到 Memory。'}));
+    this.after(3000,()=>{
+      this.pushMsg(aid,{t:'note',body:'✓ 技能完成 · 已写入共享记忆'});
+      const ag=this.state.agents[aid];
+      this.setAgent(aid,{status:'idle',last:'✓ 技能 '+name});
+      this.addNotif({agent:aid,title:ag.name+' 技能完成',text:name});
+    });
+  }
+  resume(aid,h){ this.pushMsg(aid,{t:'note',body:'↺ 已恢复会话 '+h.sid+' · '+h.sum+' ('+h.n+' 条消息)'}); this.setTab(aid,'session'); }
+  tick(){
+    this.tickN++;
+    this.setState(s=>{
+      const agents={...s.agents};
+      Object.keys(agents).forEach(k=>{ const a=agents[k]; if(a.status!=='idle'){ const dt=a.status==='executing'?200+Math.floor(Math.random()*500):a.status==='thinking'?100+Math.floor(Math.random()*150):0; agents[k]={...a,secs:a.secs+1,tok:a.tok+dt,cost:a.cost+dt*0.000018}; } });
+      return {clock:this.now(),agents};
+    });
+    if(!(this.props.liveSim ?? true)) return;
+    if(this.tickN%6===0 && this.feedIdx<this.codexFeed.length && this.state.agents.codex.status==='executing'){
+      const line=this.codexFeed[this.feedIdx++];
+      this.pushMsg('codex',{t:'note',body:line});
+      this.setAgent('codex',{last:line});
+      if(this.feedIdx===this.codexFeed.length){ this.setAgent('codex',{status:'idle'}); this.addNotif({agent:'codex',title:'Codex CLI 任务完成',text:'auth 中间件重构完成,14/14 通过'}); }
+    }
+    if(this.tickN===12 && this.state.agents.grok.status==='thinking'){
+      this.setAgent('grok',{status:'executing',last:'定位到 3 处空指针候选'});
+      this.pushMsg('grok',{t:'tool',tool:'Bash',arg:'grep -n "SIGSEGV" -r log/',res:'3 处'});
+    }
+    if(this.tickN===26 && this.state.agents.grok.status==='executing'){
+      this.pushMsg('grok',{t:'text',body:'根因:worker 池重连时复用了已关闭的句柄,并发下触发空指针。建议在 pool.acquire 增加存活检查。'});
+      this.pushMsg('grok',{t:'note',body:'✓ 分析完成'});
+      this.setAgent('grok',{status:'idle',last:'✓ 根因已定位'});
+      this.addNotif({agent:'grok',title:'Grok CLI 分析完成',text:'crash 根因已定位'});
+    }
+  }
+  smVals(V,AG,stMeta,usageBars){
+    const S=this.state;
+    if(V.kind!=='sm') return {smIsDash:false,smIsSessions:false,smIsInsights:false,smIsAnalytics:false,smIsPatterns:false,smIsExport:false,smIsSync:false};
+    const sub=V.sub||'dash';
+    const clsCl=c=>({'Bug 排查':'var(--del)','功能构建':'var(--acFg)','重构':'#b48cff','文档':'var(--wait)','测试':'var(--think)','深度专注':'var(--acFg)'}[c]||'var(--mut)');
+    const catCl=c=>({'决策':'var(--think)','经验':'var(--wait)','技巧':'#b48cff','摘要':'var(--acFg)','Prompt 质量':'var(--del)'}[c]||'var(--mut)');
+    const q=(S.smQ||'').toLowerCase();
+    const sess=this.smSessionsData.filter(s=>!q||s.title.toLowerCase().indexOf(q)>=0||s.proj.indexOf(q)>=0);
+    const smSessions=sess.map(s=>{const a=AG[s.agent];return {...s,glyph:a.glyph,hue:a.hue,agent:a.name,clsCl:clsCl(s.cls),on:()=>this.go({kind:'agent',id:s.agent})};});
+    const cats=['all','摘要','决策','经验','技巧','Prompt 质量'];
+    const smCats=cats.map(c=>{const sel=S.smCat===c;return {name:c==='all'?'全部':c,on:()=>this.setState({smCat:c}),bd:sel?'var(--accent)':'var(--bd2)',bg:sel?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent',cl:sel?'var(--text)':'var(--mut)'};});
+    const smInsights=this.smInsightsData.filter(i=>S.smCat==='all'||i.cat===S.smCat).map(i=>{const a=AG[i.agent];return {...i,catCl:catCl(i.cat),glyph:a?a.glyph:'◈',hue:a?a.hue:'var(--acFg)',src:(a?a.name:'AgentOS')+' '+i.src};});
+    const days=[{d:'周四',n:4},{d:'周五',n:7},{d:'周六',n:3},{d:'周日',n:2},{d:'周一',n:6},{d:'周二',n:8},{d:'今天',n:10}];
+    const mx=Math.max(...days.map(x=>x.n));
+    const smBars=days.map((x,i)=>({d:x.d,n:String(x.n),h:Math.max(8,Math.round(x.n/mx*100)),fill:i===days.length-1?'var(--accent)':'var(--bar)',lc:i===days.length-1?'var(--text)':'var(--faint)'}));
+    const srcCounts=[['codex',28],['claude',24],['cursor',19],['grok',12],['hermes',9]];
+    const smx=srcCounts[0][1];
+    const smSources=srcCounts.map(([k,n])=>({glyph:AG[k].glyph,hue:AG[k].hue,name:AG[k].name,n:String(n),w:Math.round(n/smx*100)}));
+    const fmts=[{k:'rules',name:'Agent Rules',desc:'CLAUDE.md / .cursorrules 可执行规则'},{k:'brief',name:'Knowledge Brief',desc:'人类可读的知识摘要 markdown'},{k:'obsidian',name:'Obsidian',desc:'带 YAML frontmatter 的笔记'},{k:'notion',name:'Notion',desc:'可导入 Notion 的结构化块'}];
+    const smFmts=fmts.map(f=>{const sel=S.smFmt===f.k;return {...f,on:()=>this.setState({smFmt:f.k,smExportNote:null}),bd:sel?'var(--accent)':'var(--bd)',bg:sel?'color-mix(in oklab, var(--accent,#3ddc84) 7%, var(--panel))':'var(--panel)'};});
+    const depths=[{k:'essential',name:'精要 ~25'},{k:'standard',name:'标准 ~80'},{k:'comprehensive',name:'完整 ~200'}];
+    const smDepths=depths.map(d=>{const sel=S.smDepth===d.k;return {...d,on:()=>this.setState({smDepth:d.k,smExportNote:null}),cl:sel?'#05130b':'var(--mut)',bg:sel?'var(--accent)':'transparent'};});
+    const tgl=on=>({bd:on?'var(--accent)':'var(--bd2)',bg:on?'color-mix(in oklab, var(--accent,#3ddc84) 20%, transparent)':'var(--hov)',knob:on?'var(--accent)':'var(--faint)',x:on?19:2});
+    const sy=tgl(S.smSync);
+    return {
+      smIsDash:sub==='dash', smIsSessions:sub==='sessions', smIsInsights:sub==='insights', smIsAnalytics:sub==='analytics', smIsPatterns:sub==='patterns', smIsExport:sub==='export', smIsSync:sub==='sync',
+      smKpis:[{label:'会话总数',value:'128',sub:'5 个来源',color:'var(--text)'},{label:'已分析',value:'96',sub:'75%',color:'var(--acFg)'},{label:'提炼洞察',value:'342',sub:'7 天 +38',color:'var(--text)'},{label:'覆盖项目',value:'4',sub:'仓库',color:'var(--text)'}],
+      smBars, smSources,
+      smQ:S.smQ, onSmQ:e=>this.setState({smQ:e.target.value}),
+      smSessions, smSessEmpty:smSessions.length===0,
+      smCats, smInsights,
+      smStats:[{label:'平均会话时长',value:'28m'},{label:'平均费用 / 会话',value:'$1.36'},{label:'洞察率',value:'2.7/会话'},{label:'工具调用',value:'486'}],
+      smModels:[{name:'claude-4.5-sonnet',tok:'412k',w:100,hue:AG.claude.hue},{name:'gpt-5-codex',tok:'388k',w:94,hue:AG.codex.hue},{name:'grok-4',tok:'302k',w:73,hue:AG.grok.hue},{name:'composer-2',tok:'98k',w:24,hue:AG.cursor.hue},{name:'hermes-4-405b',tok:'64k',w:16,hue:AG.hermes.hue}],
+      usageBars,
+      smPatterns:this.smPatternsData.map(p=>({...p,n:String(p.n),trCl:p.up?'var(--acFg)':'var(--mut)',tags:p.tags.map(t=>({t}))})),
+      smFmts, smDepths,
+      smExportLabel:S.smExporting?'生成中…':'生成导出',
+      smExport:()=>{ if(S.smExporting) return; this.setState({smExporting:true,smExportNote:null});
+        this.after(1600,()=>{ const f=fmts.find(x=>x.k===this.state.smFmt), d=depths.find(x=>x.k===this.state.smDepth);
+          this.setState({smExporting:false,smExportNote:'✓ 已生成 '+f.name+' · '+d.name.split(' ')[0]+'档 · 覆盖 96 场会话,去重合并 342 → '+(this.state.smDepth==='essential'?'25':this.state.smDepth==='standard'?'80':'200')+' 条'}); }); },
+      smExportNote:S.smExportNote,
+      smToggleSync:()=>this.setState(s=>({smSync:!s.smSync})),
+      syBd:sy.bd, syBg:sy.bg, syKnob:sy.knob, syX:sy.x,
+      smDevices:[{glyph:'⌘',name:'MacBook Pro (本机)',meta:'macOS · 128 场会话 · 全量',st:'✓ 最新',stCl:'var(--acFg)'},{glyph:'▢',name:'Mac mini · 工作室',meta:'macOS · 上次可见 3 分钟前',st:S.smSync?'✓ 已同步':'已暂停',stCl:S.smSync?'var(--acFg)':'var(--faint)'}],
+      smLastSync:S.smLastSync,
+      smSyncLabel:S.smSyncing?'同步中…':'立即同步',
+      smSyncNow:()=>{ if(S.smSyncing||!S.smSync) return; this.setState({smSyncing:true}); this.after(1400,()=>this.setState({smSyncing:false,smLastSync:'刚刚'})); }
+    };
+  }
+  hzVals(V,AG){
+    const S=this.state;
+    if(V.kind!=='hz') return {isHz:false,hzIsPrompt:false,hzIsSkills:false,hzIsMcp:false,hzIsHooks:false,hzIsRules:false,hzIsSub:false,hzIsGoal:false,hzIsWorkflow:false};
+    const sub=V.sub||'prompt';
+    const catOf=k=>this.hzCats.find(c=>c.k===k);
+    const maxChars=Math.max(...this.hzGenomeData.map(g=>g.chars));
+    const tgl=on=>({tgBd:on?'var(--accent)':'var(--bd2)',tgBg:on?'color-mix(in oklab, var(--accent,#3ddc84) 20%, transparent)':'var(--hov)',tgKnob:on?'var(--accent)':'var(--faint)',tgX:on?19:2});
+    const hzGenomes=this.hzGenomeData.map(g=>{
+      const a=AG[g.agent], openK=S.hzOpenSeg[g.agent];
+      const open=openK?g.mods.find(m=>m.k===openK):null;
+      return {name:a.name,glyph:a.glyph,hue:a.hue,file:g.file,chars:g.chars.toLocaleString(),
+        wpct:Math.max(18,Math.round(g.chars/maxChars*100)),
+        segs:g.mods.map(m=>({name:catOf(m.k).name,mass:m.mass.toLocaleString(),c:catOf(m.k).c,w:Math.round(m.mass/g.chars*100),op:openK&&openK!==m.k?0.35:0.85,
+          on:()=>this.setState(s=>({hzOpenSeg:{...s.hzOpenSeg,[g.agent]:s.hzOpenSeg[g.agent]===m.k?null:m.k}}))})),
+        openSeg:!!open, openName:open?catOf(open.k).name:'', openC:open?catOf(open.k).c:'', openMass:open?open.mass.toLocaleString():'', openPct:open?Math.round(open.mass/g.chars*100):'', openEx:open?open.ex:''};
+    });
+    return {
+      isHz:true, hzIsPrompt:sub==='prompt', hzIsSkills:sub==='skills', hzIsMcp:sub==='mcp', hzIsHooks:sub==='hooks', hzIsRules:sub==='rules', hzIsSub:sub==='sub', hzIsGoal:sub==='goal', hzIsWorkflow:sub==='workflow',
+      hzSubs:this.hzSubData.map(sb=>({...sb,glyph:AG[sb.agent].glyph,hue:AG[sb.agent].hue,spawns:String(sb.spawns),tools:sb.tools.map(t=>({t}))})),
+      hzGoals:this.hzGoalData.map(gl=>({...gl,pct:String(gl.pct),done:String(gl.done),total:String(gl.total),owners:gl.owners.map(k=>({glyph:AG[k].glyph,hue:AG[k].hue,name:AG[k].name}))})),
+      hzFlows:this.hzFlowData.map(fl=>{const running=S.hzFlowRun===fl.id;return {...fl,runs:String(fl.runs),runLabel:running?'运行中…':'▸ 运行',
+        run:()=>{ if(this.state.hzFlowRun) return; this.setState({hzFlowRun:fl.id}); this.after(2200,()=>{ this.setState({hzFlowRun:null}); this.addNotif({agent:null,title:'工作流完成',text:fl.name}); }); },
+        steps:fl.steps.map((stp,i)=>({...stp,glyph:AG[stp.agent].glyph,hue:AG[stp.agent].hue,arrow:i<fl.steps.length-1,
+          bd:running?'color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent)':'var(--bd)',bg:running?'color-mix(in oklab, var(--accent,#3ddc84) 6%, var(--panel))':'var(--panel2)',
+          st:running?'▸ 运行中':stp.st,stCl:running?'var(--think)':(stp.st.indexOf('✓')===0?'var(--acFg)':stp.st.indexOf('⚠')===0?'var(--wait)':'var(--faint)')}))};}),
+      hzLegend:this.hzCats.map(c=>({name:c.name,c:c.c})),
+      hzGenomes,
+      hzSkills:this.hzSkillsData.map(sk=>({...sk,calls:String(sk.calls),users:sk.users.map(k=>({glyph:AG[k].glyph,hue:AG[k].hue,name:AG[k].name}))})),
+      hzMcps:this.hzMcpData.map(mc=>{const on=S.hzMcpOn[mc.id];return {...mc,tools:String(mc.tools),dot:on?'var(--acFg)':'var(--dotOff)',users:mc.users.map(k=>({glyph:AG[k].glyph,hue:AG[k].hue,name:AG[k].name})),...tgl(on),toggle:()=>this.setState(s=>({hzMcpOn:{...s.hzMcpOn,[mc.id]:!s.hzMcpOn[mc.id]}}))};}),
+      hzHooks:this.hzHookData.map(hk=>{const on=S.hzHookOn[hk.id];return {...hk,runs:String(hk.runs),evCl:hk.ev,...tgl(on),toggle:()=>this.setState(s=>({hzHookOn:{...s.hzHookOn,[hk.id]:!s.hzHookOn[hk.id]}}))};}),
+      hzRules:this.hzRulesData.map(rl=>({...rl,n:String(rl.n)}))
+    };
+  }
+  renderVals(){
+    const S=this.state, V=S.view;
+    const AG=S.agents, ids=['codex','claude','grok','cursor','pi','hermes'];
+    const stMeta={
+      idle:{l:'空闲',c:'var(--idle)',anim:'none'},
+      thinking:{l:'思考中',c:'var(--think)',anim:'pulse 1.3s ease-in-out infinite'},
+      executing:{l:'执行中',c:'var(--acFg)',anim:'pulse 2.2s ease-in-out infinite'},
+      waiting:{l:'等待确认',c:'var(--wait)',anim:'pulse .9s steps(1) infinite'},
+      off:{l:'已停用',c:'var(--idle)',anim:'none'}
+    };
+    const stOf=a=>a.enabled?stMeta[a.status]:stMeta.off;
+    const fT=n=>n>=1e6?(n/1e6).toFixed(2)+'M':n>=1000?Math.round(n/1000)+'k':''+n;
+    const fC=n=>'$'+n.toFixed(2);
+    const fR=s=>{const m=Math.floor(s/60);return m>=60?Math.floor(m/60)+'h'+String(m%60).padStart(2,'0')+'m':m+'m'+String(s%60).padStart(2,'0')+'s'};
+    const totalCost=ids.reduce((a,k)=>a+AG[k].cost,0)+4.73;
+    const totalTok=ids.reduce((a,k)=>a+AG[k].tok,0)+2160000;
+    const active=ids.filter(k=>AG[k].status!=='idle'&&AG[k].enabled).length;
+    const waitingN=ids.filter(k=>AG[k].status==='waiting'&&AG[k].enabled).length;
+    const unread=S.notifs.filter(n=>!n.read).length;
+    const curAgent=V.kind==='agent'?V.id:null;
+    const hzTitles={prompt:['System Prompt','提示词基因组'],skills:['Skills','技能包注册表'],mcp:['MCP','server 注册表'],sub:['SubAgents','子代理编队'],goal:['Goals','长期目标'],workflow:['Workflows','多 Agent 流水线'],hooks:['Hooks','生命周期钩子'],rules:['Rules','项目规则文件']};
+    const smTitles={dash:['Sessions 总览','sessions manager'],sessions:['Sessions','all recorded sessions'],insights:['Insights','洞察提炼'],analytics:['Analytics','跨会话分析'],patterns:['Patterns','重复模式'],export:['Export','跨会话导出'],sync:['Cloud Sync','本地优先同步']};
+    const titles={sm:smTitles[V.sub||'dash'],hz:hzTitles[V.sub||'prompt'],home:['新建任务','new task'],dash:['总览','overview'],agent:curAgent?[AG[curAgent].name,AG[curAgent].cwd]:['Agent',''],queue:['长程任务','long-running queue'],cron:['定时任务','scheduled'],compare:['结果对比','same prompt · 3 agents'],usage:['用量统计','tokens & cost'],projects:['项目','repositories'],memory:['Memory','memories & notes'],settings:['设置','preferences']};
+    const navApps=[
+      {k:'memory',glyph:'✦',name:'Memory',badge:null}
+    ].filter(n=>S.visNav[n.k]).map(n=>({...n,on:()=>this.go({kind:n.k}),bg:V.kind===n.k?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent',cl:V.kind===n.k?'var(--text)':'var(--mut)'}));
+    const projOf=cwd=>({'~/dev/api-server':'api-server','~/dev/webapp':'webapp','~/dev/ml-pipeline':'ml-pipeline'}[cwd]||'其他');
+    const navAgents=ids.filter(k=>S.visAgents[k]).map(k=>{const a=AG[k],st=stOf(a),sel=curAgent===k;
+      const sess=[];
+      if((S.sessions[k]||[]).length>0&&a.enabled) sess.push({live:true,sum:a.task,proj:projOf(a.cwd)});
+      a.hist.forEach(h=>sess.push({live:false,sum:h.sum,proj:h.proj||'其他',when:(h.date||'').slice(0,5),h}));
+      const hasLive=sess.length>0&&sess[0].live;
+      const open=S.collapsed[k]===undefined?hasLive:!S.collapsed[k];
+      return {name:a.name,glyph:a.glyph,hue:a.hue,op:a.enabled?1:0.45,on:()=>this.go({kind:'agent',id:k}),bg:sel?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent',cl:sel?'var(--text)':'var(--mut)',dot:(a.status==='idle'||!a.enabled)?'var(--dotOff)':st.c,dotGlow:(a.status==='idle'||!a.enabled)?'transparent':st.c,anim:st.anim,waiting:a.status==='waiting'&&a.enabled,
+        open,rot:open?'90deg':'0deg',chevCl:'var(--faint)',noSess:sess.length===0,
+        toggle:e=>{e.stopPropagation();this.setState(s=>({collapsed:{...s.collapsed,[k]:open}}));},
+        sessions:sess.map(ss=>({sum:ss.sum,proj:ss.proj,live:ss.live,isHist:!ss.live,when:ss.when,
+          dot:a.status==='idle'?'var(--dotOff)':st.c,anim:st.anim,
+          bg:(sel&&ss.live)?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',cl:(sel&&ss.live)?'var(--text)':'var(--mut)',
+          on:ss.live?()=>this.go({kind:'agent',id:k}):()=>{this.resume(k,ss.h);this.go({kind:'agent',id:k});}}))};
+    });
+    const notifs=S.notifs.map(n=>{const a=n.agent?AG[n.agent]:null;return {...n,glyph:a?a.glyph:'◔',hue:a?a.hue:'#4fd8e0',unread:!n.read,op:n.read?0.55:1,click:()=>{this.setState(s=>({notifs:s.notifs.map(x=>x.id===n.id?{...x,read:true}:x),notifOpen:false}));if(n.agent)this.go({kind:'agent',id:n.agent});}};});
+    const cards=ids.filter(k=>S.visAgents[k]).map(k=>{const a=AG[k],st=stOf(a);return {name:a.name,glyph:a.glyph,hue:a.hue,model:a.model,cwd:a.cwd,task:a.enabled?a.task:'已停用',last:a.last,runtime:fR(a.secs),tok:fT(a.tok),cost:fC(a.cost),stLabel:st.l,stColor:st.c,anim:st.anim,op:a.enabled?1:0.55,pillBd:'color-mix(in srgb, '+st.c+' 35%, transparent)',pillBg:'color-mix(in srgb, '+st.c+' 8%, transparent)',bd:(a.status==='waiting'&&a.enabled)?'color-mix(in srgb, var(--wait) 45%, transparent)':'var(--bd)',open:()=>this.go({kind:'agent',id:k})};});
+    const kpis=[
+      {label:'活跃 Agent',value:active+'/6',sub:'运行中',color:'var(--acFg)'},
+      {label:'等待确认',value:String(waitingN),sub:waitingN>0?'需要处理':'无阻塞',color:waitingN>0?'var(--wait)':'var(--text)'},
+      {label:'今日费用',value:fC(totalCost),sub:'预算 78%',color:'var(--text)'},
+      {label:'今日 Tokens',value:fT(totalTok),sub:'全部 agent',color:'var(--text)'}
+    ];
+    const stT={queued:{l:'排队',c:'var(--mut)'},running:{l:'运行',c:'var(--think)'},done:{l:'完成',c:'var(--acFg)'}};
+    const tasks=S.tasks.map(t=>{const can=!!t.assignee;return {...t,stLabel:stT[t.status].l,stColor:stT[t.status].c,bd:t.status==='running'?'color-mix(in srgb, var(--think) 40%, transparent)':'var(--bd)',isQueued:t.status==='queued',isRunning:t.status==='running',isDone:t.status==='done',assigneeName:t.assignee?AG[t.assignee].name:'',dispatch:()=>this.dispatch(t.id),dpBd:can?'var(--accent)':'var(--bd2)',dpCl:can?'#05130b':'var(--faint)',dpBg:can?'var(--accent)':'transparent',dpCur:can?'pointer':'not-allowed',chips:ids.map(k=>({glyph:AG[k].glyph,hue:AG[k].hue,name:AG[k].name,pick:()=>this.assign(t.id,k),bd:t.assignee===k?AG[k].hue:'var(--bd2)',bg:t.assignee===k?'color-mix(in srgb, '+AG[k].hue+' 14%, transparent)':'transparent'}))};});
+    const days=[{d:'周二',v:6.2},{d:'周三',v:9.8},{d:'周四',v:4.1},{d:'周五',v:11.3},{d:'周六',v:8.7},{d:'周日',v:3.2},{d:'今天',v:totalCost}];
+    const mx=Math.max(...days.map(x=>x.v));
+    const usageBars=days.map((x,i)=>({d:x.d,h:Math.max(6,Math.round(x.v/mx*100)),fill:i===days.length-1?'var(--accent)':'var(--bar)',lc:i===days.length-1?'var(--text)':'var(--faint)'}));
+    const costMax=Math.max(...ids.map(k=>AG[k].cost),0.01);
+    const usageRows=ids.map(k=>({glyph:AG[k].glyph,hue:AG[k].hue,name:AG[k].name,tok:fT(AG[k].tok),cost:fC(AG[k].cost),w:Math.round(AG[k].cost/costMax*100)}));
+    const cmp=[
+      {k:'claude',time:'4m 12s',cost:'$1.84',tok:'96k',tests:'12/12 ✓',ok:true,diff:'+214 −8',note:'滑动窗口 + Redis sorted set,含限流降级路径与指标埋点,实现最稳。'},
+      {k:'codex',time:'2m 58s',cost:'$0.92',tok:'71k',tests:'11/12',ok:false,diff:'+186 −2',note:'固定窗口计数器,实现最简、最快,但窗口边界有突发放大问题。'},
+      {k:'grok',time:'6m 03s',cost:'$2.31',tok:'188k',tests:'12/12 ✓',ok:true,diff:'+402 −31',note:'令牌桶实现,额外补了 k6 压测脚本,改动面最大。'}
+    ];
+    const compareCols=cmp.map(c=>{const a=AG[c.k];return {...c,name:a.name,glyph:a.glyph,hue:a.hue,testColor:c.ok?'var(--acFg)':'var(--wait)',isAdopted:S.adopted===c.k,bd:S.adopted===c.k?'var(--accent)':'var(--bd)',bg:S.adopted===c.k?'color-mix(in oklab, var(--accent,#3ddc84) 6%, var(--panel))':'var(--panel)',adopt:()=>this.setState({adopted:c.k})};});
+    const adoptedNote=S.adopted?('已采纳 '+AG[S.adopted].name+' 的实现 — diff 已进入审阅队列,其余分支已归档'):null;
+    const projRows=[
+      {name:'api-server',path:'~/dev/api-server',branch:'main',changes:'3 处未提交',dirty:true,ags:['codex','hermes'],last:'2 分钟前'},
+      {name:'webapp',path:'~/dev/webapp',branch:'feat/schema-v2',changes:'12 处未提交',dirty:true,ags:['claude','cursor'],last:'刚刚'},
+      {name:'ml-pipeline',path:'~/dev/ml-pipeline',branch:'main',changes:'工作区干净',dirty:false,ags:['grok'],last:'14 分钟前'},
+      {name:'dotfiles',path:'~/dotfiles',branch:'main',changes:'工作区干净',dirty:false,ags:[],last:'3 天前'}
+    ];
+    const projects=projRows.map(p=>({...p,chColor:p.dirty?'var(--wait)':'var(--faint)',dots:p.ags.map(k=>({glyph:AG[k].glyph,hue:AG[k].hue,name:AG[k].name}))}));
+    const mems=this.memories, q=(S.memQ||'').toLowerCase();
+    const match=m=>!q||m.title.toLowerCase().indexOf(q)>=0||(m.body||'').toLowerCase().indexOf(q)>=0||m.proj.toLowerCase().indexOf(q)>=0;
+    const memFiltered=mems.filter(match);
+    const omiN=mems.filter(m=>m.kind==='omi').length, noteN=mems.filter(m=>m.kind==='note').length;
+    const memTab=S.memTab;
+    const memTabs=[{k:'recent',name:'最近',count:String(memFiltered.length)},{k:'notes',name:'笔记',count:null},{k:'omi',name:'记忆',count:null},{k:'graph',name:'图谱',count:null}].map(t=>({...t,on:()=>this.setState({memTab:t.k}),cl:memTab===t.k?'#05130b':'var(--mut)',bg:memTab===t.k?'var(--accent)':'transparent'}));
+    const memRow=m=>{const a=AG[m.agent];return {title:m.title,date:m.date,proj:m.proj,glyph:m.kind==='note'?'✎':(a?a.glyph:'✦'),hue:m.kind==='note'?'#b48cff':(a?a.hue:'#b48cff'),meta:(a?a.name:'—')+' · '+(m.kind==='note'?'笔记':'记忆')};};
+    const memList=(memTab==='omi'?memFiltered.filter(m=>m.kind==='omi'):memFiltered).map(memRow);
+    const memNotes=memFiltered.filter(m=>m.kind==='note');
+    const posOf={}; mems.forEach(m=>posOf[m.id]=m);
+    const memLinks=(q?[]:this.memLinkPairs).map(pr=>({x1:posOf[pr[0]].x,y1:posOf[pr[0]].y,x2:posOf[pr[1]].x,y2:posOf[pr[1]].y}));
+    const memStars=memFiltered.map(m=>({title:m.title+' · '+m.date,x:m.x,y:m.y,size:Math.round(4+m.rec*7),op:.4+m.rec*.6,glow:Math.round(6+m.rec*16),glowC:m.rec>.65?'rgba(200,180,255,.95)':'rgba(150,130,220,.55)',showLabel:m.rec>=.45,label:m.rec>=.75?(m.title.length>18?m.title.slice(0,18)+'…':m.title):m.date,
+      on:()=>this.setState({memTab:m.kind==='note'?'notes':'omi',memQ:m.title.slice(0,12)})}));
+    const th=this.theme(), ac=this.accent();
+    const tgl=(on)=>({bd:on?'var(--accent)':'var(--bd2)',bg:on?'color-mix(in oklab, var(--accent,#3ddc84) 20%, transparent)':'var(--hov)',knob:on?'var(--accent)':'var(--faint)',x:on?19:2});
+    const sel=AG[S.settingsAgent], selEn=tgl(sel.enabled), selAuto=tgl(sel.auto), nd=tgl(S.prefs.notifyDone), nw=tgl(S.prefs.notifyWait), selSt=stOf(sel);
+    const out={
+      rootRef:this.rootRefFn, clock:S.clock,
+      viewTitle:titles[V.kind][0], viewSub:titles[V.kind][1],
+      goDash:()=>this.go({kind:'dash'}), dashBg:V.kind==='dash'?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent', dashCl:V.kind==='dash'?'var(--text)':'var(--mut)',
+      goHome:()=>this.go({kind:'home'}), homeNavBg:V.kind==='home'?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent', homeNavCl:V.kind==='home'?'var(--text)':'var(--mut)',
+      goQueue:()=>this.go({kind:'queue'}), goUsage:()=>this.go({kind:'settings'}),
+      queueSecOpen:S.queueSecOpen, queueSecRot:S.queueSecOpen?'90deg':'0deg',
+      toggleQueueSec:()=>this.setState(s=>({queueSecOpen:!s.queueSecOpen})),
+      queueBg:(V.kind==='queue'||V.kind==='cron')?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent',
+      queueCl:(V.kind==='queue'||V.kind==='cron')?'var(--text)':'var(--mut)',
+      queueBadge:String(S.tasks.filter(t=>t.status==='queued').length),
+      queueNav:[{k:'cron',glyph:'◷',name:'定时任务'},{k:'queue',glyph:'⇶',name:'长程任务'}].map(n=>{const sel=V.kind===n.k;return {...n,on:()=>this.go({kind:n.k}),bg:sel?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent',cl:sel?'var(--text)':'var(--mut)'};}),
+      isCron:V.kind==='cron',
+      cronTasks:this.cronData.map(c=>{const a=AG[c.agent],on=S.cronOn[c.id];return {...c,glyph:a.glyph,hue:a.hue,agentName:a.name,last:on?c.last:'— 已暂停',lastCl:on?(c.last.indexOf('✓')===0?'var(--acFg)':'var(--faint)'):'var(--faint)',
+        tgBd:on?'var(--accent)':'var(--bd2)',tgBg:on?'color-mix(in oklab, var(--accent,#3ddc84) 20%, transparent)':'var(--hov)',tgKnob:on?'var(--accent)':'var(--faint)',tgX:on?19:2,
+        toggle:()=>this.setState(s=>({cronOn:{...s.cronOn,[c.id]:!s.cronOn[c.id]}}))};}), goSettings:()=>this.go({kind:'settings'}),
+      navApps, navAgents, notifs,
+      agentsSecOpen:S.agentsSecOpen, agentsSecRot:S.agentsSecOpen?'90deg':'0deg',
+      toggleAgentsSec:()=>this.setState(s=>({agentsSecOpen:!s.agentsSecOpen})),
+      projSecOpen:S.projSecOpen, projSecRot:S.projSecOpen?'90deg':'0deg',
+      toggleProjSec:()=>this.setState(s=>({projSecOpen:!s.projSecOpen})),
+      pinSecOpen:S.pinSecOpen, pinSecRot:S.pinSecOpen?'90deg':'0deg',
+      togglePinSec:()=>this.setState(s=>({pinSecOpen:!s.pinSecOpen})),
+      pinnedItems:[
+        {name:'限流方案对比 · 3 agents',on:()=>this.go({kind:'compare'})},
+        {name:'users 表 schema 迁移',on:()=>this.go({kind:'agent',id:'claude'})}
+      ],
+      projItems:[
+        {name:'13_locla_session_manager',sessions:[{k:'claude',sum:'调整 AgentShare 客户端'},{k:'codex',sum:'设计 agentshare 大改版方案'}]},
+        {name:'fyfactor',sessions:[{k:'grok',sum:'我想做个点子或者副业数据库'},{k:'hermes',sum:'验证 GitHub 子 agent'}]},
+        {name:'douge_ship_tem_2',sessions:[{k:'cursor',sum:'落地页动效与模板重构'}]},
+        {name:'001_bian_ai',sessions:[{k:'pi',sum:'边缘推理 API 选型调研'}]}
+      ].map((p,i)=>{const open=S.projOpen[i]===undefined?i<2:S.projOpen[i];return {name:p.name,open,rot:open?'90deg':'0deg',
+        toggle:()=>this.setState(s=>({projOpen:{...s.projOpen,[i]:!open}})),
+        sessions:p.sessions.map(c=>({sum:c.sum,glyph:AG[c.k].glyph,hue:AG[c.k].hue,on:()=>this.go({kind:'agent',id:c.k})}))};}),
+      convGroups:[
+        {label:'今天',items:[{k:'claude',sum:AG.claude.task},{k:'codex',sum:AG.codex.task}]},
+        {label:'昨天',items:[{k:'cursor',sum:'修复 webapp 构建缓存失效'},{k:'grok',sum:'API 集成测试补全'}]},
+        {label:'更早',items:[{k:'hermes',sum:'重构日志管道与告警'},{k:'pi',sum:'依赖升级与安全审计'}]}
+      ].map(g=>{const open=S.convOpen[g.label]===undefined?true:S.convOpen[g.label];return {label:g.label,open,rot:open?'90deg':'0deg',
+        toggle:()=>this.setState(s=>({convOpen:{...s.convOpen,[g.label]:!open}})),
+        items:g.items.map(c=>({sum:c.sum,glyph:AG[c.k].glyph,hue:AG[c.k].hue,on:()=>this.go({kind:'agent',id:c.k})}))};}),
+      convSecOpen:S.convSecOpen, convSecRot:S.convSecOpen?'90deg':'0deg',
+      toggleConvSec:()=>this.setState(s=>({convSecOpen:!s.convSecOpen})),
+      showHome:S.visNav.home, showDash:S.visNav.dash, showQueue:S.visNav.queue,
+      showPinned:S.visNav.pinned, showProjList:S.visNav.projList, showConv:S.visNav.conv,
+      showProjSection:!!(S.visNav.pinned||S.visNav.projList||S.visNav.conv),
+      showAgentsSection:ids.some(k=>S.visAgents[k]),
+      showHzSection:Object.values(S.visHz).some(Boolean),
+      showSmSection:Object.values(S.visSm).some(Boolean),
+      visNavRows:[{k:'home',glyph:'＋',name:'新建任务'},{k:'dash',glyph:'▦',name:'总览'},{k:'queue',glyph:'▤',name:'任务编排'},{k:'memory',glyph:'✦',name:'Memory'}].map(m=>this.visChip(m,'visNav')),
+      visProjRows:[{k:'pinned',glyph:'⚑',name:'置顶'},{k:'projList',glyph:'❒',name:'项目'},{k:'conv',glyph:'❯',name:'对话'}].map(m=>this.visChip(m,'visNav')),
+      visHzRows:[{k:'prompt',glyph:'¶',name:'System Prompt'},{k:'skills',glyph:'✦',name:'Skills'},{k:'mcp',glyph:'⚙',name:'MCP'},{k:'sub',glyph:'⛬',name:'SubAgents'},{k:'goal',glyph:'◎',name:'Goals'},{k:'workflow',glyph:'⧉',name:'Workflows'},{k:'hooks',glyph:'⚓',name:'Hooks'},{k:'rules',glyph:'§',name:'Rules'}].map(m=>this.visChip(m,'visHz')),
+      hzSecOpen:S.hzSecOpen, hzSecRot:S.hzSecOpen?'90deg':'0deg',
+      toggleHzSec:()=>this.setState(s=>({hzSecOpen:!s.hzSecOpen})),
+      hzNav:[{k:'prompt',glyph:'¶',name:'System Prompt'},{k:'skills',glyph:'✦',name:'Skills'},{k:'mcp',glyph:'⚙',name:'MCP'},{k:'sub',glyph:'⛬',name:'SubAgents'},{k:'goal',glyph:'◎',name:'Goals'},{k:'workflow',glyph:'⧉',name:'Workflows'},{k:'hooks',glyph:'⚓',name:'Hooks'},{k:'rules',glyph:'§',name:'Rules'}].filter(n=>S.visHz[n.k]).map(n=>{const sel=V.kind==='hz'&&(V.sub||'prompt')===n.k;return {...n,on:()=>this.go({kind:'hz',sub:n.k}),bg:sel?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent',cl:sel?'var(--text)':'var(--mut)'};}),
+      smSecOpen:S.smSecOpen, smSecRot:S.smSecOpen?'90deg':'0deg',
+      toggleSmSec:()=>this.setState(s=>({smSecOpen:!s.smSecOpen})),
+      smNav:[{k:'dash',glyph:'⊞',name:'Dashboard'},{k:'sessions',glyph:'❐',name:'Sessions'},{k:'insights',glyph:'☉',name:'Insights'},{k:'analytics',glyph:'▥',name:'Analytics'},{k:'patterns',glyph:'✧',name:'Patterns'},{k:'export',glyph:'⇩',name:'Export'},{k:'sync',glyph:'☁',name:'Cloud Sync'}].filter(n=>S.visSm[n.k]).map(n=>{const sel=V.kind==='sm'&&(V.sub||'dash')===n.k;return {...n,on:()=>this.go({kind:'sm',sub:n.k}),bg:sel?'color-mix(in oklab, var(--accent,#3ddc84) 13%, transparent)':'transparent',cl:sel?'var(--text)':'var(--mut)'};}), notifPeek:notifs.slice(0,3), queuePeek:tasks,
+      toggleNotif:()=>this.setState(s=>({notifOpen:!s.notifOpen})), notifOpen:S.notifOpen,
+      hasUnread:unread>0, unreadLabel:String(unread),
+      markAll:()=>this.setState(s=>({notifs:s.notifs.map(n=>({...n,read:true}))})),
+      activeLabel:active+'/6', costTotal:fC(totalCost), tokTotal:fT(totalTok),
+      isDash:V.kind==='dash', isAgent:V.kind==='agent', isQueue:V.kind==='queue', isCompare:V.kind==='compare', isUsage:V.kind==='usage', isProjects:V.kind==='projects', isSettings:V.kind==='settings', isMemory:V.kind==='memory', isHome:V.kind==='home', isSM:V.kind==='sm',
+      homeGreet:(()=>{const h=new Date().getHours();return (h<5?'深夜好':h<12?'早上好':h<18?'下午好':'晚上好')+' · RYO';})(),
+      homeDraft:S.homeDraft, onHomeDraft:e=>this.setState({homeDraft:e.target.value}),
+      onHomeKey:e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))this.homeSend();},
+      homeSend:()=>this.homeSend(),
+      isManualMode:S.homeMode==='manual', isAutoMode:S.homeMode==='auto',
+      modeManual:()=>this.setState({homeMode:'manual'}), modeAuto:()=>this.setState({homeMode:'auto',homeMenu:null}),
+      mmCl:S.homeMode==='manual'?'#05130b':'var(--mut)', mmBg:S.homeMode==='manual'?'var(--accent)':'transparent',
+      maCl:S.homeMode==='auto'?'#05130b':'var(--mut)', maBg:S.homeMode==='auto'?'var(--accent)':'transparent',
+      homeAgentName:AG[S.homeAgent].name, homeAgentGlyph:AG[S.homeAgent].glyph, homeAgentHue:AG[S.homeAgent].hue,
+      toggleAgentMenu:()=>this.setState(s=>({homeMenu:s.homeMenu==='agent'?null:'agent'})),
+      togglePathMenu:()=>this.setState(s=>({homeMenu:s.homeMenu==='path'?null:'path'})),
+      agentMenuOpen:S.homeMenu==='agent', pathMenuOpen:S.homeMenu==='path',
+      homeAgentOpts:ids.map(k=>{const a=AG[k],st=stOf(a);return {glyph:a.glyph,hue:a.hue,name:a.name,st:st.l,dot:(a.status==='idle'||!a.enabled)?'var(--dotOff)':st.c,bg:S.homeAgent===k?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',pick:e=>{e.stopPropagation();this.setState({homeAgent:k,homeMenu:null});}};}),
+      homePath:S.homePath,
+      homePathOpts:[{p:'~',tag:null},{p:'~/dev/webapp',tag:'webapp'},{p:'~/dev/api-server',tag:'api-server'},{p:'~/dev/ml-pipeline',tag:'ml-pipeline'},{p:'~/dotfiles',tag:null}].map(o=>({path:o.p,tag:o.tag,bg:S.homePath===o.p?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',pick:e=>{e.stopPropagation();this.setState({homePath:o.p,homeMenu:null});}})),
+      homeSuggestions:['修复 flaky 的 e2e 登录用例','分析昨晚的 crash 日志','为 parser 补全单元测试','重新生成 OpenAPI 文档'].map(t=>({t,on:()=>this.setState({homeDraft:t})})),
+      homeStatusLine:active+' 个 Agent 运行中 · 今日 '+fC(totalCost)+' · ⌘+Enter 发送',
+      ...this.smVals(V,AG,stMeta,usageBars),
+      ...this.hzVals(V,AG),
+      memQ:S.memQ, onMemQ:e=>this.setState({memQ:e.target.value}),
+      memCounts:omiN+' 记忆 · '+noteN+' 笔记', memTabs,
+      memIsGraph:memTab==='graph', memIsList:memTab==='recent'||memTab==='omi', memIsNotes:memTab==='notes',
+      memList, memNotes, memEmpty:memFiltered.length===0, memStars, memLinks,
+      memStarCount:String(memStars.length), memLinkCount:String(memLinks.length),
+      kpis, cards, tasks, usageBars, usageRows, compareCols, adoptedNote, projects,
+      setDark:()=>this.setState({theme:'dark'}), setLight:()=>this.setState({theme:'light'}),
+      darkCl:th==='dark'?'#05130b':'var(--mut)', darkBg:th==='dark'?'var(--accent)':'transparent',
+      lightCl:th==='light'?'#05130b':'var(--mut)', lightBg:th==='light'?'var(--accent)':'transparent',
+      swatches:['#3ddc84','#4fd8e0','#ffb454','#b48cff'].map(c=>({c,pick:()=>this.setState({accent:c}),ring:c===ac?'var(--panel)':'transparent',halo:c===ac?c:'transparent'})),
+      visAgents:ids.map(k=>{const a=AG[k],on=S.visAgents[k];return {glyph:a.glyph,hue:a.hue,name:a.name,op:on?1:.55,bd:on?'color-mix(in srgb, '+a.hue+' 45%, transparent)':'var(--bd2)',bg:on?'color-mix(in srgb, '+a.hue+' 8%, transparent)':'transparent',cl:on?'var(--text)':'var(--faint)',mark:on?'✓':'—',markCl:on?'var(--acFg)':'var(--faint)',on:()=>this.setState(s=>({visAgents:{...s.visAgents,[k]:!s.visAgents[k]}}))};}),
+      visSm:[{k:'dash',glyph:'⊞',name:'Dashboard'},{k:'sessions',glyph:'❐',name:'Sessions'},{k:'insights',glyph:'☉',name:'Insights'},{k:'analytics',glyph:'▥',name:'Analytics'},{k:'patterns',glyph:'✧',name:'Patterns'},{k:'export',glyph:'⇩',name:'Export'},{k:'sync',glyph:'☁',name:'Cloud Sync'}].map(m=>{const on=S.visSm[m.k];return {...m,op:on?1:.55,bd:on?'color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent)':'var(--bd2)',bg:on?'color-mix(in oklab, var(--accent,#3ddc84) 8%, transparent)':'transparent',cl:on?'var(--text)':'var(--faint)',mark:on?'✓':'—',markCl:on?'var(--acFg)':'var(--faint)',on:()=>this.setState(s=>({visSm:{...s.visSm,[m.k]:!s.visSm[m.k]}}))};}),
+      setChips:ids.map(k=>{const a=AG[k],seld=S.settingsAgent===k;return {glyph:a.glyph,hue:a.hue,name:a.name,pick:()=>this.setState({settingsAgent:k}),bd:seld?a.hue:'var(--bd2)',bg:seld?'color-mix(in srgb, '+a.hue+' 10%, transparent)':'transparent',cl:seld?'var(--text)':'var(--mut)',dot:a.enabled?(a.status==='idle'?'var(--dotOff)':stMeta[a.status].c):'var(--dotOff)'};}),
+      selName:sel.name, selGlyph:sel.glyph, selHue:sel.hue, selBin:sel.bin, selKey:sel.key, selCwd:sel.cwd,
+      selEnLabel:sel.enabled?'已启用':'已停用', selEnCl:sel.enabled?'var(--acFg)':'var(--faint)',
+      selToggleEn:()=>this.setAgent(S.settingsAgent,{enabled:!sel.enabled}),
+      selEnBd:selEn.bd, selEnBg:selEn.bg, selEnKnob:selEn.knob, selEnX:selEn.x,
+      selModels:sel.models.map(mo=>({name:mo,pick:()=>this.setAgent(S.settingsAgent,{model:mo}),bd:mo===sel.model?sel.hue:'var(--bd2)',cl:mo===sel.model?sel.hue:'var(--mut)',bg:mo===sel.model?'color-mix(in srgb, '+sel.hue+' 10%, transparent)':'transparent'})),
+      selToggleAuto:()=>this.setAgent(S.settingsAgent,{auto:!sel.auto}),
+      selAutoBd:selAuto.bd, selAutoBg:selAuto.bg, selAutoKnob:selAuto.knob, selAutoX:selAuto.x,
+      toggleNotifyDone:()=>this.setState(s=>({prefs:{...s.prefs,notifyDone:!s.prefs.notifyDone}})),
+      ndBd:nd.bd, ndBg:nd.bg, ndKnob:nd.knob, ndX:nd.x,
+      toggleNotifyWait:()=>this.setState(s=>({prefs:{...s.prefs,notifyWait:!s.prefs.notifyWait}})),
+      nwBd:nw.bd, nwBg:nw.bg, nwKnob:nw.knob, nwX:nw.x
+    };
+    if(curAgent){
+      const a=AG[curAgent], st=stOf(a), tab=S.tabs[curAgent]||'session';
+      const msgs=(S.sessions[curAgent]||[]).map(m=>({...m,
+        isUser:m.t==='user',isText:m.t==='text',isNote:m.t==='note',isThink:m.t==='think',isTool:m.t==='tool',isDiff:m.t==='diff',isApproval:m.t==='approval',
+        pending:m.t==='approval'&&m.approved==null,decided:m.t==='approval'&&m.approved!=null,
+        decLabel:m.approved===true?'✓ 已批准,执行中':'✕ 已拒绝',decColor:m.approved===true?'var(--acFg)':'var(--del)',
+        approve:()=>this.decide(curAgent,m.id,true),deny:()=>this.decide(curAgent,m.id,false),
+        lines:(m.lines||[]).map(l=>({c:l.k==='+'?'var(--add)':l.k==='-'?'var(--del)':'var(--mut)',bg:l.k==='+'?'var(--addBg)':l.k==='-'?'var(--delBg)':'transparent',s:l.k+' '+l.s}))
+      }));
+      Object.assign(out,{
+        agName:a.name,agGlyph:a.glyph,agHue:a.hue,agModel:a.model,agCwd:a.cwd,agProj:projOf(a.cwd),agRuntime:fR(a.secs),agTok:fT(a.tok),agCost:fC(a.cost),
+        agStLabel:st.l,agStColor:st.c,agAnim:st.anim,agPillBd:'color-mix(in srgb, '+st.c+' 35%, transparent)',agPillBg:'color-mix(in srgb, '+st.c+' 8%, transparent)',
+        agMsgs:msgs,agEmpty:msgs.length===0,
+        tabSession:tab==='session',tabHistory:tab==='history',
+        tabS:()=>this.setTab(curAgent,'session'),tabH:()=>this.setTab(curAgent,'history'),
+        tabSC:tab==='session'?'#05130b':'var(--mut)',tabSB:tab==='session'?'var(--accent)':'transparent',
+        tabHC:tab==='history'?'#05130b':'var(--mut)',tabHB:tab==='history'?'var(--accent)':'transparent',
+        agConfig:()=>this.setState({view:{kind:'settings'},settingsAgent:curAgent,notifOpen:false}),
+        agDraft:S.drafts[curAgent]||'',
+        onDraft:e=>{const v=e.target.value;this.setState(s=>({drafts:{...s.drafts,[curAgent]:v}}))},
+        onKey:e=>{if(e.key==='Enter'&&!(e.nativeEvent&&e.nativeEvent.isComposing))this.send(curAgent)},
+        agSend:()=>this.send(curAgent),
+        listRef:el=>{this.listEl=el},
+        agHist:a.hist.map(h=>({...h,resume:()=>this.resume(curAgent,h)})),agNoHist:a.hist.length===0
+      });
+      const isHermes=curAgent==='hermes';
+      const modDefs=[{k:'session',name:'对话',glyph:'❯'},{k:'history',name:'历史',glyph:'↺'},{k:'skills',name:'技能',glyph:'✦'},{k:'kanban',name:'看板',glyph:'▦'},{k:'mcps',name:'MCPs',glyph:'⚙'}];
+      Object.assign(out,{
+        agHasModules:isHermes, agNoModules:!isHermes,
+        agModules:modDefs.map(d=>({name:d.name,glyph:d.glyph,on:()=>this.setTab(curAgent,d.k),cl:tab===d.k?'#05130b':'var(--mut)',bg:tab===d.k?'var(--accent)':'transparent',bd:tab===d.k?'var(--accent)':'var(--bd2)'})),
+        tabSkills:tab==='skills', tabKanban:tab==='kanban', tabMcps:tab==='mcps',
+        agSkills:this.hermesSkills.map(sk=>({...sk,runs:String(sk.runs),run:()=>this.runSkill(curAgent,sk.name)})),
+        agKanban:this.hermesKanban.map(c=>({...c,count:String(c.cards.length)})),
+        agMcps:this.hermesMcps.map(mc=>({...mc,tools:String(mc.tools),dot:mc.on?'var(--acFg)':'var(--dotOff)',st:mc.on?'已连接':'未连接',stCl:mc.on?'var(--acFg)':'var(--faint)'}))
+      });
+    }
+    return out;
+  }
+}
+</script>
+</body>
+</html>

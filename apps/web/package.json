@@ -1,0 +1,44 @@
+{
+  "name": "@dougoos/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && vite build && node ../../tooling/assert-web-release.mjs",
+    "build:visual": "vite build --mode visual-test",
+    "dev": "vite",
+    "debug": "tsx src/debug.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.app.json --noEmit"
+  },
+  "dependencies": {
+    "@dougoos/shared": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "remark-breaks": "4.0.0",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@fontsource/instrument-sans": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "vite": "8.1.5"
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.turbo/
+.cache/
+playwright-report/
+test-results/
+**/worker-configuration.d.ts
+docs/
+prototypes/
+references/
+plan.md
+CLAUDE.md
+pnpm-lock.yaml

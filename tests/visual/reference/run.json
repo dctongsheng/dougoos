@@ -1,0 +1,56 @@
+{
+  "browser": {
+    "name": "chromium",
+    "version": "149.0.7827.55"
+  },
+  "caseCount": 156,
+  "deterministic": {
+    "animationPolicy": "infinite animations are frozen at cycle start; finite animations and transitions are settled to their end state",
+    "caret": "hidden",
+    "externalNetwork": "blocked",
+    "fixedTime": "2026-07-23T04:05:06.000Z",
+    "fontWait": "document.fonts.ready + explicit \"Instrument Sans\"/\"JetBrains Mono\" checks",
+    "intervalPolicy": "prototype 1000ms tick is suppressed before support.js executes",
+    "locale": "zh-CN",
+    "randomSeed": 1597463007,
+    "timezoneId": "Asia/Shanghai"
+  },
+  "fonts": [
+    "instrument-sans-latin-400-normal.woff2",
+    "instrument-sans-latin-500-normal.woff2",
+    "instrument-sans-latin-600-normal.woff2",
+    "instrument-sans-latin-700-normal.woff2",
+    "jetbrains-mono-latin-400-normal.woff2",
+    "jetbrains-mono-latin-500-normal.woff2",
+    "jetbrains-mono-latin-700-normal.woff2"
+  ],
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "bytes": 194641,
+      "path": "prototypes/agentos/project/AgentOS SaaS.dc.html",
+      "sha256": "8131d4a788fbbb49f4945329dfede493ef72bf4a3bd3063e731dcae3bf2e2370"
+    },
+    {
+      "bytes": 29687,
+      "path": "prototypes/agentos/project/AgentOS Landing.dc.html",
+      "sha256": "f12d4170050b6869cb44153c18fb45135939a89bbb7070962c5e4265f2f62008"
+    },
+    {
+      "bytes": 66404,
+      "path": "prototypes/agentos/project/support.js",
+      "sha256": "c60c49083997f51a592df118c0068475337afd20b8cfd8e1cd9d5eb0c7e254f6"
+    },
+    {
+      "bytes": 1619,
+      "path": "prototypes/agentos/README.md",
+      "sha256": "39f21ee138284d1501708c4259fd4e535bf70278df7f798bde9582942eb0cca1"
+    }
+  ],
+  "thresholds": {
+    "colorPerChannel": 1,
+    "geometryPixels": 1,
+    "maxDiffPixelRatio": 0.005,
+    "ssimMinimum": 0.995
+  }
+}
