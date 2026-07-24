@@ -19,6 +19,8 @@
 
 - [任务体系](./plan/README.md)：后续任务的 develop/verify/review 流程。
 - [Release Baseline 分析](./plan/analysis/p1-release-baseline.md)
+- [视觉阻塞归因](./plan/analysis/ui-regression-release-blocker.md)
+- [视觉阻塞修复任务](./plan/tasks/ui-regression-001.md)
 - [Release Baseline 任务](./plan/tasks/release-baseline-001.md)
 - [Backlog](./plan/backlog.md)：已接受的非阻塞事项。
 - [P0/P1 验证报告](./VALIDATION_REPORT.md)

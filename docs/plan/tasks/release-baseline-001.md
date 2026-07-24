@@ -2,7 +2,7 @@
 id: release-baseline-001
 scope: release
 status: in-progress
-depends-on: []
+depends-on: [ui-regression-001]
 ---
 
 # P1 Release Baseline
@@ -57,6 +57,7 @@ depends-on: []
 8. hash 只覆盖 Git 可发布输入，并排除 manifest 自身；clean checkout 中重新计算必须一致。
 9. 实现完成时任务保持 `in-progress`，由独立 review 和最终 clean-checkout 门禁决定是否转为 `done`。
 10. 若完整门禁暴露任务开始前已存在且可确定复现的测试合同漂移，可以在本任务内做最小测试修复；不得删除断言或改弱产品合同。审批场景必须分别验证可见的 approval command、折叠态 tool preview，以及展开前不可见、展开后可见的 tool input，禁止再用跨层级文本总数作为合同。
+11. `ui-regression-001` 是 clean-checkout 视觉门禁发现的 blocking dependency；在该任务通过独立验证前，本任务不得完成、合并或打 tag。
 
 ## verification
 
