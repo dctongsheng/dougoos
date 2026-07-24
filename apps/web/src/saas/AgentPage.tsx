@@ -11,6 +11,7 @@ import { isAbsoluteWorkspacePath, resolveInitialAgentCwd } from "./home-task.js"
 import { MarkdownMessage } from "./MarkdownMessage.js";
 import type {
   AgentId,
+  AgentStatus,
   AgentTab,
   ChatViewSnapshot,
   DataMode,
@@ -38,7 +39,7 @@ interface AgentPageProps {
   readonly onRuntimeAction: () => void;
   readonly onRuntimeChange: (
     agentId: AgentId,
-    status: "thinking",
+    status: AgentStatus,
     task: string,
     last: string,
   ) => void;
@@ -99,9 +100,8 @@ export function AgentPage({
   const timers = useRef<readonly number[]>([]);
   const timerGeneration = useRef(0);
   const messages = messagesByAgent[agentId];
-  const displayedMessages: readonly AgentMessage[] = messages.filter(
-    (message) => message.type !== "think",
-  );
+  const displayedMessages: readonly AgentMessage[] =
+    dataMode === "real" ? messages.filter((message) => message.type !== "think") : messages;
   const provider = chat?.providers.find((candidate) => candidate.agentId === agentId);
   const selectedSessionId = chat?.selectedSessionIds[agentId];
   const selectedSession = chat?.sessions.find((candidate) => candidate.id === selectedSessionId);
@@ -232,6 +232,7 @@ export function AgentPage({
     }
     dispatch({ agentId, approved, messageId: message.id, type: "agent.approval" });
     if (approved) {
+      onRuntimeChange(agentId, "executing", agent.task, "▸ prisma migrate deploy");
       append(agentId, {
         arg: message.command,
         id: messageId(),
@@ -240,6 +241,7 @@ export function AgentPage({
         type: "tool",
       });
     } else {
+      onRuntimeChange(agentId, "idle", agent.task, "✕ 部署被拒绝");
       append(agentId, {
         body: "✕ 已拒绝执行,任务挂起等待新指示",
         id: messageId(),
@@ -455,6 +457,7 @@ export function AgentPage({
                   onDecision={(optionId, approved) => {
                     if (message.type === "approval") decide(message, optionId, approved);
                   }}
+                  renderFixturePresentation={dataMode === "fixture"}
                   writesDisabled={transportWritesDisabled || resolvingApprovals.has(message.id)}
                 />
               ))
@@ -597,10 +600,12 @@ function ProductionStateNotice({
 function MessageView({
   message,
   onDecision,
+  renderFixturePresentation,
   writesDisabled,
 }: {
   readonly message: AgentMessage;
   readonly onDecision: (optionId: string, approved: boolean) => void;
+  readonly renderFixturePresentation: boolean;
   readonly writesDisabled: boolean;
 }) {
   switch (message.type) {
@@ -627,9 +632,11 @@ function MessageView({
         </div>
       );
     case "think":
-      // Raw provider reasoning remains a separate journal event but is not
-      // rendered in the user-facing transcript.
-      return null;
+      return renderFixturePresentation ? (
+        <div className="message think-message" data-message-type="think">
+          ▚ {message.body}
+        </div>
+      ) : null;
     case "tool": {
       const firstInputLine =
         message.arg
@@ -638,6 +645,18 @@ function MessageView({
           ?.trim() ?? "查看详情";
       const inputPreview =
         firstInputLine.length > 160 ? `${firstInputLine.slice(0, 159)}…` : firstInputLine;
+      if (renderFixturePresentation) {
+        return (
+          <div className="message tool-message fixture-tool-message" data-message-type="tool">
+            <span aria-hidden="true" className="tool-message-chevron">
+              ▸
+            </span>
+            <strong>{message.tool}</strong>
+            <code className="tool-message-preview">{inputPreview}</code>
+            <small>{message.result}</small>
+          </div>
+        );
+      }
       return (
         <ToolDisclosure className="message tool-message" data-message-type="tool">
           <summary aria-label={`${message.tool} 工具详情`}>

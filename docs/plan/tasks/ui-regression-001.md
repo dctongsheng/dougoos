@@ -1,7 +1,7 @@
 ---
 id: ui-regression-001
 scope: web-visual
-status: ready
+status: in-progress
 depends-on: []
 ---
 
@@ -63,4 +63,3 @@ git diff --exit-code HEAD -- tests/visual/reference prototypes/agentos
 - real provider snapshot 仍能呈现 OpenClaw/OpenCode；
 - fixture canned `think` 可见，但 real raw `think` 不进入 DOM；
 - 没有阈值放宽、reference 刷新或 CSS 裁切。
-

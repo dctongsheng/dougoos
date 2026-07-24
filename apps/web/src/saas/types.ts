@@ -21,6 +21,15 @@ export const AGENT_IDS = [
 
 export type AgentId = (typeof AGENT_IDS)[number];
 
+export const PROTOTYPE_AGENT_IDS = [
+  "codex",
+  "claude",
+  "grok",
+  "cursor",
+  "pi",
+  "hermes",
+] as const satisfies readonly AgentId[];
+
 export type AgentStatus = "executing" | "idle" | "thinking" | "waiting";
 
 export type AgentTab = "history" | "kanban" | "mcps" | "session" | "skills";

@@ -194,12 +194,13 @@ function routeResponse(
   init: RequestInit | undefined,
   instanceId: string,
   snapshot = emptySnapshot(),
+  providers = [PROVIDER],
 ): Response {
   const path = new URL(String(input)).pathname;
   if (path === "/api/health/ready") {
     return Response.json({ checkedAt: NOW, instanceId, status: "ready" });
   }
-  if (path === "/api/providers") return Response.json({ providers: [PROVIDER] });
+  if (path === "/api/providers") return Response.json({ providers });
   if (path === "/api/clis") return Response.json({ checkedAt: NOW, clis: [CLI] });
   if (path === "/api/snapshot") return Response.json(snapshot);
   if (path === "/api/events") return openEventStream(init?.signal);
@@ -235,6 +236,78 @@ describe("CoreDataSource", () => {
       opencode: "opencode",
       pi: "pi",
     });
+  });
+
+  it("adds OpenClaw and OpenCode from the real provider snapshot without expanding fixtures", async () => {
+    const provider = new FakeConnectionProvider();
+    const providers = ["openclaw", "opencode"].map((id) =>
+      ProviderSchema.parse({
+        ...PROVIDER,
+        displayName: id === "openclaw" ? "OpenClaw" : "OpenCode",
+        id,
+      }),
+    );
+    const source = new CoreDataSource(provider, {
+      fetch: (input, init) =>
+        Promise.resolve(routeResponse(input, init, "instance:a", emptySnapshot(), providers)),
+    });
+    try {
+      const snapshot = await source.getSnapshot(new AbortController().signal);
+      expect(snapshot.fixture.agents.map((agent) => agent.id)).toEqual([
+        "codex",
+        "claude",
+        "grok",
+        "cursor",
+        "pi",
+        "hermes",
+        "openclaw",
+        "opencode",
+      ]);
+      expect(snapshot.fixture.agents.slice(-2)).toEqual([
+        expect.objectContaining({ enabled: true, id: "openclaw", name: "OpenClaw" }),
+        expect.objectContaining({ enabled: true, id: "opencode", name: "OpenCode" }),
+      ]);
+      expect(snapshot.chat?.providers.map((candidate) => candidate.id)).toEqual([
+        "openclaw",
+        "opencode",
+      ]);
+    } finally {
+      source.close();
+    }
+  });
+
+  it("does not expose raw provider reasoning in the persisted UI snapshot", async () => {
+    const sensitiveReasoning = "PRIVATE_REASONING_SENTINEL";
+    const provider = new FakeConnectionProvider();
+    const baseline = populatedSnapshot("Public answer");
+    const snapshotWithReasoning = GlobalSnapshotSchema.parse({
+      ...baseline,
+      includedSessions: baseline.includedSessions.map((session) => ({
+        ...session,
+        messages: [
+          {
+            body: sensitiveReasoning,
+            createdAt: NOW,
+            id: "message:private-reasoning",
+            kind: "think",
+            sessionId: SESSION.id,
+            state: "complete",
+            turnId: "turn:prior",
+          },
+        ],
+      })),
+    });
+    const source = new CoreDataSource(provider, {
+      fetch: (input, init) =>
+        Promise.resolve(routeResponse(input, init, "instance:a", snapshotWithReasoning)),
+    });
+    try {
+      const snapshot = await source.getSnapshot(new AbortController().signal);
+      expect(snapshot.fixture.features.agent.initialMessages.claude).toEqual([]);
+      expect(JSON.stringify(snapshot)).not.toContain(sensitiveReasoning);
+    } finally {
+      source.close();
+    }
   });
 
   it("loads real provider state while keeping credentials header-only and memory-only", async () => {

@@ -418,7 +418,8 @@ Landing 仅有以下真实原型事件：
 | 当前 Claude/Codex session 选择与展示 | Core API 的当前 session/snapshot；不等同于恢复历史进程 |
 | Claude/Codex composer 发送 | shared/Core DTO 创建 Turn；发送态、busy 与错误来自真实 Core |
 | 当前 Claude/Codex session 消息 | snapshot + ordered envelope |
-| user/text/note/think/tool/diff/approval | shared DTO；不能有第二套 UI |
+| user/text/note/tool/diff/approval | shared DTO；不能有第二套 UI |
+| real provider think | 本地 journal/snapshot 可保留协议事件，但 raw reasoning 不得进入 DOM、日志或持久化 UI 配置 |
 | approval option | 只发服务端 optionId；一次性解决 |
 | Turn Stop/cancel | 生产新增；幂等 Core API |
 | busy/error/recovery | 生产新增；shared/Core 状态 |
@@ -552,6 +553,9 @@ Landing 原型写“你的会话数据永远不离开你的机器”，架构允
    parser 和 fixture 不得进入 release bundle。
 9. Metadata 分别记录 release/visual-test build hash、语义检查、landmark、真实
    request/storage 和经过清理的 command effect；不得记录 bearer token、prompt、cwd 或原始业务 body。
+10. 历史 case ID `saas-production-seven-message-types` 只使用安全固定 fixture 展示七类
+    视觉消息；它不代表 real Provider reasoning 可见。real mode 由独立 DOM 隐私断言确认
+    raw `think` 不可见。
 
 阈值来自计划：
 

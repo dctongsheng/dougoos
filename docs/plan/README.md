@@ -31,7 +31,7 @@ pending -> ready -> in-progress -> done
 
 | ID | 目标 | 状态 |
 |---|---|---|
-| [`ui-regression-001`](./tasks/ui-regression-001.md) | 恢复 fixture/real 数据边界和像素级视觉合同 | ready |
+| [`ui-regression-001`](./tasks/ui-regression-001.md) | 恢复 fixture/real 数据边界和像素级视觉合同 | in-progress |
 | [`release-baseline-001`](./tasks/release-baseline-001.md) | 建立 P0/P1 可复现、可回退的发布基线 | in-progress |
 
 ## Release Baseline 门禁

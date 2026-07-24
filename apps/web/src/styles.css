@@ -2564,6 +2564,7 @@ input:focus-visible,
 }
 
 .think-message {
+  animation: pulse 1.4s ease-in-out infinite;
   color: var(--think);
 }
 
@@ -2576,6 +2577,30 @@ input:focus-visible,
   max-width: 86%;
   min-width: 0;
   overflow: hidden;
+}
+
+.fixture-tool-message {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  padding: 7px 11px;
+}
+
+.fixture-tool-message > strong {
+  color: var(--text2);
+  font-size: 11.5px;
+}
+
+.fixture-tool-message > .tool-message-preview {
+  flex: 1;
+}
+
+.fixture-tool-message > small {
+  color: var(--faint);
+  flex: none;
+  font-family: inherit;
+  font-size: 10.5px;
+  white-space: nowrap;
 }
 
 .tool-message > summary {

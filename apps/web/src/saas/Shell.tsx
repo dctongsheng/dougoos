@@ -5,7 +5,6 @@ import type { CSSProperties } from "react";
 import { agentById } from "./fixtures.js";
 import { routeMeta } from "./state.js";
 import {
-  AGENT_IDS,
   type AgentId,
   type HarnessSection,
   type Route,
@@ -118,9 +117,7 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
     return Object.fromEntries(
       (fixture?.agents ?? []).map((agent) => [
         agent.id,
-        agent.enabled &&
-          ((fixture?.features.agent.initialMessages[agent.id].length ?? 0) > 0 ||
-            (fixture?.features.agent.histories[agent.id].length ?? 0) > 0),
+        agent.enabled && (fixture?.features.agent.initialMessages[agent.id].length ?? 0) > 0,
       ]),
     ) as Record<AgentId, boolean>;
   });
@@ -567,7 +564,7 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
             <span className="avatar">R</span>
             <div>
               <strong>Ryo</strong>
-              <small>Pro · {AGENT_IDS.length} agents linked</small>
+              <small>Pro · {fixture.agents.length} agents linked</small>
             </div>
             <button
               aria-label="设置"

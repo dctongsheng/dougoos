@@ -43,7 +43,7 @@ async function coreRequest(
   );
 }
 
-test("runs the scripted Fake Provider through Desktop, Journal, SSE, and Web", async () => {
+test("runs the scripted Fake Provider end to end without rendering raw reasoning", async () => {
   const root = join(import.meta.dirname, "../../..");
   const desktopPath = join(root, "apps/desktop");
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "dougoos-fake-e2e-"));
@@ -331,7 +331,7 @@ test("runs the scripted Fake Provider through Desktop, Journal, SSE, and Web", a
   }
 });
 
-test("hands the Home project to Fake Agent once and renders Markdown without reasoning", async () => {
+test("hands the Home project to Fake Agent and renders Markdown without raw reasoning", async () => {
   const root = join(import.meta.dirname, "../../..");
   const desktopPath = join(root, "apps/desktop");
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "dougoos-home-markdown-e2e-"));

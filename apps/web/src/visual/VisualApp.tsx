@@ -89,7 +89,9 @@ const runtimeByScenario: Readonly<Record<VisualScenarioId, RuntimePresentation>>
   },
 };
 
-const sevenTypeMessages: readonly AgentMessage[] = [
+// This scenario uses only safe canned fixture content. Its historical case ID
+// is retained because production-only IDs are part of the committed manifest.
+const safeFixtureSevenTypeMessages: readonly AgentMessage[] = [
   { body: "✓ 已记录工作区检查点", id: "visual-note", type: "note" },
   {
     body: "正在核验依赖方向与回归证据 …",
@@ -113,7 +115,7 @@ class VisualDataSource extends FixtureDataSource {
           };
         };
       };
-      mutable.features.agent.initialMessages.claude.push(...sevenTypeMessages);
+      mutable.features.agent.initialMessages.claude.push(...safeFixtureSevenTypeMessages);
     }
     return snapshot;
   }

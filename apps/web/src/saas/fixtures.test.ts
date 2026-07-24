@@ -1,19 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { agentById, FixtureDataSource, saasFixture } from "./fixtures.js";
+import { PROTOTYPE_AGENT_IDS } from "./types.js";
 
 describe("FixtureDataSource", () => {
-  it("exposes all eight integrated Agent slots", () => {
-    expect(saasFixture.agents.map((agent) => agent.id)).toEqual([
-      "codex",
-      "claude",
-      "grok",
-      "cursor",
-      "pi",
-      "hermes",
-      "openclaw",
-      "opencode",
-    ]);
+  it("keeps the prototype fixture at its canonical six Agent slots", () => {
+    expect(saasFixture.agents.map((agent) => agent.id)).toEqual(PROTOTYPE_AGENT_IDS);
   });
 
   it("returns independent typed copies", async () => {

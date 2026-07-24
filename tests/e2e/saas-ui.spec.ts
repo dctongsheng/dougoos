@@ -146,7 +146,7 @@ test("Home keyboard contract preserves newline and IME, then Ctrl/Cmd+Enter send
   await expect(page.locator(".agent-header")).toContainText("Claude Code");
 });
 
-test("Agent composer sends on Enter, preserves Shift+Enter, and ignores composing Enter", async ({
+test("fixture Agent composer sends on Enter and renders only its safe canned think", async ({
   page,
 }) => {
   await openApp(page);
@@ -168,7 +168,7 @@ test("Agent composer sends on Enter, preserves Shift+Enter, and ignores composin
   await expect(page.locator(".user-message")).toHaveText("解释 workspace protocol");
   await expect(composer).toHaveValue("");
   await page.waitForTimeout(600);
-  await expect(page.locator(".think-message")).toHaveCount(0);
+  await expect(page.locator(".think-message")).toContainText("正在分析仓库上下文与依赖");
 });
 
 test("approval is single-use and notification click marks read while navigating", async ({
@@ -188,14 +188,12 @@ test("approval is single-use and notification click marks read while navigating"
   await expect(page.getByText("✓ 已批准,执行中", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { exact: true, name: "批准执行" })).toHaveCount(0);
   await expect(page.getByRole("button", { exact: true, name: "拒绝" })).toHaveCount(0);
-  const approvedTool = page.locator("details.tool-message").filter({
+  const approvedTool = page.locator(".fixture-tool-message").filter({
     has: page.locator(".tool-message-preview", { hasText: command }),
   });
   await expect(approvedTool.locator(".tool-message-preview")).toBeVisible();
-  const toolInput = approvedTool.locator('[data-tool-detail="input"]');
-  await expect(toolInput).toBeHidden();
-  await approvedTool.locator("summary").click();
-  await expect(toolInput).toBeVisible();
+  await expect(approvedTool.locator("small")).toHaveText("运行中…");
+  await expect(page.locator("details.tool-message")).toHaveCount(0);
 });
 
 test("constrained sidebar remains reachable and Settings visibility changes the live shell", async ({
@@ -227,6 +225,14 @@ test("responsive collapse recovers when resizing from 1024 to desktop width", as
   await page.setViewportSize({ height: 800, width: 1280 });
   await expect(page.locator(".app-shell")).not.toHaveClass(/sidebar-collapsed/);
   await expect(sidebarNav(page, "新建任务")).toBeVisible();
+});
+
+test("Agent trees default open only for live fixture sessions, not history-only Agents", async ({
+  page,
+}) => {
+  await openApp(page);
+  await expect(page.getByRole("button", { name: "收起 Cursor CLI 会话" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "展开 Hermes 会话" })).toBeVisible();
 });
 
 test("Agent, Settings, Queue, and Sessions state survives routes without stale async work", async ({

@@ -256,12 +256,16 @@ export function App({ dataSource, initialRoute, runtimePresentation }: AppProps)
   if (state.fixture === null || state.features === null) {
     throw new Error("Ready connection state requires fixture and feature state");
   }
+  const loadedFixture = state.fixture;
 
   const sendHomeTask = () => {
     if (writesDisabled) return;
     const text = state.homeDraft.trim();
     if (text.length === 0) return;
-    const agentId = state.homeMode === "auto" ? routeTask(text) : state.homeAgentId;
+    const requestedAgentId = state.homeMode === "auto" ? routeTask(text) : state.homeAgentId;
+    const agentId = loadedFixture.agents.some((agent) => agent.id === requestedAgentId)
+      ? requestedAgentId
+      : state.homeAgentId;
     const provider = state.chat?.providers.find((candidate) => candidate.agentId === agentId);
     const command =
       source.mode === "real"

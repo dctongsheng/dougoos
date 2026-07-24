@@ -100,6 +100,35 @@ function statusForSession(
   }
 }
 
+const realOnlyAgentPresentation: Readonly<
+  Partial<Record<AgentId, Pick<AgentFixture, "glyph" | "model" | "tone">>>
+> = {
+  openclaw: { glyph: "⌁", model: "default", tone: "#ff6b6b" },
+  opencode: { glyph: "◈", model: "auto", tone: "#d6e4ff" },
+};
+
+function realProviderAgent(
+  agentId: AgentId,
+  provider: Provider,
+  summary: SessionSummary | undefined,
+): AgentFixture {
+  const presentation = realOnlyAgentPresentation[agentId];
+  return {
+    cost: 0,
+    cwd: summary?.cwd ?? "~",
+    enabled: provider.status === "available",
+    glyph: presentation?.glyph ?? "◇",
+    id: agentId,
+    last: summary?.lastMessagePreview ?? "—",
+    model: provider.version ?? presentation?.model ?? provider.id,
+    name: provider.displayName,
+    status: statusForSession(summary?.state),
+    task: summary === undefined ? "待命" : sessionDisplayTitle(summary),
+    tokenCount: 0,
+    tone: presentation?.tone ?? "#8a968e",
+  };
+}
+
 function messageForFixture(message: LiveMessage): AgentMessage | null {
   switch (message.kind) {
     case "user":
@@ -186,7 +215,7 @@ export function fixtureFromCoreState(
     const agentId = assignments.get(provider.id);
     if (agentId !== undefined) providerByAgent.set(agentId, provider);
   }
-  const agents: readonly AgentFixture[] = base.agents.map((agent) => {
+  const fixtureAgents = base.agents.map((agent) => {
     const provider = providerByAgent.get(agent.id);
     const summary = latestByAgent.get(agent.id);
     return {
@@ -202,6 +231,13 @@ export function fixtureFromCoreState(
       tokenCount: 0,
     };
   });
+  const prototypeAgentIds = new Set(fixtureAgents.map((agent) => agent.id));
+  const realOnlyAgents = providers.flatMap((provider) => {
+    const agentId = assignments.get(provider.id);
+    if (agentId === undefined || prototypeAgentIds.has(agentId)) return [];
+    return [realProviderAgent(agentId, provider, latestByAgent.get(agentId))];
+  });
+  const agents: readonly AgentFixture[] = [...fixtureAgents, ...realOnlyAgents];
   const initialMessages = Object.fromEntries(
     AGENT_IDS.map((agentId) => {
       const summary = latestByAgent.get(agentId);
