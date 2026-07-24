@@ -6,8 +6,8 @@ renderer、Core/ACP/provider/storage packages，以及严格的 TypeScript、wor
 
 - 当前项目版本：`0.1.0`
 - P0/P1 产品实现：历史 checkpoint 已验证
-- `p0-p1-mvp` release baseline：`in-progress`；review 02 已通过，clean-checkout `check`
-  顺序修复等待 exact-Node 最终复验，未创建 tag
+- `p0-p1-mvp` release baseline：`done`；三轮独立 review 已关闭全部 finding，exact-Node
+  clean checkout 已重现全部离线门禁，本地 annotated tag 可用于回退
 
 ## 工具链
 

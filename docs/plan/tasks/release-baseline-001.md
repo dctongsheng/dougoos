@@ -1,7 +1,7 @@
 ---
 id: release-baseline-001
 scope: release
-status: in-progress
+status: done
 depends-on: [ui-regression-001]
 ---
 
@@ -75,6 +75,19 @@ pnpm smoke:build
 
 ```text
 docs/plan/reviews/release-baseline-001-01.md
+docs/plan/reviews/release-baseline-001-02.md
+docs/plan/reviews/release-baseline-001-03.md
 ```
 
 Review 记录必须逐条区分 blocking/non-blocking finding，并给出 `pass` 或 `blocked` 结论。
+
+## completion evidence
+
+- Review 01：`blocked`，发现 release Node 版本来源不一致和文档 EOF 空白。
+- Review 02：`pass`，确认 `.nvmrc` 成为 exact release Node 的唯一真源并关闭 review 01 findings。
+- Review 03：`pass`，确认全新 clone 在安装前后无 workspace `dist`，无需手动预构建即可直接通过
+  `pnpm check`；无开放 P1/P2/P3 finding。
+- Final release checkout：exact Node `22.23.1`、pnpm `11.16.0`、frozen lockfile，依次通过
+  manifest check、319 个 package tests、E2E 15/15、visual 9/9 和 8 个 build-smoke ESM
+  入口。
+- Release rollback point：annotated tag `p0-p1-mvp` 指向最终 release commit。

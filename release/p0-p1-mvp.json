@@ -6,8 +6,8 @@
   },
   "source": {
     "algorithm": "sha256(path-length:path:type:size:content; git releasable inputs; manifest excluded)",
-    "fileCount": 587,
-    "sha256": "710548f6a2629dd4976b824baa1ff558749f84336f27cc8b8ed83e336438a990"
+    "fileCount": 588,
+    "sha256": "19e99875b2061f652c4fbd69d3851695017461c3b0fffd9f2f623a980bb471f3"
   },
   "runtime": {
     "node": "22.23.1",

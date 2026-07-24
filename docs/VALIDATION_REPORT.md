@@ -8,10 +8,11 @@ P0/P1 功能实现的历史 checkpoint 已完成，真实 Claude Code 已通过 
 ACP → Agent → Journal → SSE → UI 全链路；Landing 与 health-only Worker 已发布到
 <https://dougoos.com>。
 
-2026-07-24 的 release candidate 离线门禁现已全绿，视觉修复也通过独立
-`ui-regression-001` review，release review 02 也已通过。随后 final exact-Node clean checkout
-暴露根 `check` 在首次 build 前 typecheck 的顺序缺陷；当前修复等待 exact-Node 最终复验，
-任务保持 `in-progress`，尚未创建 `p0-p1-mvp` tag。
+2026-07-24 的 P0/P1 release baseline 已完成。视觉修复通过独立 `ui-regression-001`
+review；release review 01 的 Node provenance blocker 已关闭，review 02/03 均为 `pass`。
+final clean checkout 使用 exact Node `22.23.1` 和 frozen lockfile，在没有旧 workspace
+`dist` 或手动预构建的条件下重现全部离线门禁；本地 annotated tag `p0-p1-mvp` 指向该
+release commit。
 
 ## 自动化与构建
 
@@ -124,10 +125,11 @@ Provider 完整 Desktop UI 链路的完成下限。
   保持 `>=22.13.0`
 - clean-checkout workflow：已加入 release candidate
 - 轻量 release manifest：已加入 release candidate，可用 `pnpm release:manifest:check` 校验
-- 当前离线门禁：当前 Node 的全新 clone 已直接验证 `pnpm check`；exact Node 22.23.1
-  全门禁最终复验待 orchestrator 执行
-- 独立 release review：review 02 为 `pass`；后续 clean-checkout 顺序修复等待最终复验
-- Git tag：尚未创建；必须在独立 release review 通过后创建
+- 当前离线门禁：final clean checkout 使用 exact Node `22.23.1` 和 frozen lockfile，
+  manifest check、`pnpm check`、E2E、视觉回归与 build smoke 全部通过
+- 独立 release review：review 01 为 `blocked`，其 findings 已关闭；review 02/03 均为
+  `pass`，无开放 P1/P2/P3 finding
+- Git tag：本地 annotated tag `p0-p1-mvp` 指向最终 release commit，可用于确定性回退
 
 ## 启动
 

@@ -22,6 +22,10 @@
 - [视觉阻塞归因](./plan/analysis/ui-regression-release-blocker.md)
 - [视觉阻塞修复任务](./plan/tasks/ui-regression-001.md)
 - [Release Baseline 任务](./plan/tasks/release-baseline-001.md)
+- [Release Review 01](./plan/reviews/release-baseline-001-01.md)：`blocked`，记录 Node provenance blocker。
+- [Release Review 02](./plan/reviews/release-baseline-001-02.md)：`pass`，关闭 Node blocker。
+- [Release Review 03](./plan/reviews/release-baseline-001-03.md)：`pass`，验证无旧 `dist` 的 clean-checkout
+  `pnpm check`。
 - [Backlog](./plan/backlog.md)：已接受的非阻塞事项。
 - [P0/P1 验证报告](./VALIDATION_REPORT.md)
 - [P0/P1 Release Manifest](../release/p0-p1-mvp.json)：版本、发布输入 hash、锁定工具链与测试摘要。
