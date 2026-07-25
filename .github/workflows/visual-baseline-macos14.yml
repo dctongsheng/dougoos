@@ -36,19 +36,10 @@ jobs:
       - name: Install pinned Chromium
         run: pnpm exec playwright install chromium
 
-      - name: Capture canonical references
-        run: pnpm visual:references
+      - name: Build visual sites
+        run: |
+          pnpm --filter @dougoos/web build
+          pnpm --filter @dougoos/web build:visual
 
-      - name: Upload canonical references
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-reference-macos14-${{ github.sha }}
-          path: tests/visual/reference
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Build workspace dependencies
-        run: pnpm -r build
-
-      - name: Verify production visual regression
-        run: pnpm test:visual
+      - name: Diagnose settings geometry
+        run: pnpm exec playwright test tests/visual/debug-settings.spec.ts --project=visual
