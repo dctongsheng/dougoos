@@ -4833,6 +4833,10 @@ input:focus-visible,
   font-family: "JetBrains Mono", monospace;
 }
 
+.settings-page .visibility-grid button[style] {
+  height: 30px;
+}
+
 .settings-page .visibility-grid button[style][aria-pressed="true"] {
   background: color-mix(in srgb, var(--agent-tone) 8%, transparent);
   border-color: color-mix(in srgb, var(--agent-tone) 45%, transparent);
@@ -4963,6 +4967,7 @@ input:focus-visible,
 
 .agent-config-section {
   gap: 12px;
+  height: 377px;
 }
 
 .agent-config-section > div:first-child h2 {
