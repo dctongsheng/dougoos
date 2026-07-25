@@ -15,6 +15,7 @@ const application = await electron.launch({
   env: {
     ...process.env,
     DOUGOOS_DATABASE_PATH: databasePath,
+    DOUGOOS_DISABLE_UPDATES: "1",
     DOUGOOS_TEST_FAKE_PROVIDER: "1",
   },
   executablePath: manifest.executablePath,
@@ -33,7 +34,7 @@ function processExists(pid) {
 
 try {
   const page = await application.firstWindow();
-  await page.waitForFunction(() => globalThis.document.title === "AgentOS", undefined, {
+  await page.waitForFunction(() => globalThis.document.title === "DougoOS", undefined, {
     timeout: 30_000,
   });
   const connection = await page.evaluate(async () => {

@@ -26,6 +26,9 @@ interface LandingAppProps {
 
 type CustomProperties = CSSProperties & Readonly<Record<`--${string}`, string>>;
 
+const EARLY_ACCESS_DOWNLOAD_URL =
+  "https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg";
+
 const blockDemoNavigation = (event: MouseEvent<HTMLElement>): void => {
   event.preventDefault();
 };
@@ -327,15 +330,15 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
               登录
             </button>
           )}
-          <button className="header-download" onClick={blockDemoNavigation} type="button">
+          <a className="header-download" href={EARLY_ACCESS_DOWNLOAD_URL}>
             免费下载
-          </button>
+          </a>
         </header>
 
         <section className="hero">
           <div className="version-chip">
             <span />
-            v2.0 · 本地优先 · macOS / Linux
+            v0.2.0 · Early Access · macOS Apple Silicon
           </div>
           <h1>
             多个 Agent CLI
@@ -347,14 +350,29 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
             的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。
           </p>
           <div className="hero-actions">
-            <button className="primary-action" onClick={blockDemoNavigation} type="button">
+            <a className="primary-action" href={EARLY_ACCESS_DOWNLOAD_URL}>
               下载桌面版
-            </button>
+            </a>
             <button className="secondary-action" onClick={blockDemoNavigation} type="button">
               在线体验 →
             </button>
           </div>
-          <div className="install-command">curl -fsSL https://dougoos.com/install | sh</div>
+          <div className="install-command">
+            macOS Apple Silicon · Early Access · 未经 Apple 公证
+          </div>
+          <section
+            aria-labelledby="early-access-install-title"
+            className="early-access-install"
+            id="download"
+          >
+            <h2 id="early-access-install-title">四步开始体验</h2>
+            <ol>
+              <li>下载并打开 DMG</li>
+              <li>拖入 Applications</li>
+              <li>首次尝试启动</li>
+              <li>被拦截时在“隐私与安全性”选择“仍要打开”</li>
+            </ol>
+          </section>
         </section>
 
         <ProductWindow />
@@ -454,13 +472,9 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
           <h2>把所有终端窗口,收进一个 OS</h2>
           <p>免费、开源、本地优先。你的会话数据永远不离开你的机器。</p>
           <div>
-            <button
-              className="primary-action final-primary"
-              onClick={blockDemoNavigation}
-              type="button"
-            >
-              下载 AgentOS
-            </button>
+            <a className="primary-action final-primary" href={EARLY_ACCESS_DOWNLOAD_URL}>
+              下载 DougoOS
+            </a>
             <button
               className="secondary-action final-secondary"
               onClick={blockDemoNavigation}

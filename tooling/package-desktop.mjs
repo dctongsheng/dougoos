@@ -1,12 +1,27 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cp, lstat, mkdir, readdir, realpath, rename, rm, writeFile } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import {
+  cp,
+  lstat,
+  mkdir,
+  readFile,
+  readdir,
+  realpath,
+  rename,
+  rm,
+  stat,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { arch, platform } from "node:process";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 
 import { createPackageWithOptions, getRawHeader } from "@electron/asar";
 import electronExecutable from "electron";
+
+import { generateDesktopIcon } from "./generate-desktop-icon.mjs";
 
 const execute = promisify(execFile);
 const root = process.cwd();
@@ -15,7 +30,20 @@ const stagePath = join(artifactsRoot, "desktop-stage");
 const packageOutput = join(artifactsRoot, "desktop");
 const resourceRoot = join(artifactsRoot, "desktop-resources");
 const webResource = join(resourceRoot, "web");
+const releaseOutput = join(artifactsRoot, "release");
 const manifestPath = join(artifactsRoot, "desktop-package.json");
+const rootPackage = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+const desktopPackage = JSON.parse(
+  await readFile(join(root, "apps", "desktop", "package.json"), "utf8"),
+);
+const appVersion = rootPackage.version;
+if (
+  typeof appVersion !== "string" ||
+  !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u.test(appVersion) ||
+  desktopPackage.version !== appVersion
+) {
+  throw new Error("Root and desktop package versions must match as major.minor.patch");
+}
 const pnpmScript = process.env.npm_execpath;
 if (pnpmScript === undefined) {
   throw new Error("package-desktop must be launched through pnpm");
@@ -63,7 +91,7 @@ async function materializeProductionDependencies() {
   await rm(join(nodeModulesPath, ".pnpm"), { recursive: true });
 }
 
-for (const path of [stagePath, packageOutput, resourceRoot, manifestPath]) {
+for (const path of [stagePath, packageOutput, resourceRoot, releaseOutput, manifestPath]) {
   await rm(path, { force: true, recursive: true });
 }
 await mkdir(artifactsRoot, { recursive: true });
@@ -93,25 +121,70 @@ const buildPath = join(packageOutput, `DougoOS-${platform}-${arch}`);
 let executablePath;
 let macInfoPath;
 let resourcesPath;
+let appPath;
 await mkdir(buildPath, { recursive: true });
 
 if (platform === "darwin") {
   const sourceApp = dirname(dirname(dirname(electronExecutable)));
   const targetApp = join(buildPath, "DougoOS.app");
+  appPath = targetApp;
   await cp(sourceApp, targetApp, { recursive: true, verbatimSymlinks: true });
   macInfoPath = join(targetApp, "Contents", "Info.plist");
   await execute("plutil", ["-remove", "ElectronAsarIntegrity", macInfoPath]);
+  const plistValues = {
+    CFBundleDisplayName: "DougoOS",
+    CFBundleExecutable: "DougoOS",
+    CFBundleIconFile: "DougoOS.icns",
+    CFBundleIdentifier: "com.dougoos.desktop",
+    CFBundleName: "DougoOS",
+    CFBundleShortVersionString: appVersion,
+    CFBundleVersion: appVersion,
+    LSApplicationCategoryType: "public.app-category.developer-tools",
+    LSMinimumSystemVersion: "13.0",
+  };
+  for (const [key, value] of Object.entries(plistValues)) {
+    await execute("plutil", ["-replace", key, "-string", value, macInfoPath]);
+  }
   await execute("plutil", [
     "-replace",
-    "CFBundleIdentifier",
-    "-string",
-    "com.dougoos.desktop",
+    "NSAppTransportSecurity",
+    "-json",
+    JSON.stringify({ NSAllowsLocalNetworking: true }),
     macInfoPath,
   ]);
-  await execute("plutil", ["-replace", "CFBundleExecutable", "-string", "DougoOS", macInfoPath]);
+  for (const key of [
+    "NSAudioCaptureUsageDescription",
+    "NSBluetoothAlwaysUsageDescription",
+    "NSBluetoothPeripheralUsageDescription",
+    "NSCameraUsageDescription",
+    "NSMicrophoneUsageDescription",
+  ]) {
+    await execute("plutil", ["-remove", key, macInfoPath]);
+  }
   executablePath = join(targetApp, "Contents", "MacOS", "DougoOS");
   await rename(join(targetApp, "Contents", "MacOS", "Electron"), executablePath);
   resourcesPath = join(targetApp, "Contents", "Resources");
+
+  const frameworksPath = join(targetApp, "Contents", "Frameworks");
+  for (const suffix of ["", " (Renderer)", " (GPU)", " (Plugin)"]) {
+    const oldName = `Electron Helper${suffix}`;
+    const newName = `DougoOS Helper${suffix}`;
+    const oldAppPath = join(frameworksPath, `${oldName}.app`);
+    const helperInfoPath = join(oldAppPath, "Contents", "Info.plist");
+    await rename(
+      join(oldAppPath, "Contents", "MacOS", oldName),
+      join(oldAppPath, "Contents", "MacOS", newName),
+    );
+    for (const [key, value] of Object.entries({
+      CFBundleDisplayName: newName,
+      CFBundleExecutable: newName,
+      CFBundleIdentifier: `com.dougoos.desktop.helper${suffix.replaceAll(/[ ()]/gu, "")}`,
+      CFBundleName: newName,
+    })) {
+      await execute("plutil", ["-replace", key, "-string", value, helperInfoPath]);
+    }
+    await rename(oldAppPath, join(frameworksPath, `${newName}.app`));
+  }
 } else {
   const sourceDist = dirname(electronExecutable);
   await cp(sourceDist, buildPath, { recursive: true, verbatimSymlinks: true });
@@ -147,15 +220,59 @@ if (macInfoPath !== undefined) {
 }
 await cp(webResource, join(resourcesPath, "web"), { recursive: true });
 
+let dmgPath;
+let dmgSha256;
+let dmgSize;
+let signing;
+if (platform === "darwin" && appPath !== undefined && macInfoPath !== undefined) {
+  const iconPath = await generateDesktopIcon(resourceRoot);
+  await rm(join(resourcesPath, "electron.icns"), { force: true });
+  await cp(iconPath, join(resourcesPath, "DougoOS.icns"));
+  await execute("codesign", ["--force", "--deep", "--sign", "-", "--timestamp=none", appPath]);
+  await execute("codesign", ["--verify", "--deep", "--strict", appPath]);
+  signing = "ad-hoc";
+
+  await symlink("/Applications", join(buildPath, "Applications"), "dir");
+  await mkdir(releaseOutput, { recursive: true });
+  dmgPath = join(releaseOutput, `DougoOS-${appVersion}-arm64.dmg`);
+  await execute(
+    "hdiutil",
+    [
+      "create",
+      "-volname",
+      "DougoOS Early Access",
+      "-srcfolder",
+      buildPath,
+      "-format",
+      "UDZO",
+      "-ov",
+      dmgPath,
+    ],
+    { maxBuffer: 8 * 1024 * 1024 },
+  );
+  dmgSize = (await stat(dmgPath)).size;
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(dmgPath)) hash.update(chunk);
+  dmgSha256 = hash.digest("hex");
+}
+
 await writeFile(
   manifestPath,
   `${JSON.stringify(
     {
       arch,
+      appPath,
+      appVersion,
       buildPath,
+      dmgPath,
+      dmgSha256,
+      dmgSize,
       electronVersion: "43.2.0",
       executablePath,
+      minimumMacOS: platform === "darwin" ? "13.0" : undefined,
+      notarized: false,
       platform,
+      signing,
     },
     null,
     2,
@@ -164,4 +281,5 @@ await writeFile(
 );
 
 console.log(`Desktop package: ${buildPath}`);
+if (dmgPath !== undefined) console.log(`Early Access DMG: ${dmgPath}`);
 console.log(`Package manifest: ${manifestPath}`);

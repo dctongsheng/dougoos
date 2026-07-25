@@ -33,6 +33,7 @@ pending -> ready -> in-progress -> done
 |---|---|---|
 | [`ui-regression-001`](./tasks/ui-regression-001.md) | 恢复 fixture/real 数据边界和像素级视觉合同 | done |
 | [`release-baseline-001`](./tasks/release-baseline-001.md) | 建立 P0/P1 可复现、可回退的发布基线 | done |
+| [`early-access-0.2.0`](./tasks/early-access-0.2.0.md) | 零付费发布 macOS Apple Silicon Early Access | in-progress |
 
 ## Release Baseline 门禁
 
@@ -43,3 +44,11 @@ pending -> ready -> in-progress -> done
 3. `pnpm check`、`pnpm test:e2e`、`pnpm test:visual`、`pnpm smoke:build` 通过。
 4. clean-checkout CI 覆盖相同离线门禁。
 5. 独立 release review 结论为 `pass`，且没有 blocking finding。
+
+Early Access 发布另需满足：
+
+1. `v0.2.0` manifest 与 tag 对应，历史 `p0-p1-mvp` manifest 只校验其自身 tag。
+2. DMG 为 macOS 13+ Apple Silicon、ad-hoc signed、未公证，官网没有误导性表述。
+3. 更新包必须通过大小、SHA-256 与 Ed25519 签名校验，且不会自覆盖应用。
+4. R2 必须先发布并公网回读不可变制品，最后才能更新 `latest.json` 和固定别名。
+5. 独立 release review 没有 blocking finding。

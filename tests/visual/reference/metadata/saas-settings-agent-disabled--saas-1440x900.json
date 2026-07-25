@@ -24,8 +24,8 @@
     "width": 1440
   },
   "dom": {
-    "digest": "f308f5be41a419e6",
-    "visibleElementCount": 889
+    "digest": "a3c8b297f7ce921b",
+    "visibleElementCount": 907
   },
   "externalRequests": [],
   "fonts": {
@@ -96,7 +96,7 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ 项目 ❒ 13_locla_session_manager ▶ 调整 AgentShare 客户端 ◆ 设计 agentshare 大改版方案 ❯ ❒ fyfactor ▶ 我想做个点子或者副业数据库 ◭ 验证 GitHub 子 agent ☿ ❒ douge_ship_tem_2 ▶ ❒ 001_bian_ai ▶ 对话 ▶ 今天 ▶ ◆ 迁移 users 表到新 schema ❯ 重构 auth 中间件为策略模式 昨天 ▶ ⌖ 修复 webapp 构建缓存失效 ◭ API 集成测试补全 更早 ▶ ☿ 重构日志管道与告警 π 依赖升级与安全审计 AGENTS ▶ ▶ ❯ Codex CLI ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
     },
     {
       "boundingBox": {
@@ -158,7 +158,7 @@
         "width": "240px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ 项目 ❒ 13_locla_session_manager ▶ 调整 AgentShare 客户端 ◆ 设计 agentshare 大改版方案 ❯ ❒ fyfactor ▶ 我想做个点子或者副业数据库 ◭ 验证 GitHub 子 agent ☿ ❒ douge_ship_tem_2 ▶ ❒ 001_bian_ai ▶ 对话 ▶ 今天 ▶ ◆ 迁移 users 表到新 schema ❯ 重构 auth 中间件为策略模式 昨天 ▶ ⌖ 修复 webapp 构建缓存失效 ◭ API 集成测试补全 更早 ▶ ☿ 重构日志管道与告警 π 依赖升级与安全审计 AGENTS ▶ ▶ ❯ Codex CLI ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
     },
     {
       "boundingBox": {
@@ -220,11 +220,11 @@
         "width": "1200px",
         "z-index": "auto"
       },
-      "text": "设置 preferences 活跃 3/6 今日 $12.47 2.58M tok ◍ 2 12:05:06"
+      "text": "设置 preferences 活跃 4/6 今日 $12.47 2.58M tok ◍ 2 12:05:06"
     },
     {
       "boundingBox": {
-        "height": 2226.188,
+        "height": 2398.188,
         "width": 860,
         "x": 240,
         "y": -636
@@ -259,7 +259,7 @@
         "font-weight": "400",
         "gap": "14px",
         "grid-template-columns": "none",
-        "height": "2226.19px",
+        "height": "2398.19px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -282,14 +282,14 @@
         "width": "860px",
         "z-index": "auto"
       },
-      "text": "外观 主题 深色 浅色 主题色 界面自定义 勾选侧边栏中显示的模块 —— 主导航、PROJECTS、Agent、HARNESS 与 Sessions Manager 主导航 ＋ 新建任务 ✓ ▦ 总览 ✓ ▤ 任务编排 ✓ ✦ Memory ✓ PROJECTS 模块 ⚑ 置顶 ✓ ❒ 项目 ✓ ❯ 对话 ✓ AGENTS ❯ Codex CLI ✓ ◆ Claude Code ✓ ◭ Grok CLI ✓ ⌖ Cursor CLI ✓ π Pi ✓ ☿ Hermes ✓ HARNESS 模块 ¶ System Prompt ✓ ✦ Skills ✓ ⚙ MCP ✓ ⛬ SubAgents ✓ ◎ Goals ✓ ⧉ Workflows ✓ ⚓ Hooks ✓ § Rules ✓ SESSIONS MANAGER 模块 ⊞ Dashboard ✓ ❐ Sessions ✓ ☉ Insights ✓ ▥ Analytics ✓ ✧ Patterns ✓ ⇩ Export ✓ ☁ Cloud Sync ✓ Agent 配置 接入的 CLI Agent 的模型、密钥、工作目录与审批策略 ❯ "
+      "text": "外观 主题 深色 浅色 主题色 对话项目 新建对话默认在这个目录中运行，Agent 可以在这里读取和创建文件。 内置项目 ◇ 对话目录 /Users/ryo/Documents/Dogoos 修改只影响之后新建的对话，不会移动已有对话或文件。 选择目录 界面自定义 勾选侧边栏中显示的模块 —— 主导航、PROJECTS、Agent、HARNESS 与 Sessions Manager 主导航 ＋ 新建任务 ✓ ▦ 总览 ✓ ▤ 任务编排 ✓ ✦ Memory ✓ PROJECTS 模块 ⚑ 置顶 ✓ ❒ 项目 ✓ ❯ 对话 ✓ AGENTS ❯ Codex CLI ✓ ◆ Claude Code ✓ ◭ Grok CLI ✓ ⌖ Cursor CLI ✓ π Pi ✓ ☿ Hermes ✓ HARNESS 模块 ¶ System Prompt ✓ ✦ Skills ✓ ⚙ MCP ✓ ⛬ SubAgents ✓ ◎ Goals ✓ ⧉ Workflows ✓ ⚓ Hooks ✓ § Rules ✓ SESSIONS MANAGER 模块 ⊞ Dashboard ✓ ❐ Sessions"
     },
     {
       "boundingBox": {
         "height": 377,
         "width": 820,
         "x": 260,
-        "y": -9
+        "y": 163
       },
       "count": 1,
       "name": "settings-agent-section",
@@ -344,15 +344,15 @@
         "width": "820px",
         "z-index": "auto"
       },
-      "text": "Agent 配置 接入的 CLI Agent 的模型、密钥、工作目录与审批策略 ❯ Codex CLI ◆ Claude Code ◭ Grok CLI ⌖ Cursor CLI π Pi ☿ Hermes ❯ Codex CLI /usr/local/bin/codex · v3.4.1 已停用 模型 gpt-5-codex o4 o4-mini API Key sk-cx-••••••••7f21 更换 工作目录 ~/dev/api-server 审批策略 自动批准低风险操作 读取、检索、测试类命令免确认;写库与部署仍需人工批准"
+      "text": "Agent 配置 接入的 CLI Agent 的模型、密钥、工作目录与审批策略 ❯ Codex CLI ◆ Claude Code ◭ Grok CLI ⌖ Cursor CLI π Pi ☿ Hermes ❯ Codex CLI /usr/local/bin/codex · v3.4.1 已停用 模型 gpt-5-codex o4 o4-mini API Key codex-••••••••7f21 更换 工作目录 ~/dev/api-server 审批策略 自动批准低风险操作 读取、检索、测试类命令免确认;写库与部署仍需人工批准"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 172256,
+    "bytes": 175830,
     "path": "screenshots/saas-settings-agent-disabled--saas-1440x900.png",
-    "sha256": "b69985758336d0a23e58d12c360a5957a507a45a6d20102a7bb2d0a1a891ee7d"
+    "sha256": "a0014ebfb46662b280eaddefcf4c7c23cad60c1ef5ee1dd159e35c9c8df9f664"
   },
   "scroll": {
     "main": 690,
@@ -360,7 +360,7 @@
     "sidebar": "top"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "0718a6d5370d7754f15215a2b77447714aef0b1d66b85ee930b60659f6eee854",
+  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
   "surface": "saas",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",

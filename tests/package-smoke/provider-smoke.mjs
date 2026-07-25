@@ -19,6 +19,7 @@ const application = await electron.launch({
   args: [`--user-data-dir=${userDataPath}`],
   env: {
     ...process.env,
+    DOUGOOS_DISABLE_UPDATES: "1",
     DOUGOOS_DATABASE_PATH: databasePath,
   },
   executablePath: manifest.executablePath,
@@ -65,7 +66,7 @@ async function descendantProcessIds(parentPid) {
 
 try {
   const page = await application.firstWindow();
-  await page.waitForFunction(() => globalThis.document.title === "AgentOS", undefined, {
+  await page.waitForFunction(() => globalThis.document.title === "DougoOS", undefined, {
     timeout: 45_000,
   });
   const connection = await page.evaluate(async () => {

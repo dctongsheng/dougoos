@@ -21,6 +21,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -39,7 +42,11 @@ jobs:
         run: pnpm exec playwright install chromium
 
       - name: Verify release manifest
-        run: pnpm release:manifest:check
+        run: |
+          pnpm release:manifest:check
+          if git rev-parse --verify --quiet refs/tags/v0.2.0; then
+            pnpm release:manifest:next:check
+          fi
 
       - name: Check workspace
         run: pnpm check

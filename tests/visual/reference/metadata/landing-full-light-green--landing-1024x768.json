@@ -18,14 +18,14 @@
     "timezoneId": "Asia/Shanghai"
   },
   "document": {
-    "height": 2799,
+    "height": 2904,
     "scrollX": 0,
     "scrollY": 0,
     "width": 1024
   },
   "dom": {
-    "digest": "d6c6fcab67e076dd",
-    "visibleElementCount": 318
+    "digest": "563b170bd8f12771",
+    "visibleElementCount": 325
   },
   "externalRequests": [],
   "fonts": {
@@ -38,7 +38,7 @@
   "landmarks": [
     {
       "boundingBox": {
-        "height": 2799.281,
+        "height": 2904.156,
         "width": 1024,
         "x": 0,
         "y": 0
@@ -73,7 +73,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2799.28px",
+        "height": "2904.16px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -96,7 +96,7 @@
         "width": "1024px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS 功能 Agents Memory 文档 ☾ 登录 免费下载 v2.0 · 本地优先 · macOS / Linux 多个 Agent CLI一个控制台 Codex、Claude Code、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。 下载桌面版 在线体验 → curl -fsSL https://dougoos.com/install | sh AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Code 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 4/6 等待确认 1 今日费用 $12.40 今日 Tokens 2.9M ✳ Claude Code 执行中 users 表 schema 迁移,先跑 dry-run ▸ prisma migrate diff --preview ⌬ Codex 思考中 为 CI 写 flaky 测试重试脚本 an"
+      "text": "◈ AgentOS 功能 Agents Memory 文档 ☾ 登录 免费下载 v0.2.0 · Early Access · macOS Apple Silicon 多个 Agent CLI一个控制台 Codex、Claude Code、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。 下载桌面版 在线体验 → macOS Apple Silicon · Early Access · 未经 Apple 公证 四步开始体验 下载并打开 DMG 拖入 Applications 首次尝试启动 被拦截时在“隐私与安全性”选择“仍要打开” AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Code 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 4/6 等待确认 1 今日费用 $12.40 今日 Tokens 2.9M ✳ Claude Code 执行中 users 表 sche"
     },
     {
       "boundingBox": {
@@ -163,9 +163,9 @@
     {
       "boundingBox": {
         "height": 125.438,
-        "width": 380.422,
-        "x": 321.781,
-        "y": 194
+        "width": 379.969,
+        "x": 322.016,
+        "y": 192
       },
       "count": 1,
       "name": "hero-title",
@@ -217,7 +217,7 @@
         "position": "static",
         "transform": "none",
         "transition-duration": "0s",
-        "width": "380.422px",
+        "width": "379.969px",
         "z-index": "auto"
       },
       "text": "多个 Agent CLI一个控制台"
@@ -227,7 +227,7 @@
         "height": 13,
         "width": 882,
         "x": 95,
-        "y": 546.531
+        "y": 653.406
       },
       "count": 1,
       "name": "product-window-title",
@@ -289,7 +289,7 @@
         "height": 14,
         "width": 960,
         "x": 32,
-        "y": 1178.531
+        "y": 1285.406
       },
       "count": 1,
       "name": "features-heading",
@@ -351,7 +351,7 @@
         "height": 14,
         "width": 456,
         "x": 32,
-        "y": 1730.484
+        "y": 1837.359
       },
       "count": 1,
       "name": "routing-heading",
@@ -413,7 +413,7 @@
         "height": 14,
         "width": 456,
         "x": 536,
-        "y": 1998.078
+        "y": 2104.953
       },
       "count": 1,
       "name": "memory-heading",
@@ -475,7 +475,7 @@
         "height": 53,
         "width": 960,
         "x": 32,
-        "y": 2480.281
+        "y": 2587.156
       },
       "count": 1,
       "name": "cta-heading",
@@ -534,7 +534,7 @@
     },
     {
       "boundingBox": {
-        "height": 2799.281,
+        "height": 2904.156,
         "width": 1024,
         "x": 0,
         "y": 0
@@ -569,7 +569,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2799.28px",
+        "height": "2904.16px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -592,15 +592,15 @@
         "width": "1024px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS 功能 Agents Memory 文档 ☾ 登录 免费下载 v2.0 · 本地优先 · macOS / Linux 多个 Agent CLI一个控制台 Codex、Claude Code、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。 下载桌面版 在线体验 → curl -fsSL https://dougoos.com/install | sh AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Code 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 4/6 等待确认 1 今日费用 $12.40 今日 Tokens 2.9M ✳ Claude Code 执行中 users 表 schema 迁移,先跑 dry-run ▸ prisma migrate diff --preview ⌬ Codex 思考中 为 CI 写 flaky 测试重试脚本 an"
+      "text": "◈ AgentOS 功能 Agents Memory 文档 ☾ 登录 免费下载 v0.2.0 · Early Access · macOS Apple Silicon 多个 Agent CLI一个控制台 Codex、Claude Code、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。 下载桌面版 在线体验 → macOS Apple Silicon · Early Access · 未经 Apple 公证 四步开始体验 下载并打开 DMG 拖入 Applications 首次尝试启动 被拦截时在“隐私与安全性”选择“仍要打开” AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Code 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 4/6 等待确认 1 今日费用 $12.40 今日 Tokens 2.9M ✳ Claude Code 执行中 users 表 sche"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 558097,
+    "bytes": 570917,
     "path": "screenshots/landing-full-light-green--landing-1024x768.png",
-    "sha256": "ac139822062eb300ca6f6278594449abb45db07de8ea792fb4e5a75273c0eebc"
+    "sha256": "b79313b2315afee28584118272710a1b405913988cd4b04d22a00ef153ac1895"
   },
   "scroll": {
     "main": "top",
@@ -608,7 +608,7 @@
     "sidebar": "top"
   },
   "source": "prototypes/agentos/project/AgentOS Landing.dc.html",
-  "sourceSha256": "88b18e2dcb5a41e64f598d597b1f39c169b122f5f1d59d3d7277e7d9ba9bbc17",
+  "sourceSha256": "b6b6b8edbd13397430d70df3cb2f0d0c19a47afa4ac04e56bfc87d446a03c442",
   "surface": "landing",
   "theme": "light",
   "timezoneId": "Asia/Shanghai",

@@ -95,10 +95,9 @@
         </sc-if>
         </sc-if>
         <sc-if value="{{ showProjList }}" hint-placeholder-val="{{ true }}">
-        <div style="padding:10px 10px 2px 12px;font-size:11px;font-weight:600;color:var(--faint);user-select:none">项目</div>
-        <sc-for list="{{ projItems }}" as="p" hint-placeholder-count="4">
+        <sc-for list="{{ projItems }}" as="p" hint-placeholder-count="5">
           <div onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 12px;border-radius:8px;cursor:pointer;user-select:none" style-hover="background:var(--hov)">
-            <span style="width:14px;text-align:center;font-size:11px;color:var(--mut)">❒</span>
+            <span style="width:14px;text-align:center;font-size:11px;color:var(--mut)">{{ p.glyph }}</span>
             <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;color:var(--mut)">{{ p.name }}</span>
             <span style="font-size:7px;color:var(--faint);transform:rotate({{ p.rot }});transition:transform .15s">▶</span>
           </div>
@@ -303,9 +302,9 @@
                   <span style="color:var(--faint)">⌂</span>{{ homePath }}<span style="font-size:9px;color:var(--faint)">▼</span>
                   <sc-if value="{{ pathMenuOpen }}" hint-placeholder-val="{{ false }}">
                     <div style="position:absolute;top:calc(100% + 8px);left:0;min-width:220px;z-index:60;background:var(--panel);border:1px solid var(--bd2);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:risein .15s ease-out">
-                      <sc-for list="{{ homePathOpts }}" as="op" hint-placeholder-count="4">
+                      <sc-for list="{{ homePathOpts }}" as="op" hint-placeholder-count="5">
                         <div onClick="{{ op.pick }}" style="display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;background:{{ op.bg }};font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)" style-hover="background:var(--hov)">
-                          <span style="color:var(--faint)">⌂</span><span style="flex:1">{{ op.path }}</span>
+                          <span style="color:var(--faint)">{{ op.glyph }}</span><span style="flex:1">{{ op.path }}</span>
                           <sc-if value="{{ op.tag }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;color:var(--faint);border:1px solid var(--bd);border-radius:5px;padding:0 5px">{{ op.tag }}</span></sc-if>
                         </div>
                       </sc-for>
@@ -314,7 +313,7 @@
                 </div>
                 <div style="flex:1"></div>
                 <div style="font-size:12.5px;color:var(--faint)">模型由 Agent 管理</div>
-                <div onClick="{{ homeSend }}" title="发送 (⌘+Enter)" style="width:42px;height:42px;flex:none;border-radius:50%;background:var(--accent,#3ddc84);display:grid;place-items:center;cursor:pointer;color:#05130b;font-size:15px" style-hover="filter:brightness(1.12)" style-active="transform:scale(.95)">➤</div>
+                <div onClick="{{ homeSend }}" title="发送 (⌘+Enter)" style="width:42px;height:42px;flex:none;border-radius:50%;background:{{ homeSendBg }};display:grid;place-items:center;cursor:{{ homeSendCursor }};color:{{ homeSendCl }};font-size:15px;opacity:{{ homeSendOp }}" style-hover="filter:brightness(1.12)" style-active="transform:scale(.95)">➤</div>
               </div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
@@ -1122,6 +1121,25 @@
             </div>
           </div>
 
+          <div style="height:159px;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="height:35px;flex:none;display:flex;align-items:flex-start;gap:12px">
+              <div style="flex:1">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text)">对话项目</div>
+                <div style="font-size:11.5px;color:var(--faint)">新建对话默认在这个目录中运行，Agent 可以在这里读取和创建文件。</div>
+              </div>
+              <div style="font-size:10px;color:var(--acFg);border:1px solid color-mix(in srgb, var(--accent,#3ddc84) 28%, transparent);border-radius:999px;padding:2px 8px;background:color-mix(in srgb, var(--accent,#3ddc84) 10%, transparent)">内置项目</div>
+            </div>
+            <div style="height:78px;flex:none;display:flex;align-items:center;gap:12px;border:1px solid var(--bd);border-radius:12px;padding:12px 13px;background:color-mix(in srgb, var(--panel2) 72%, transparent)">
+              <div style="width:34px;height:34px;flex:none;border-radius:9px;display:grid;place-items:center;font-size:16px;color:var(--acFg);background:color-mix(in srgb, var(--accent,#3ddc84) 12%, transparent)">◇</div>
+              <div style="flex:1;min-width:0;display:grid;gap:3px">
+                <div style="font-size:12.5px;font-weight:600;color:var(--text2)">对话目录</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ conversationDir }}</div>
+                <div style="font-size:10.5px;color:var(--faint)">修改只影响之后新建的对话，不会移动已有对话或文件。</div>
+              </div>
+              <div onClick="{{ chooseConversationDir }}" style="flex:none;min-width:76px;padding:7px 11px;font-size:11.5px;text-align:center;color:#fff;cursor:pointer;background:#6b6b6b;user-select:none">选择目录</div>
+            </div>
+          </div>
+
           <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px">
             <div>
               <div style="font-size:13.5px;font-weight:700;color:var(--text)">界面自定义</div>
@@ -1363,7 +1381,7 @@ class Component extends DCLogic {
     const hist=(sid,date,sum,n,tok,proj)=>({sid,date,sum,n,tok,proj});
     this.state={
       clock:this.now(), view:{kind:'home'}, notifOpen:false, adopted:null, drafts:{}, tabs:{}, collapsed:{}, memTab:'graph', memQ:'',
-      homeDraft:'', homeAgent:'claude', homePath:'~', homeMenu:null, homeMode:'manual', agentsSecOpen:true, projSecOpen:true, pinSecOpen:false, projOpen:{}, convSecOpen:true, convOpen:{},
+      homeDraft:'', homeAgent:'claude', homePath:'对话', homeMenu:null, homeMode:'manual', conversationDir:'/Users/ryo/Documents/Dogoos', agentsSecOpen:true, projSecOpen:true, pinSecOpen:false, projOpen:{}, convSecOpen:true, convOpen:{},
       smSecOpen:true, smQ:'', smCat:'all', smFmt:'rules', smDepth:'standard', smExporting:false, smExportNote:null, smSync:true, smSyncing:false, smLastSync:'3 分钟前',
       visAgents:{codex:true,claude:true,grok:true,cursor:true,pi:true,hermes:true},
       queueSecOpen:true, cronOn:{c1:true,c2:true,c3:false,c4:true},
@@ -1372,9 +1390,9 @@ class Component extends DCLogic {
       visSm:{dash:true,sessions:true,insights:true,analytics:true,patterns:true,export:true,sync:true},
       visNav:{home:true,dash:true,queue:true,memory:true,pinned:true,projList:true,conv:true},
       visHz:{prompt:true,skills:true,mcp:true,sub:true,goal:true,workflow:true,hooks:true,rules:true},
-      theme:null, accent:null, settingsAgent:'codex', prefs:{notifyDone:true,notifyWait:true},
+      theme:null, accent:null, settingsAgent:'codex', settingsEnabled:{}, prefs:{notifyDone:true,notifyWait:true},
       agents:{
-        codex:{id:'codex',name:'Codex CLI',glyph:'❯',hue:'#4fd8e0',bin:'/usr/local/bin/codex · v3.4.1',enabled:true,model:'gpt-5-codex',models:['gpt-5-codex','o4','o4-mini'],cwd:'~/dev/api-server',status:'executing',task:'重构 auth 中间件为策略模式',tok:182400,cost:4.21,secs:1380,last:'▸ 重写 middleware/auth.ts',auto:true,key:'sk-cx-••••••••7f21',hist:[hist('#c2e8','07-20 21:02','修复 CI 缓存键漂移',22,'188k','api-server'),hist('#b011','07-18 10:33','gRPC 网关脚手架',41,'520k','api-server')]},
+        codex:{id:'codex',name:'Codex CLI',glyph:'❯',hue:'#4fd8e0',bin:'/usr/local/bin/codex · v3.4.1',enabled:true,model:'gpt-5-codex',models:['gpt-5-codex','o4','o4-mini'],cwd:'~/dev/api-server',status:'executing',task:'重构 auth 中间件为策略模式',tok:182400,cost:4.21,secs:1380,last:'▸ 重写 middleware/auth.ts',auto:true,key:'codex-••••••••7f21',hist:[hist('#c2e8','07-20 21:02','修复 CI 缓存键漂移',22,'188k','api-server'),hist('#b011','07-18 10:33','gRPC 网关脚手架',41,'520k','api-server')]},
         claude:{id:'claude',name:'Claude Code',glyph:'◆',hue:'#ff9d66',bin:'/usr/local/bin/claude · v2.8.0',enabled:true,model:'claude-4.5-sonnet',models:['claude-4.5-opus','claude-4.5-sonnet','claude-4-haiku'],cwd:'~/dev/webapp',status:'waiting',task:'迁移 users 表到新 schema',tok:96300,cost:1.84,secs:660,last:'⚠ 等待确认: prisma migrate deploy',auto:false,key:'sk-ant-••••••••a4f2',hist:[hist('#a3f2','07-20 22:14','重构支付 webhook 重试逻辑',34,'412k','webapp'),hist('#98c1','07-19 16:40','修复 SSR hydration 报错',18,'156k','webapp')]},
         grok:{id:'grok',name:'Grok CLI',glyph:'◭',hue:'#b48cff',bin:'~/.grok/bin/grok · v1.9.2',enabled:true,model:'grok-4',models:['grok-4','grok-4-fast'],cwd:'~/dev/ml-pipeline',status:'thinking',task:'分析生产环境 crash 日志',tok:54100,cost:0.63,secs:240,last:'…扫描 log/2026-07-21.gz',auto:false,key:'xai-••••••••90bd',hist:[hist('#77de','07-17 09:12','训练数据去重脚本',26,'302k','ml-pipeline')]},
         cursor:{id:'cursor',name:'Cursor CLI',glyph:'⌖',hue:'#6aa5ff',bin:'/usr/local/bin/cursor-agent · v0.52',enabled:true,model:'composer-2',models:['composer-2','auto'],cwd:'~/dev/webapp',status:'executing',task:'为 parser 补全单元测试',tok:77800,cost:0.94,secs:1020,last:'✓ tests/parser.spec.ts 14/14',auto:true,key:'cur-••••••••11c8',hist:[hist('#61aa','07-20 15:27','抽离表单校验 hooks',15,'98k','webapp')]},
@@ -1868,7 +1886,7 @@ class Component extends DCLogic {
         toggle:e=>{e.stopPropagation();this.setState(s=>({collapsed:{...s.collapsed,[k]:open}}));},
         sessions:sess.map(ss=>({sum:ss.sum,proj:ss.proj,live:ss.live,isHist:!ss.live,when:ss.when,
           dot:a.status==='idle'?'var(--dotOff)':st.c,anim:st.anim,
-          bg:(sel&&ss.live)?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',cl:(sel&&ss.live)?'var(--text)':'var(--mut)',
+          bg:(sel&&ss.live&&(S.tabs[k]||'session')==='session')?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',cl:(sel&&ss.live&&(S.tabs[k]||'session')==='session')?'var(--text)':'var(--mut)',
           on:ss.live?()=>this.go({kind:'agent',id:k}):()=>{this.resume(k,ss.h);this.go({kind:'agent',id:k});}}))};
     });
     const notifs=S.notifs.map(n=>{const a=n.agent?AG[n.agent]:null;return {...n,glyph:a?a.glyph:'◔',hue:a?a.hue:'#4fd8e0',unread:!n.read,op:n.read?0.55:1,click:()=>{this.setState(s=>({notifs:s.notifs.map(x=>x.id===n.id?{...x,read:true}:x),notifOpen:false}));if(n.agent)this.go({kind:'agent',id:n.agent});}};});
@@ -1915,7 +1933,7 @@ class Component extends DCLogic {
       on:()=>this.setState({memTab:m.kind==='note'?'notes':'omi',memQ:m.title.slice(0,12)})}));
     const th=this.theme(), ac=this.accent();
     const tgl=(on)=>({bd:on?'var(--accent)':'var(--bd2)',bg:on?'color-mix(in oklab, var(--accent,#3ddc84) 20%, transparent)':'var(--hov)',knob:on?'var(--accent)':'var(--faint)',x:on?19:2});
-    const sel=AG[S.settingsAgent], selEn=tgl(sel.enabled), selAuto=tgl(sel.auto), nd=tgl(S.prefs.notifyDone), nw=tgl(S.prefs.notifyWait), selSt=stOf(sel);
+    const sel=AG[S.settingsAgent], settingsSelEnabled=S.settingsEnabled[S.settingsAgent]===undefined?sel.enabled:S.settingsEnabled[S.settingsAgent], selEn=tgl(settingsSelEnabled), selAuto=tgl(sel.auto), nd=tgl(S.prefs.notifyDone), nw=tgl(S.prefs.notifyWait), selSt=stOf(sel);
     const out={
       rootRef:this.rootRefFn, clock:S.clock,
       viewTitle:titles[V.kind][0], viewSub:titles[V.kind][1],
@@ -1944,12 +1962,13 @@ class Component extends DCLogic {
         {name:'users 表 schema 迁移',on:()=>this.go({kind:'agent',id:'claude'})}
       ],
       projItems:[
-        {name:'13_locla_session_manager',sessions:[{k:'claude',sum:'调整 AgentShare 客户端'},{k:'codex',sum:'设计 agentshare 大改版方案'}]},
-        {name:'fyfactor',sessions:[{k:'grok',sum:'我想做个点子或者副业数据库'},{k:'hermes',sum:'验证 GitHub 子 agent'}]},
-        {name:'douge_ship_tem_2',sessions:[{k:'cursor',sum:'落地页动效与模板重构'}]},
-        {name:'001_bian_ai',sessions:[{k:'pi',sum:'边缘推理 API 选型调研'}]}
-      ].map((p,i)=>{const open=S.projOpen[i]===undefined?i<2:S.projOpen[i];return {name:p.name,open,rot:open?'90deg':'0deg',
-        toggle:()=>this.setState(s=>({projOpen:{...s.projOpen,[i]:!open}})),
+        {name:'对话',glyph:'◫',show:S.visNav.conv,initiallyOpen:true,sessions:[{k:'claude',sum:'迁移 users 表到新 schema'},{k:'codex',sum:'重构 auth 中间件为策略模式'},{k:'cursor',sum:'修复 webapp 构建缓存失效'},{k:'grok',sum:'API 集成测试补全'},{k:'hermes',sum:'重构日志管道与告警'},{k:'pi',sum:'依赖升级与安全审计'}]},
+        {name:'webapp',glyph:'❒',show:S.visNav.projList,initiallyOpen:true,sessions:[{k:'claude',sum:'调整 AgentShare 客户端'},{k:'cursor',sum:'落地页动效与模板重构'}]},
+        {name:'api-server',glyph:'❒',show:S.visNav.projList,initiallyOpen:false,sessions:[{k:'codex',sum:'设计 agentshare 大改版方案'},{k:'hermes',sum:'验证 GitHub 子 agent'}]},
+        {name:'ml-pipeline',glyph:'❒',show:S.visNav.projList,initiallyOpen:false,sessions:[{k:'pi',sum:'边缘推理 API 选型调研'}]},
+        {name:'dotfiles',glyph:'❒',show:S.visNav.projList,initiallyOpen:false,sessions:[]}
+      ].filter(p=>p.show).map((p,i)=>{const open=S.projOpen[p.name]===undefined?p.initiallyOpen:S.projOpen[p.name];return {name:p.name,glyph:p.glyph,open,rot:open?'90deg':'0deg',
+        toggle:()=>this.setState(s=>({projOpen:{...s.projOpen,[p.name]:!open}})),
         sessions:p.sessions.map(c=>({sum:c.sum,glyph:AG[c.k].glyph,hue:AG[c.k].hue,on:()=>this.go({kind:'agent',id:c.k})}))};}),
       convGroups:[
         {label:'今天',items:[{k:'claude',sum:AG.claude.task},{k:'codex',sum:AG.codex.task}]},
@@ -1961,7 +1980,7 @@ class Component extends DCLogic {
       convSecOpen:S.convSecOpen, convSecRot:S.convSecOpen?'90deg':'0deg',
       toggleConvSec:()=>this.setState(s=>({convSecOpen:!s.convSecOpen})),
       showHome:S.visNav.home, showDash:S.visNav.dash, showQueue:S.visNav.queue,
-      showPinned:S.visNav.pinned, showProjList:S.visNav.projList, showConv:S.visNav.conv,
+      showPinned:S.visNav.pinned, showProjList:!!(S.visNav.projList||S.visNav.conv), showConv:false,
       showProjSection:!!(S.visNav.pinned||S.visNav.projList||S.visNav.conv),
       showAgentsSection:ids.some(k=>S.visAgents[k]),
       showHzSection:Object.values(S.visHz).some(Boolean),
@@ -1984,6 +2003,7 @@ class Component extends DCLogic {
       homeDraft:S.homeDraft, onHomeDraft:e=>this.setState({homeDraft:e.target.value}),
       onHomeKey:e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))this.homeSend();},
       homeSend:()=>this.homeSend(),
+      homeSendBg:S.homeDraft.trim()?'var(--accent)':'var(--hov)', homeSendCl:S.homeDraft.trim()?'#05130b':'var(--faint)', homeSendCursor:S.homeDraft.trim()?'pointer':'not-allowed', homeSendOp:S.homeDraft.trim()?1:.7,
       isManualMode:S.homeMode==='manual', isAutoMode:S.homeMode==='auto',
       modeManual:()=>this.setState({homeMode:'manual'}), modeAuto:()=>this.setState({homeMode:'auto',homeMenu:null}),
       mmCl:S.homeMode==='manual'?'#05130b':'var(--mut)', mmBg:S.homeMode==='manual'?'var(--accent)':'transparent',
@@ -1994,7 +2014,7 @@ class Component extends DCLogic {
       agentMenuOpen:S.homeMenu==='agent', pathMenuOpen:S.homeMenu==='path',
       homeAgentOpts:ids.map(k=>{const a=AG[k],st=stOf(a);return {glyph:a.glyph,hue:a.hue,name:a.name,st:st.l,dot:(a.status==='idle'||!a.enabled)?'var(--dotOff)':st.c,bg:S.homeAgent===k?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',pick:e=>{e.stopPropagation();this.setState({homeAgent:k,homeMenu:null});}};}),
       homePath:S.homePath,
-      homePathOpts:[{p:'~',tag:null},{p:'~/dev/webapp',tag:'webapp'},{p:'~/dev/api-server',tag:'api-server'},{p:'~/dev/ml-pipeline',tag:'ml-pipeline'},{p:'~/dotfiles',tag:null}].map(o=>({path:o.p,tag:o.tag,bg:S.homePath===o.p?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',pick:e=>{e.stopPropagation();this.setState({homePath:o.p,homeMenu:null});}})),
+      homePathOpts:[{p:'对话',glyph:'◫',tag:null},{p:'~/dev/webapp',glyph:'⌂',tag:'webapp'},{p:'~/dev/api-server',glyph:'⌂',tag:'api-server'},{p:'~/dev/ml-pipeline',glyph:'⌂',tag:'ml-pipeline'},{p:'~/dotfiles',glyph:'⌂',tag:null}].map(o=>({path:o.p,glyph:o.glyph,tag:o.tag,bg:S.homePath===o.p?'color-mix(in oklab, var(--accent,#3ddc84) 10%, transparent)':'transparent',pick:e=>{e.stopPropagation();this.setState({homePath:o.p,homeMenu:null});}})),
       homeSuggestions:['修复 flaky 的 e2e 登录用例','分析昨晚的 crash 日志','为 parser 补全单元测试','重新生成 OpenAPI 文档'].map(t=>({t,on:()=>this.setState({homeDraft:t})})),
       homeStatusLine:active+' 个 Agent 运行中 · 今日 '+fC(totalCost)+' · ⌘+Enter 发送',
       ...this.smVals(V,AG,stMeta,usageBars),
@@ -2009,12 +2029,13 @@ class Component extends DCLogic {
       darkCl:th==='dark'?'#05130b':'var(--mut)', darkBg:th==='dark'?'var(--accent)':'transparent',
       lightCl:th==='light'?'#05130b':'var(--mut)', lightBg:th==='light'?'var(--accent)':'transparent',
       swatches:['#3ddc84','#4fd8e0','#ffb454','#b48cff'].map(c=>({c,pick:()=>this.setState({accent:c}),ring:c===ac?'var(--panel)':'transparent',halo:c===ac?c:'transparent'})),
+      conversationDir:S.conversationDir, chooseConversationDir:()=>{},
       visAgents:ids.map(k=>{const a=AG[k],on=S.visAgents[k];return {glyph:a.glyph,hue:a.hue,name:a.name,op:on?1:.55,bd:on?'color-mix(in srgb, '+a.hue+' 45%, transparent)':'var(--bd2)',bg:on?'color-mix(in srgb, '+a.hue+' 8%, transparent)':'transparent',cl:on?'var(--text)':'var(--faint)',mark:on?'✓':'—',markCl:on?'var(--acFg)':'var(--faint)',on:()=>this.setState(s=>({visAgents:{...s.visAgents,[k]:!s.visAgents[k]}}))};}),
       visSm:[{k:'dash',glyph:'⊞',name:'Dashboard'},{k:'sessions',glyph:'❐',name:'Sessions'},{k:'insights',glyph:'☉',name:'Insights'},{k:'analytics',glyph:'▥',name:'Analytics'},{k:'patterns',glyph:'✧',name:'Patterns'},{k:'export',glyph:'⇩',name:'Export'},{k:'sync',glyph:'☁',name:'Cloud Sync'}].map(m=>{const on=S.visSm[m.k];return {...m,op:on?1:.55,bd:on?'color-mix(in oklab, var(--accent,#3ddc84) 45%, transparent)':'var(--bd2)',bg:on?'color-mix(in oklab, var(--accent,#3ddc84) 8%, transparent)':'transparent',cl:on?'var(--text)':'var(--faint)',mark:on?'✓':'—',markCl:on?'var(--acFg)':'var(--faint)',on:()=>this.setState(s=>({visSm:{...s.visSm,[m.k]:!s.visSm[m.k]}}))};}),
       setChips:ids.map(k=>{const a=AG[k],seld=S.settingsAgent===k;return {glyph:a.glyph,hue:a.hue,name:a.name,pick:()=>this.setState({settingsAgent:k}),bd:seld?a.hue:'var(--bd2)',bg:seld?'color-mix(in srgb, '+a.hue+' 10%, transparent)':'transparent',cl:seld?'var(--text)':'var(--mut)',dot:a.enabled?(a.status==='idle'?'var(--dotOff)':stMeta[a.status].c):'var(--dotOff)'};}),
       selName:sel.name, selGlyph:sel.glyph, selHue:sel.hue, selBin:sel.bin, selKey:sel.key, selCwd:sel.cwd,
-      selEnLabel:sel.enabled?'已启用':'已停用', selEnCl:sel.enabled?'var(--acFg)':'var(--faint)',
-      selToggleEn:()=>this.setAgent(S.settingsAgent,{enabled:!sel.enabled}),
+      selEnLabel:settingsSelEnabled?'已启用':'已停用', selEnCl:'var(--acFg)',
+      selToggleEn:()=>this.setState(s=>({settingsEnabled:{...s.settingsEnabled,[S.settingsAgent]:!settingsSelEnabled}})),
       selEnBd:selEn.bd, selEnBg:selEn.bg, selEnKnob:selEn.knob, selEnX:selEn.x,
       selModels:sel.models.map(mo=>({name:mo,pick:()=>this.setAgent(S.settingsAgent,{model:mo}),bd:mo===sel.model?sel.hue:'var(--bd2)',cl:mo===sel.model?sel.hue:'var(--mut)',bg:mo===sel.model?'color-mix(in srgb, '+sel.hue+' 10%, transparent)':'transparent'})),
       selToggleAuto:()=>this.setAgent(S.settingsAgent,{auto:!sel.auto}),

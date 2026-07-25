@@ -4,6 +4,17 @@ const JSON_HEADERS = {
   "x-content-type-options": "nosniff",
 } as const;
 
+const INSTALL_HEADERS = {
+  "cache-control": "no-store",
+  "content-type": "text/plain; charset=utf-8",
+  "x-content-type-options": "nosniff",
+} as const;
+
+const INSTALL_DEPRECATION = `#!/bin/sh
+echo "DougoOS 安装脚本已停用。请从 https://dougoos.com 下载 Early Access DMG。" >&2
+exit 1
+`;
+
 const json = (body: unknown, init: ResponseInit): Response =>
   new Response(JSON.stringify(body), {
     ...init,
@@ -15,6 +26,18 @@ export function handleRequest(
   assets: Pick<Fetcher, "fetch">,
 ): Response | Promise<Response> {
   const url = new URL(request.url);
+  if (url.pathname === "/install") {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response(null, {
+        headers: { ...INSTALL_HEADERS, allow: "GET, HEAD" },
+        status: 405,
+      });
+    }
+    return new Response(request.method === "HEAD" ? null : INSTALL_DEPRECATION, {
+      headers: INSTALL_HEADERS,
+      status: 410,
+    });
+  }
   if (url.pathname === "/v1/health") {
     if (request.method !== "GET" && request.method !== "HEAD") {
       return json(

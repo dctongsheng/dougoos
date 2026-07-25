@@ -15,8 +15,9 @@ const releaseForbidden = [
   ["visual scenario seam", /visualCase|data-visual-case|production-safe-cta/iu],
   ["test runtime hook", /__dougoos/u],
   ["account or ingest API", /\/(?:api\/auth|v1\/ingest)\b/iu],
-  ["external resource attribute", /(?:src|href)\s*=\s*["']https?:\/\//iu],
 ];
+const allowedExternalUrl = "https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg";
+const externalResourceAttribute = /(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/giu;
 const sourceForbidden = [
   ["HTML injection", /dangerouslySetInnerHTML|\.innerHTML\s*=/u],
   ["iframe", /<iframe\b|createElement\(["']iframe/iu],
@@ -74,6 +75,11 @@ for (const [path, content] of contents) {
     if (pattern.test(content))
       failures.push(`${relative(workspaceRoot, path)}: forbidden ${label}`);
   }
+  for (const match of content.matchAll(externalResourceAttribute)) {
+    if (match[1] !== allowedExternalUrl) {
+      failures.push(`${relative(workspaceRoot, path)}: forbidden external resource URL`);
+    }
+  }
 }
 const workerContent = await readFile(workerEntry, "utf8");
 for (const token of workerRequired) {
@@ -97,6 +103,9 @@ for (const path of sourcePaths.filter((sourcePath) =>
 }
 
 const composite = contents.map(([, content]) => content).join("\n");
+if (!composite.includes(allowedExternalUrl)) {
+  failures.push("release output: missing canonical Early Access download URL");
+}
 for (const token of required) {
   if (!composite.includes(token)) failures.push(`release output: missing ${token}`);
 }

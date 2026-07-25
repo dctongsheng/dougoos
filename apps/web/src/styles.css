@@ -1271,9 +1271,11 @@ input:focus-visible,
 }
 
 .send-button:disabled {
+  background: var(--hov);
+  color: var(--faint);
   cursor: not-allowed;
-  filter: grayscale(0.7);
-  opacity: 0.45;
+  filter: none;
+  opacity: 0.7;
 }
 
 .suggestion-list {
@@ -4688,7 +4690,13 @@ input:focus-visible,
 .conversation-project-settings-section > header {
   align-items: flex-start;
   display: flex;
+  flex: none;
   gap: 12px;
+  height: 35px;
+}
+
+.conversation-project-settings-section {
+  height: 159px;
 }
 
 .conversation-project-settings-section > header > div {
@@ -4722,7 +4730,9 @@ input:focus-visible,
   border: 1px solid var(--bd);
   border-radius: 12px;
   display: flex;
+  flex: none;
   gap: 12px;
+  height: 78px;
   padding: 12px 13px;
 }
 
@@ -4821,6 +4831,26 @@ input:focus-visible,
 .settings-page .visibility-grid button[style] > span {
   color: var(--agent-tone);
   font-family: "JetBrains Mono", monospace;
+}
+
+.settings-page .visibility-grid button[style] {
+  height: 30px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(2) {
+  width: 129.781px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(3) {
+  width: 104.953px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(4) {
+  width: 120.328px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(5) {
+  width: 64.719px;
 }
 
 .settings-page .visibility-grid button[style][aria-pressed="true"] {
@@ -4953,6 +4983,7 @@ input:focus-visible,
 
 .agent-config-section {
   gap: 12px;
+  height: 377px;
 }
 
 .agent-config-section > div:first-child h2 {
@@ -4973,7 +5004,33 @@ input:focus-visible,
   font-size: 12.5px;
   font-weight: 600;
   gap: 7px;
+  height: 30px;
   padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.settings-page .agent-config-tabs button:nth-child(1) {
+  width: 114px;
+}
+
+.settings-page .agent-config-tabs button:nth-child(2) {
+  width: 129px;
+}
+
+.settings-page .agent-config-tabs button:nth-child(3) {
+  width: 105px;
+}
+
+.settings-page .agent-config-tabs button:nth-child(4) {
+  width: 119px;
+}
+
+.settings-page .agent-config-tabs button:nth-child(5) {
+  width: 64px;
+}
+
+.settings-page .agent-config-tabs button:nth-child(6) {
+  width: 100px;
 }
 
 .settings-page .agent-config-tabs button > span {

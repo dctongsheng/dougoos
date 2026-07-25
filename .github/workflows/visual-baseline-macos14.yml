@@ -1,0 +1,54 @@
+name: Visual baseline macOS 14
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-baseline:
+    name: Capture canonical references
+    runs-on: macos-14
+    timeout-minutes: 45
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.16.0 --activate
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install pinned Chromium
+        run: pnpm exec playwright install chromium
+
+      - name: Capture canonical references
+        run: pnpm visual:references
+
+      - name: Upload canonical references
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-reference-macos14-${{ github.sha }}
+          path: tests/visual/reference
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build workspace dependencies
+        run: pnpm -r build
+
+      - name: Verify production visual regression
+        run: pnpm test:visual

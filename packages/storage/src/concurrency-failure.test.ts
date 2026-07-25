@@ -13,7 +13,12 @@ import { GlobalSnapshotSchema } from "@dougoos/shared";
 import { StorageError } from "./errors.js";
 import { verifyMigrationHistory } from "./migrations.js";
 import { buildGlobalSnapshot } from "./snapshots.js";
-import { DougoStorage, openStorage, type CreateTurnInput } from "./store.js";
+import {
+  DougoStorage,
+  SQLITE_BUSY_TIMEOUT_MS,
+  openStorage,
+  type CreateTurnInput,
+} from "./store.js";
 import { createInitializedSession, createTestContext, time } from "./test-utils/helpers.js";
 
 interface ChildResult {
@@ -191,6 +196,7 @@ describe("real SQLite concurrency", () => {
 
   it("classifies a real lock timeout as DATABASE_BUSY, never SESSION_BUSY", async () => {
     const context = createTestContext();
+    const releaseLockPath = join(context.directory, "release-lock");
     let child: PipeChild | undefined;
     try {
       createInitializedSession(context.store, "session-lock-timeout");
@@ -200,16 +206,28 @@ describe("real SQLite concurrency", () => {
           "--input-type=module",
           "-e",
           `
+              import { existsSync } from "node:fs";
               import Database from "better-sqlite3";
               const db = new Database(process.argv[1]);
-              db.exec("BEGIN IMMEDIATE");
-              process.stdout.write("locked\\n");
-              setTimeout(() => {
+              const releaseLockPath = process.argv[2];
+              const safetyDeadline = Date.now() + ${SQLITE_BUSY_TIMEOUT_MS * 2};
+              try {
+                db.exec("BEGIN IMMEDIATE");
+                process.stdout.write("locked\\n");
+                while (!existsSync(releaseLockPath) && Date.now() < safetyDeadline) {
+                  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5);
+                }
+                if (!existsSync(releaseLockPath)) {
+                  process.stderr.write("timed out waiting for parent to release lock\\n");
+                  process.exitCode = 2;
+                }
                 db.exec("ROLLBACK");
+              } finally {
                 db.close();
-              }, 6500);
+              }
             `,
           context.databasePath,
+          releaseLockPath,
         ],
         {
           cwd: process.cwd(),
@@ -219,26 +237,30 @@ describe("real SQLite concurrency", () => {
       child = lockChild;
       await waitForOutput(lockChild, "locked");
       const startedAt = Date.now();
-      expectCode(
-        () =>
-          context.store.createTurn({
-            occurredAt: time(30),
-            queuedEventId: "event-lock-timeout-queued",
-            request: {
-              clientRequestId: "request-lock-timeout",
-              content: [{ text: "blocked", type: "text" }],
-            },
-            sessionId: "session-lock-timeout",
-            turnId: "turn-lock-timeout",
-            userMessages: [
-              {
-                eventId: "event-lock-timeout-user",
-                messageId: "message-lock-timeout",
+      try {
+        expectCode(
+          () =>
+            context.store.createTurn({
+              occurredAt: time(30),
+              queuedEventId: "event-lock-timeout-queued",
+              request: {
+                clientRequestId: "request-lock-timeout",
+                content: [{ text: "blocked", type: "text" }],
               },
-            ],
-          }),
-        "DATABASE_BUSY",
-      );
+              sessionId: "session-lock-timeout",
+              turnId: "turn-lock-timeout",
+              userMessages: [
+                {
+                  eventId: "event-lock-timeout-user",
+                  messageId: "message-lock-timeout",
+                },
+              ],
+            }),
+          "DATABASE_BUSY",
+        );
+      } finally {
+        writeFileSync(releaseLockPath, "release");
+      }
       expect(Date.now() - startedAt).toBeGreaterThanOrEqual(4_500);
       expect(await waitForExit(lockChild)).toBe(0);
       expect(context.store.getSessionSnapshot("session-lock-timeout").turns).toEqual([]);
@@ -246,7 +268,7 @@ describe("real SQLite concurrency", () => {
       if (child?.exitCode === null) child.kill();
       context.cleanup();
     }
-  }, 15_000);
+  }, 20_000);
 
   it("pins a read transaction across a child commit and observes every later intermediate snapshot", async () => {
     const context = createTestContext();
