@@ -4830,10 +4830,23 @@ input:focus-visible,
 
 .settings-page .visibility-grid button[style] > span {
   color: var(--agent-tone);
+  font-family: "JetBrains Mono", monospace;
 }
 
 .settings-page .visibility-grid button[style] {
   height: 30px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(2) {
+  width: 130px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(3) {
+  width: 104px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(4) {
+  width: 121px;
 }
 
 .settings-page .visibility-grid button[style][aria-pressed="true"] {
