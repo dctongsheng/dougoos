@@ -43,3 +43,11 @@ jobs:
 
       - name: Diagnose settings geometry
         run: pnpm exec playwright test tests/visual/debug-settings.spec.ts --project=visual
+
+      - name: Upload settings comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-settings-macos14-${{ github.sha }}
+          path: test-results/debug-settings
+          if-no-files-found: error
+          retention-days: 1

@@ -1,3 +1,5 @@
+import { mkdir, writeFile } from "node:fs/promises";
+
 import { test } from "@playwright/test";
 
 import { captureProductionSet } from "./production-harness.js";
@@ -42,19 +44,33 @@ test("debug settings geometry", async ({ browser }) => {
     production: production.captures.get(visualCase.id),
     reference: reference.captures.get(visualCase.id),
   };
+  await mkdir("test-results/debug-settings", { recursive: true });
+  await Promise.all(
+    Object.entries(captures).map(async ([kind, capture]) => {
+      if (capture === undefined) return;
+      await writeFile(`test-results/debug-settings/${kind}.png`, capture.screenshot);
+    }),
+  );
   console.log(
     JSON.stringify(
       Object.fromEntries(
-        Object.entries(captures).map(([kind, capture]) => [
-          kind,
-          {
-            errors: kind === "production" ? production.errors : reference.errors,
-            landmarks: capture?.metadata.landmarks.map(({ boundingBox, name }) => ({
-              boundingBox,
-              name,
-            })),
-          },
-        ]),
+        Object.entries(captures).map(([kind, capture]) => {
+          const comparison =
+            capture !== undefined && "comparison" in capture.metadata
+              ? capture.metadata.comparison
+              : undefined;
+          return [
+            kind,
+            {
+              comparison,
+              errors: kind === "production" ? production.errors : reference.errors,
+              landmarks: capture?.metadata.landmarks.map(({ boundingBox, name }) => ({
+                boundingBox,
+                name,
+              })),
+            },
+          ];
+        }),
       ),
       null,
       2,
