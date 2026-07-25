@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "785f48a1b8669e73",
+    "digest": "8597b9a7979199bf",
     "visibleElementCount": 352
   },
   "externalRequests": [],
@@ -287,8 +287,8 @@
     {
       "boundingBox": {
         "height": 15,
-        "width": 47.844,
-        "x": 816.156,
+        "width": 47.063,
+        "x": 816.938,
         "y": 282
       },
       "count": 1,
@@ -350,9 +350,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 118359,
+    "bytes": 118700,
     "path": "screenshots/saas-sm-sync-syncing--saas-1440x900.png",
-    "sha256": "a82a508b1a8a8622b7593bca64f54f9b62e24bac9658d1a4427c3004da4fcb94"
+    "sha256": "50dba2f2b76b5ee42e7280636ffd7082f0c6f7ebec283b4832601608ed312ba4"
   },
   "scroll": {
     "main": "top",

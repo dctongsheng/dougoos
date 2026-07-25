@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "ee0081b38eceb533",
+    "digest": "ac0c76748ddcf8c4",
     "visibleElementCount": 366
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 138640,
+    "bytes": 138917,
     "path": "screenshots/saas-agent-claude-history--saas-1440x900.png",
-    "sha256": "804f5c894102c4812d4cb957b013c5c899c472e3a44de19a56b8ef6f8dc79af9"
+    "sha256": "292505a549500072d413dfaf13a80238cfd69f7a9e07b4b02a522bf9fb3b995f"
   },
   "scroll": {
     "main": "top",

@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "f9b3dcfdd952e05f",
+    "digest": "a3c8b297f7ce921b",
     "visibleElementCount": 907
   },
   "externalRequests": [],
@@ -224,7 +224,7 @@
     },
     {
       "boundingBox": {
-        "height": 2399.188,
+        "height": 2398.188,
         "width": 860,
         "x": 240,
         "y": -636
@@ -259,7 +259,7 @@
         "font-weight": "400",
         "gap": "14px",
         "grid-template-columns": "none",
-        "height": "2399.19px",
+        "height": "2398.19px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -289,7 +289,7 @@
         "height": 377,
         "width": 820,
         "x": 260,
-        "y": 164
+        "y": 163
       },
       "count": 1,
       "name": "settings-agent-section",
@@ -350,9 +350,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 176156,
+    "bytes": 175830,
     "path": "screenshots/saas-settings-agent-disabled--saas-1440x900.png",
-    "sha256": "b92f230433eb1ddaae19385db7d3396303239ea67634d218ff0e56d2af6a82ba"
+    "sha256": "a0014ebfb46662b280eaddefcf4c7c23cad60c1ef5ee1dd159e35c9c8df9f664"
   },
   "scroll": {
     "main": 690,

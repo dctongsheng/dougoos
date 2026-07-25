@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "96df40a52b907321",
+    "digest": "f238adfa7387ffc0",
     "visibleElementCount": 410
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 91227,
+    "bytes": 91290,
     "path": "screenshots/saas-sm-analytics--saas-1280x800.png",
-    "sha256": "3d049558f5098152a5dffc55437e31b64085b573a03d96880650945a68daea1f"
+    "sha256": "e1c3552c46d338eb4f09f514fb8af3950013ebe61c3eb5202cf4e89dfefec728"
   },
   "scroll": {
     "main": "top",

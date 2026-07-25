@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "98aa8655740cdcb5",
+    "digest": "c378374cfe5e04fa",
     "visibleElementCount": 406
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 157255,
+    "bytes": 156152,
     "path": "screenshots/saas-hermes-mcps--saas-1440x900.png",
-    "sha256": "33c53a023987f2279f0056c7b534762beb1772c995cbdd13801af04810a9d12e"
+    "sha256": "25dbc30e76478004376860481301ea0bcd5aa8ec2b06d9a721debb7e685d7791"
   },
   "scroll": {
     "main": "top",

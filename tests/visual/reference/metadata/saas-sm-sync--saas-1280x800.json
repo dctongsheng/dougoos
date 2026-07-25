@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "f8c991e9971bc09b",
+    "digest": "1dfe08b408732daa",
     "visibleElementCount": 352
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 99361,
+    "bytes": 98903,
     "path": "screenshots/saas-sm-sync--saas-1280x800.png",
-    "sha256": "fb83ce5dfc286b5b375364b749a78e0462ca4fad2418e00f1b454ffe4bd5da9c"
+    "sha256": "7cd7c5d214d3be9797378d6adf51ac3c6ed7d74e9eaa6da1834a4591ed47d1e7"
   },
   "scroll": {
     "main": "top",

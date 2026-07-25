@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "74aa738fbcab22f9",
+    "digest": "a2cab307f8a3b28b",
     "visibleElementCount": 417
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 157455,
+    "bytes": 156196,
     "path": "screenshots/saas-hermes-kanban--saas-1440x900.png",
-    "sha256": "9f96fd65a3a9c767937efd0dcd877ed2dc4aaf179f092fa275c77b15cdbebf58"
+    "sha256": "14ddc291fb2cb92c8b7321d1d841574e6920f4f1644bd8a60ba1d48c8da32ba7"
   },
   "scroll": {
     "main": "top",

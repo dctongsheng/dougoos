@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "5b6249067cdafd14",
+    "digest": "8ad3a44a9676a716",
     "visibleElementCount": 377
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 145134,
+    "bytes": 143050,
     "path": "screenshots/saas-cron--saas-1440x900.png",
-    "sha256": "1ec5327aa2834244244b72daf9db467041993092ec82c54606592f15abfa3b88"
+    "sha256": "3d84ff6aab8cd6a5c368d4d024885ad23eebc5e591de3f59bf808e42493d778b"
   },
   "scroll": {
     "main": "top",

@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "1b7a49e50cf0e075",
+    "digest": "70ad504afa408b18",
     "visibleElementCount": 352
   },
   "externalRequests": [],
@@ -287,7 +287,7 @@
     {
       "boundingBox": {
         "height": 15,
-        "width": 70.703,
+        "width": 69.313,
         "x": 277,
         "y": 282
       },
@@ -341,7 +341,7 @@
         "position": "static",
         "transform": "none",
         "transition-duration": "0s",
-        "width": "70.7031px",
+        "width": "69.3125px",
         "z-index": "auto"
       },
       "text": "上次同步 刚刚"
@@ -350,9 +350,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 118177,
+    "bytes": 118554,
     "path": "screenshots/saas-sm-sync-completed--saas-1440x900.png",
-    "sha256": "8f4bd479c23087325ac484d9ae15cdc91d29ec3df47de27199c7c676ae5690a5"
+    "sha256": "deec28078bf71de3a0cea20979eba3be114143ae2f6968d5c39037b116bd6b94"
   },
   "scroll": {
     "main": "top",

@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "4d25f160f669c04e",
+    "digest": "14cde39b700c60f3",
     "visibleElementCount": 419
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 156330,
+    "bytes": 155544,
     "path": "screenshots/saas-harness-subagents--saas-1440x900.png",
-    "sha256": "6e6dab8e9815ecffdcf89a6d05f0ca52caf9c87bdef9e7c0e7f89e4b9e40796d"
+    "sha256": "b2b997e107180dd8ed5a1b82f1a23f5aa897bde0ebb6af06197713eb26c43027"
   },
   "scroll": {
     "main": "top",

@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "e07ce30f8f10a1ed",
+    "digest": "e20456fccaec3cec",
     "visibleElementCount": 350
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 128495,
+    "bytes": 127973,
     "path": "screenshots/saas-agent-pi-session--saas-1280x800.png",
-    "sha256": "0a2706b690152bb36f70d9e715ac147733120fd3fdfaea03200551d3251d7b47"
+    "sha256": "072eec4f47a82bfec31d3ef0a188fb8991532a086ded2d971f6dfdf9c9dd9a5c"
   },
   "scroll": {
     "main": "top",

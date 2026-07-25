@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "2217bda863690f4e",
+    "digest": "20f7a20ca14806a8",
     "visibleElementCount": 389
   },
   "externalRequests": [],
@@ -224,7 +224,7 @@
     },
     {
       "boundingBox": {
-        "height": 488.125,
+        "height": 485.125,
         "width": 1040,
         "x": 240,
         "y": 54
@@ -259,7 +259,7 @@
         "font-weight": "400",
         "gap": "14px",
         "grid-template-columns": "none",
-        "height": "488.125px",
+        "height": "485.125px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 132684,
+    "bytes": 131752,
     "path": "screenshots/saas-harness-goals--saas-1280x800.png",
-    "sha256": "a8703bcdbc26c4fed1de362009121e87b3bc002f53d09d0b510a0164b1c6dcde"
+    "sha256": "103c2b879a0a6590c0cfe3726763b53e71b2fc5bf3cc5f334303fdc41b98f569"
   },
   "scroll": {
     "main": "top",

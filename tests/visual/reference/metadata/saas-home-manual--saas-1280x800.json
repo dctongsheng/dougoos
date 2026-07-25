@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "4067ae9bac1e83b3",
+    "digest": "937e53b21c1e7ad0",
     "visibleElementCount": 355
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 195019,
+    "bytes": 195198,
     "path": "screenshots/saas-home-manual--saas-1280x800.png",
-    "sha256": "d351139e34b875fbc5d845e093dca5a5e5547761cd7fb48c9eb2c170426d61b2"
+    "sha256": "40d4c1356f346e79f40b51a372bc399f6f1ec3b54c7d1160c045f6c7e7db341b"
   },
   "scroll": {
     "main": "top",

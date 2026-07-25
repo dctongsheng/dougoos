@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "d721aa7c6188c076",
+    "digest": "a26669fba35bab7d",
     "visibleElementCount": 370
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 135756,
+    "bytes": 136480,
     "path": "screenshots/saas-harness-hooks--saas-1440x900.png",
-    "sha256": "dcc085a13f1d557a450ddf8cd129452aaea941a81c4192dd2191153181f9cccf"
+    "sha256": "1b7658ca5debc22988ea8984ca0618e71e5f386c3a4d75b6600043c698f9d37e"
   },
   "scroll": {
     "main": "top",

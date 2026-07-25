@@ -2,11 +2,6 @@ name: Visual baseline macOS 14
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - codex/early-access-release
-    paths:
-      - .github/workflows/visual-baseline-macos14.yml
 
 permissions:
   contents: read
@@ -51,6 +46,9 @@ jobs:
           path: tests/visual/reference
           if-no-files-found: error
           retention-days: 7
+
+      - name: Build workspace dependencies
+        run: pnpm -r build
 
       - name: Verify production visual regression
         run: pnpm test:visual

@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "bfa8a17aaf896318",
+    "digest": "6997eb52f1faa240",
     "visibleElementCount": 348
   },
   "externalRequests": [],
@@ -287,7 +287,7 @@
     {
       "boundingBox": {
         "height": 16,
-        "width": 374.938,
+        "width": 370.344,
         "x": 312,
         "y": 181
       },
@@ -350,9 +350,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 137151,
+    "bytes": 136604,
     "path": "screenshots/saas-memory-star-filtered--saas-1440x900.png",
-    "sha256": "7d63d0f6a2db9205844fe68a2fb9f055be38189a190b89406702d96cd509ba7e"
+    "sha256": "dc2e320c1fa9dd6780ca5627aab08ac5a34d1c803ce4ec312b0f2a6b43998152"
   },
   "scroll": {
     "main": "top",

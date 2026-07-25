@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "2399a31c91857fda",
+    "digest": "f93e00626971937c",
     "visibleElementCount": 907
   },
   "externalRequests": [],
@@ -224,7 +224,7 @@
     },
     {
       "boundingBox": {
-        "height": 2399.188,
+        "height": 2398.188,
         "width": 860,
         "x": 240,
         "y": 54
@@ -259,7 +259,7 @@
         "font-weight": "400",
         "gap": "14px",
         "grid-template-columns": "none",
-        "height": "2399.19px",
+        "height": "2398.19px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 194587,
+    "bytes": 193601,
     "path": "screenshots/saas-settings-appearance--saas-1440x900.png",
-    "sha256": "7cb9bd7039ce8657a9597875a490965ebf016bea8c7b5d61dc84200078cefcf5"
+    "sha256": "4a8005568443013049d19595f77af6d99d6bd736fddcf96906cd950143b1d9ff"
   },
   "scroll": {
     "main": 0,

@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "5544263c1603f4f2",
+    "digest": "0252b5c8b7a42346",
     "visibleElementCount": 380
   },
   "externalRequests": [],
@@ -287,8 +287,8 @@
     {
       "boundingBox": {
         "height": 16,
-        "width": 113.609,
-        "x": 1182.391,
+        "width": 111.453,
+        "x": 1184.547,
         "y": 182
       },
       "count": 1,
@@ -350,9 +350,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 149965,
+    "bytes": 149146,
     "path": "screenshots/saas-hermes-skill-running--saas-1440x900.png",
-    "sha256": "ccf9a1cb5dfcd5a2b4892992aa7d1336fff83fdf128a77860aabf728094b9384"
+    "sha256": "7df05476195b1b5b9833d61fcd1d3d14e1d286f1e729355913065057bc6d3a42"
   },
   "scroll": {
     "main": "top",

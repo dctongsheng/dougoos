@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "56cd069ea1212edc",
+    "digest": "de7a0c5f78b33ff3",
     "visibleElementCount": 394
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 211673,
+    "bytes": 211025,
     "path": "screenshots/saas-agent-claude-dark-cyan--saas-1440x900.png",
-    "sha256": "402e477074af5879d5e7c8c15541cc390714457f0e08cef56c25f115a4293dc9"
+    "sha256": "be26e7edb568163e406dbd491c3309589528e41b9c24df20dc701ac2f869423c"
   },
   "scroll": {
     "main": "top",

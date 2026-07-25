@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "d95849a7fea10eed",
+    "digest": "49a53dd3eefdc4f9",
     "visibleElementCount": 569
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 203046,
+    "bytes": 202231,
     "path": "screenshots/saas-interaction-card-hover--saas-1440x900.png",
-    "sha256": "9a3ac275be93df3f85f5eded0a0d16fb816f119e025b56ecf8eaa59dbba0a110"
+    "sha256": "70d5eb26100714696a9dcba011df2d1232f01a90caf546c463c0be8623260d77"
   },
   "scroll": {
     "main": "top",

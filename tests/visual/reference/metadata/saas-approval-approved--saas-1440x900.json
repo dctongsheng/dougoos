@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "df79dcabce3bafa3",
+    "digest": "3f50ac6e738b6918",
     "visibleElementCount": 400
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 212804,
+    "bytes": 212344,
     "path": "screenshots/saas-approval-approved--saas-1440x900.png",
-    "sha256": "e67fcd2f949ec9776ddab36c3d0aea371d65e4a8d957f5d4f8bdf1877df0c47b"
+    "sha256": "d0645e0b0baa34f359db97f872fe270dda79f2be54b7e51b104544b0a0deedda"
   },
   "scroll": {
     "main": "top",

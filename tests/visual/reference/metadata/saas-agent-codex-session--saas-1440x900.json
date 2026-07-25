@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "f93879ffbe4447a3",
+    "digest": "fb3eb86a4cee836c",
     "visibleElementCount": 369
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 166015,
+    "bytes": 165647,
     "path": "screenshots/saas-agent-codex-session--saas-1440x900.png",
-    "sha256": "57bebb587bf7a6480010836312f2d879ec728a926a0610f97c0240d1b933b2e3"
+    "sha256": "58d3823726cadf69e595828e4c20ff4b4a9363052b06f73eab51d4ebd10ddefa"
   },
   "scroll": {
     "main": "top",

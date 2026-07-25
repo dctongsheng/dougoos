@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "1c7cb322cd7b1662",
+    "digest": "133ac3acf3791256",
     "visibleElementCount": 364
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 131511,
+    "bytes": 132179,
     "path": "screenshots/saas-sm-insights-filter--saas-1440x900.png",
-    "sha256": "fe6de20b92c4a031f8b283e7dcc0a06b4acca2bedec950d3c763a3e2956fd3a0"
+    "sha256": "a108a973de7fe37033889906315c091ba8f2db6baed1e0b885b85ca0c2cc18d1"
   },
   "scroll": {
     "main": "top",

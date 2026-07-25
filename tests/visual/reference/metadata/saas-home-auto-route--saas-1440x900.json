@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "d3e876c0130bf590",
+    "digest": "a5ede57e4360d828",
     "visibleElementCount": 350
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 210067,
+    "bytes": 210122,
     "path": "screenshots/saas-home-auto-route--saas-1440x900.png",
-    "sha256": "4508110900bc1fd23570e353df9d0de6825f0608a9233696c1715c00538eb387"
+    "sha256": "f04dc1968bbf0263688a3fa8d7602ff4812dee420aaef26dc984b7cddc6efb90"
   },
   "scroll": {
     "main": "top",

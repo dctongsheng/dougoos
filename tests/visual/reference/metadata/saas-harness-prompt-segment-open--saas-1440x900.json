@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "39d37b994f5464f9",
+    "digest": "450b3fa676859c9e",
     "visibleElementCount": 432
   },
   "externalRequests": [],
@@ -412,9 +412,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 138736,
+    "bytes": 139658,
     "path": "screenshots/saas-harness-prompt-segment-open--saas-1440x900.png",
-    "sha256": "d854b55d5f53792bd3d42fc5c6896745e43dd85907a40eaa1f03cfb84e5b9e3a"
+    "sha256": "fbfd7296db71328eec0f0dbb5e9797a47adfa31cca8fd67fe043948dacd15888"
   },
   "scroll": {
     "main": "top",

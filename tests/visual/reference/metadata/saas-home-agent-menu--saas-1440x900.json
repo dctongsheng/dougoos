@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "df85e18580718239",
+    "digest": "c920f358785f0560",
     "visibleElementCount": 404
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 219849,
+    "bytes": 220107,
     "path": "screenshots/saas-home-agent-menu--saas-1440x900.png",
-    "sha256": "c0dd1138110290935ffc992ae3cd39912c5b3ca9fc7fabf72cd6f4024101858d"
+    "sha256": "b146f97bcbe131ecacc711ef634b99ba7068c064aa9b3514b4f15afbcec7b0df"
   },
   "scroll": {
     "main": "top",

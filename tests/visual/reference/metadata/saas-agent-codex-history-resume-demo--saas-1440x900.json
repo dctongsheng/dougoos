@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "29e48bcaff24f164",
+    "digest": "9cdb6a6852b5f674",
     "visibleElementCount": 371
   },
   "externalRequests": [],
@@ -287,7 +287,7 @@
     {
       "boundingBox": {
         "height": 14,
-        "width": 307.266,
+        "width": 303.625,
         "x": 374,
         "y": 334.516
       },
@@ -349,7 +349,7 @@
     {
       "boundingBox": {
         "height": 39,
-        "width": 865.469,
+        "width": 866,
         "x": 370,
         "y": 845
       },
@@ -403,7 +403,7 @@
         "position": "static",
         "transform": "none",
         "transition-duration": "0s",
-        "width": "865.469px",
+        "width": "866px",
         "z-index": "auto"
       },
       "text": ""
@@ -412,9 +412,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 171741,
+    "bytes": 171414,
     "path": "screenshots/saas-agent-codex-history-resume-demo--saas-1440x900.png",
-    "sha256": "0903776a8493b1fff92f57fff678038e6aa2734d7d6c2b61dbb1d72796a58173"
+    "sha256": "b151563c77b3a8d335f9c47b57f0dfd074e916d12dea9915af23faf895405916"
   },
   "scroll": {
     "main": "top",

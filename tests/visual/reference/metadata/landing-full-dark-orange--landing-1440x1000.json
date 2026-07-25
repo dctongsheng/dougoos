@@ -18,13 +18,13 @@
     "timezoneId": "Asia/Shanghai"
   },
   "document": {
-    "height": 2906,
+    "height": 2904,
     "scrollX": 0,
     "scrollY": 0,
     "width": 1440
   },
   "dom": {
-    "digest": "4fab9995c518029d",
+    "digest": "d73b62efe09cf59d",
     "visibleElementCount": 325
   },
   "externalRequests": [],
@@ -38,7 +38,7 @@
   "landmarks": [
     {
       "boundingBox": {
-        "height": 2906.156,
+        "height": 2904.156,
         "width": 1440,
         "x": 0,
         "y": 0
@@ -73,7 +73,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2906.16px",
+        "height": "2904.16px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -163,8 +163,8 @@
     {
       "boundingBox": {
         "height": 125.438,
-        "width": 380.422,
-        "x": 529.781,
+        "width": 379.969,
+        "x": 530.016,
         "y": 192
       },
       "count": 1,
@@ -217,7 +217,7 @@
         "position": "static",
         "transform": "none",
         "transition-duration": "0s",
-        "width": "380.422px",
+        "width": "379.969px",
         "z-index": "auto"
       },
       "text": "多个 Agent CLI一个控制台"
@@ -534,7 +534,7 @@
     },
     {
       "boundingBox": {
-        "height": 2906.156,
+        "height": 2904.156,
         "width": 1440,
         "x": 0,
         "y": 0
@@ -569,7 +569,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2906.16px",
+        "height": "2904.16px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -598,9 +598,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 596410,
+    "bytes": 593726,
     "path": "screenshots/landing-full-dark-orange--landing-1440x1000.png",
-    "sha256": "2d12efe80a600e46faea554f1b46591f03d0a2f382e6c03a967f2fe96c06721c"
+    "sha256": "8d79d6c9c5337f72fbf526a41543c936f2301bb5bd80fa93cf9fe07531290526"
   },
   "scroll": {
     "main": "top",

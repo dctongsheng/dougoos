@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "55c175b291cef9e2",
+    "digest": "f98133b797f872df",
     "visibleElementCount": 376
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 124889,
+    "bytes": 124811,
     "path": "screenshots/saas-queue--saas-1280x800.png",
-    "sha256": "83e212b00e1e1d041bf326274a35dc56117b07c448c46d2231624ecd7369bef0"
+    "sha256": "23128450305df637f151deb1e26264e51d1032a197680fce471994ed839b65b7"
   },
   "scroll": {
     "main": "top",

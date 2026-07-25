@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "edb8ec644ae90de8",
+    "digest": "53892572c61e4dc2",
     "visibleElementCount": 351
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 138755,
+    "bytes": 138141,
     "path": "screenshots/saas-agent-grok-session--saas-1280x800.png",
-    "sha256": "fe074ed96f19127d0a96f427d03c53b54218051d7bcf7443c3aa13e7bf3436df"
+    "sha256": "98ce5e568ace0100a65e48de2db606bf04b2da755058c1ac0a60d19e985e84db"
   },
   "scroll": {
     "main": "top",

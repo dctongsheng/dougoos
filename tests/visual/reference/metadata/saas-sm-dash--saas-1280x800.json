@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "abb541ae41df01f2",
+    "digest": "720727b33b57b941",
     "visibleElementCount": 432
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 90799,
+    "bytes": 90611,
     "path": "screenshots/saas-sm-dash--saas-1280x800.png",
-    "sha256": "8f9c03cae8fbbce844c8be51588de7ca335378d1975d04c3b82d00c355c6071c"
+    "sha256": "b4f369241c7d062a4f1205103e439a3f27d1ca711033698a50b9c7a29aff69c0"
   },
   "scroll": {
     "main": "top",

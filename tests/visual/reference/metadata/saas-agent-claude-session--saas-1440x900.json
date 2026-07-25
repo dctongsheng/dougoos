@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "3ab75aa9de8bdb1b",
+    "digest": "91867042457af3e0",
     "visibleElementCount": 394
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 210186,
+    "bytes": 209664,
     "path": "screenshots/saas-agent-claude-session--saas-1440x900.png",
-    "sha256": "e5b09acfc2747abf465396ea6f0ce86117cacd8e2a8c1c65bbeaf997fd18b105"
+    "sha256": "376a427ae72827739d61dcd4f92b6d15834e6630940c2897bb2deb6898a0e7f8"
   },
   "scroll": {
     "main": "top",

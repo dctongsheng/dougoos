@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "54ee274088abf772",
+    "digest": "3aab43270002cd2b",
     "visibleElementCount": 406
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 145478,
+    "bytes": 146302,
     "path": "screenshots/saas-harness-skills--saas-1440x900.png",
-    "sha256": "aa59efbb01f57539dcadced6dfb967665bc28dd2f2651ad85b92ceb3d430fb7d"
+    "sha256": "c5c32a033760f4af1e5763f38aa9b1dd6aef70f5310d42e7a060a3987e763f57"
   },
   "scroll": {
     "main": "top",

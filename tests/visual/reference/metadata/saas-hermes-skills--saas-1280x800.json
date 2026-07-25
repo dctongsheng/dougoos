@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "1436a8a5344d5841",
+    "digest": "1bcf6bc15e2be431",
     "visibleElementCount": 428
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 169142,
+    "bytes": 167417,
     "path": "screenshots/saas-hermes-skills--saas-1280x800.png",
-    "sha256": "75038e4a939d90b1bf6861c10b4cbed8d53edb55b4ff30ac091ab3dd1a9c0e31"
+    "sha256": "a9a52ad2ea22eb3e5229fc970dac044316407a12d9e2a2bb98c5d67eb3fedfab"
   },
   "scroll": {
     "main": "top",

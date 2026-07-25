@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "be0d9bf08c5f92d0",
+    "digest": "fcc1f371c46d6efd",
     "visibleElementCount": 397
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 137084,
+    "bytes": 136189,
     "path": "screenshots/saas-sm-patterns--saas-1280x800.png",
-    "sha256": "40cd6e8ed38e719c143e9f470ff626d265c7e471e94abb21d5629244eeaba601"
+    "sha256": "92261895c1a626b61f2505555124a26061576c4fd2e97e0bfddd93095b592187"
   },
   "scroll": {
     "main": "top",

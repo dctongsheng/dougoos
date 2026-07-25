@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "e430c0e88f72e130",
+    "digest": "ecdae88a9bc0bdbc",
     "visibleElementCount": 355
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 193571,
+    "bytes": 194328,
     "path": "screenshots/saas-sidebar-bottom--saas-1440x900.png",
-    "sha256": "a7be5500b876ff28683689161390b7088bade9f923516e8869b7c6f4c09cfff3"
+    "sha256": "50ac9a137a0ea62d4e853bb651362ff8f3cb37b614af52b37299e0b7a0eedc15"
   },
   "scroll": {
     "main": "top",

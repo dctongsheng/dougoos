@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "788c2636912ae13a",
+    "digest": "356b40fb6d2fa1e1",
     "visibleElementCount": 355
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 208822,
+    "bytes": 208847,
     "path": "screenshots/saas-interaction-input-focus--saas-1440x900.png",
-    "sha256": "6b3f0c2e2cb195e39d44fe4b1ae65ac93ad82da5965c8d5905d8bdfc2d1f4be4"
+    "sha256": "7c7b97e2aebf32958cab14e7dd6e65e6677a25e3ef9e6d37825d43d26e7af8fd"
   },
   "scroll": {
     "main": "top",

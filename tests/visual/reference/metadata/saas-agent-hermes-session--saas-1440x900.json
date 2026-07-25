@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "75659d823c911f86",
+    "digest": "e7ea86b1ac777a5b",
     "visibleElementCount": 368
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 151425,
+    "bytes": 150688,
     "path": "screenshots/saas-agent-hermes-session--saas-1440x900.png",
-    "sha256": "829100271adc5eeafc1db94717353c8987e5c78fa20b93d515ec3ed3f36f706b"
+    "sha256": "20b7c6564193d3f99a773b9f6a5df14f7bd7389bccc638ed6c43f5fb6bc2ca53"
   },
   "scroll": {
     "main": "top",

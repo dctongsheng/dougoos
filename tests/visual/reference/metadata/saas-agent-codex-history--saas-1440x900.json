@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "6cb9799df9c7ef9f",
+    "digest": "5a6e8a45fa915679",
     "visibleElementCount": 366
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 137112,
+    "bytes": 136663,
     "path": "screenshots/saas-agent-codex-history--saas-1440x900.png",
-    "sha256": "7ef5b6143cfdcb5364f685327d65c7ff54b8ba762b2be5d2174df6f2f73f04e7"
+    "sha256": "c2595e217f65145e8a5646df4f2978af9c9fc6c18bf429f10d0d24d0dbcd51c9"
   },
   "scroll": {
     "main": "top",

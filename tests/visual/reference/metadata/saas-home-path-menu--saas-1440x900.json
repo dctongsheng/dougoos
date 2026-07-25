@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "35a2e45c075cd75e",
+    "digest": "315b1b075766d2ed",
     "visibleElementCount": 387
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 219116,
+    "bytes": 219034,
     "path": "screenshots/saas-home-path-menu--saas-1440x900.png",
-    "sha256": "732953cd2ecae50c277ae64411d72e4bf44a37839256510f75b4991e5eea514a"
+    "sha256": "01c6ec227c9fc4ec45163d0ac31bb1148da6226570cedc016c7aecf8b4cc86b5"
   },
   "scroll": {
     "main": "top",

@@ -18,13 +18,13 @@
     "timezoneId": "Asia/Shanghai"
   },
   "document": {
-    "height": 2906,
+    "height": 2904,
     "scrollX": 0,
     "scrollY": 0,
     "width": 1440
   },
   "dom": {
-    "digest": "b8a55e5d2b8e6995",
+    "digest": "f04f9457d891791d",
     "visibleElementCount": 325
   },
   "externalRequests": [],
@@ -38,7 +38,7 @@
   "landmarks": [
     {
       "boundingBox": {
-        "height": 2906.156,
+        "height": 2904.156,
         "width": 1440,
         "x": 0,
         "y": 0
@@ -73,7 +73,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2906.16px",
+        "height": "2904.16px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -163,8 +163,8 @@
     {
       "boundingBox": {
         "height": 125.438,
-        "width": 380.422,
-        "x": 529.781,
+        "width": 379.969,
+        "x": 530.016,
         "y": 192
       },
       "count": 1,
@@ -217,7 +217,7 @@
         "position": "static",
         "transform": "none",
         "transition-duration": "0s",
-        "width": "380.422px",
+        "width": "379.969px",
         "z-index": "auto"
       },
       "text": "多个 Agent CLI一个控制台"
@@ -534,7 +534,7 @@
     },
     {
       "boundingBox": {
-        "height": 2906.156,
+        "height": 2904.156,
         "width": 1440,
         "x": 0,
         "y": 0
@@ -569,7 +569,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2906.16px",
+        "height": "2904.16px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -598,9 +598,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 284680,
+    "bytes": 283222,
     "path": "screenshots/landing-interaction-nav-hover--landing-1440x1000.png",
-    "sha256": "c9d1cd6d5e89ef43e4651cf11ad461cc8498123dc8f6db737c7eb5b6b6cb117c"
+    "sha256": "e842895528fe7edfbbd07fc2c756a016517278389de13bbb614a36df242d8762"
   },
   "scroll": {
     "main": "top",

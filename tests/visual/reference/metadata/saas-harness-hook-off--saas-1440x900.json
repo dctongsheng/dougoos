@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "a945354dbaf6d4dd",
+    "digest": "ae6b8a2e47061d0e",
     "visibleElementCount": 370
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 135681,
+    "bytes": 136410,
     "path": "screenshots/saas-harness-hook-off--saas-1440x900.png",
-    "sha256": "44be4d752845858f9489e4eea1c4c75bb6d17a834e247d5e9d3c9e073ee11f9f"
+    "sha256": "3a0b0bcb3c2388bbec04739dbd48d6b3908a8fe69152b5ffc706336bd335d59c"
   },
   "scroll": {
     "main": "top",

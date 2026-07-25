@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "c5e4721cf9fb1a10",
+    "digest": "fc8cd24368fcadb7",
     "visibleElementCount": 373
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 141670,
+    "bytes": 140921,
     "path": "screenshots/saas-hermes-history--saas-1440x900.png",
-    "sha256": "cca94d39075a9023d955e2c027fa6ce7a78b9a707cc2bd9a8e212607c41d8aa4"
+    "sha256": "7c3277b13f80d09f4a192eaa48daa419cd54da2a069b51c962fb90ecbfd89140"
   },
   "scroll": {
     "main": "top",

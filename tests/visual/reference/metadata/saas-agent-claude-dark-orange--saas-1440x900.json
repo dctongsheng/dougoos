@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "e687bbec6bec3ea6",
+    "digest": "13df2d63c52c411d",
     "visibleElementCount": 394
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 209032,
+    "bytes": 208634,
     "path": "screenshots/saas-agent-claude-dark-orange--saas-1440x900.png",
-    "sha256": "402fbb6b1aaad81ae95bf9cb959ed10565cf0c381d6f0c60d694141024f93e95"
+    "sha256": "8ca99c05086a1d6ae7d448e7f2c35c62190fb81062841ed09cb4489161f04165"
   },
   "scroll": {
     "main": "top",

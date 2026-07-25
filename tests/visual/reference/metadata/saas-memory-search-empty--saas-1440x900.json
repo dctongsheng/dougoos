@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "d1dfb68a64e02c28",
+    "digest": "8db1653f943dab53",
     "visibleElementCount": 344
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 360764,
+    "bytes": 359626,
     "path": "screenshots/saas-memory-search-empty--saas-1440x900.png",
-    "sha256": "8911cb29921ab99ddcd50f379b7dbd0c7b9987fe0afd4d9f443a87c294bdcdea"
+    "sha256": "ecf0018a99566e34fe23d6ae4d5ebd0f2a84454f931c703b872a35dc7a6c97b7"
   },
   "scroll": {
     "main": "top",

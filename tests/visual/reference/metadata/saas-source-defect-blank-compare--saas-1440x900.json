@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "7f3fc14a03349106",
+    "digest": "834a826578dd63cb",
     "visibleElementCount": 327
   },
   "externalRequests": [],
@@ -226,9 +226,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 125974,
+    "bytes": 125753,
     "path": "screenshots/saas-source-defect-blank-compare--saas-1440x900.png",
-    "sha256": "5d6f1018f07608e4365dc4901340475050f46ae50401dac1ad1a69fc70eebe5f"
+    "sha256": "e24ed5ea48192fd91f211ecd935bb81d03936c089957df6383031fc9736f90f9"
   },
   "scroll": {
     "main": "top",

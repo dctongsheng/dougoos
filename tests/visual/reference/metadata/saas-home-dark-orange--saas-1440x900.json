@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "18e3db8e40cde0e2",
+    "digest": "297f8974cb8e0a5e",
     "visibleElementCount": 355
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 206311,
+    "bytes": 206769,
     "path": "screenshots/saas-home-dark-orange--saas-1440x900.png",
-    "sha256": "02ea066cc069aa6efd574a2b150d74d62296bc2c33ea842032896b33e21162b0"
+    "sha256": "9321d70f690817a54f4d1ac9297742fd0ea9596379c05320539d60f75be276c8"
   },
   "scroll": {
     "main": "top",

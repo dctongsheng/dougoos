@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "3ab75aa9de8bdb1b",
+    "digest": "91867042457af3e0",
     "visibleElementCount": 394
   },
   "externalRequests": [],
@@ -287,8 +287,8 @@
     {
       "boundingBox": {
         "height": 16,
-        "width": 350.125,
-        "x": 945.875,
+        "width": 346.078,
+        "x": 949.922,
         "y": 139
       },
       "count": 1,
@@ -411,7 +411,7 @@
     {
       "boundingBox": {
         "height": 39,
-        "width": 865.469,
+        "width": 866,
         "x": 370,
         "y": 845
       },
@@ -465,7 +465,7 @@
         "position": "static",
         "transform": "none",
         "transition-duration": "0s",
-        "width": "865.469px",
+        "width": "866px",
         "z-index": "auto"
       },
       "text": ""
@@ -474,9 +474,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 210183,
+    "bytes": 209664,
     "path": "screenshots/saas-approval-pending--saas-1440x900.png",
-    "sha256": "1349c0ff68381d7bb736aa77439dbfeeb52f7351f37c77518d80c3c612988e14"
+    "sha256": "376a427ae72827739d61dcd4f92b6d15834e6630940c2897bb2deb6898a0e7f8"
   },
   "scroll": {
     "main": "top",

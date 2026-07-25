@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "7b5dd3948337a8b0",
+    "digest": "6b05496cd48c6846",
     "visibleElementCount": 396
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 342211,
+    "bytes": 341522,
     "path": "screenshots/saas-memory-graph--saas-1280x800.png",
-    "sha256": "154d08158fb1a04b8b72c61ff6249efabdd39f5d276b33a7b73c67eac1e8b906"
+    "sha256": "6c74d249ed0f5b5f703cc71bcf10ffbf38e2ca872784938cbd064867105d1778"
   },
   "scroll": {
     "main": "top",

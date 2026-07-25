@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "538d68ebf9e96ae3",
+    "digest": "0f6030c37bedc5d5",
     "visibleElementCount": 465
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 144486,
+    "bytes": 144707,
     "path": "screenshots/saas-harness-workflows--saas-1440x900.png",
-    "sha256": "566451720689ab64a56320e734d5c74f7e32ad7f2085f47631a474822e2207db"
+    "sha256": "9a3f792f6cb1ee7e7ff39d69546269431599e412f6ccb2bf524fa28893054ca5"
   },
   "scroll": {
     "main": "top",

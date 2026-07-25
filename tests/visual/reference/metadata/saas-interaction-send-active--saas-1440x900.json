@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "36c9f1dffe2823bf",
+    "digest": "bc0083967e7df28c",
     "visibleElementCount": 355
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 208801,
+    "bytes": 208826,
     "path": "screenshots/saas-interaction-send-active--saas-1440x900.png",
-    "sha256": "b96e86e87f9e70d17d6e05bbee3fd3b68fc155d5e60f487825e398a6c4d7b360"
+    "sha256": "53a0a28031554ae12d65fe966c26957c78d8e8b1635b080e3a785700ab9d1317"
   },
   "scroll": {
     "main": "top",

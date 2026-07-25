@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "44b6c397d0ace10f",
+    "digest": "ca9e598d76ffb3e7",
     "visibleElementCount": 569
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 202623,
+    "bytes": 201841,
     "path": "screenshots/saas-dashboard--saas-1440x900.png",
-    "sha256": "9183d04d72d01a4d3a03c56624be319c35ca2f08b5f5c0d9c44201db820d5929"
+    "sha256": "98463b81e84f840e8297de2cd79ff56694881dfc54f45134a2400080cad863a9"
   },
   "scroll": {
     "main": "top",

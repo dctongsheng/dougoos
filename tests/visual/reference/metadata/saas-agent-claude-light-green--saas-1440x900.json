@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "446e65570fdd7bdb",
+    "digest": "c67cc220c59bf090",
     "visibleElementCount": 394
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 225787,
+    "bytes": 225859,
     "path": "screenshots/saas-agent-claude-light-green--saas-1440x900.png",
-    "sha256": "3ca7bf3abcb4ce48a9240bb7cfa34efd8835b12aeefe7c0e61754f2bcbccf23f"
+    "sha256": "7cfac9fe121cc361e963a243fd5b40d0f32faa12a6c2b05b3f170aead53971df"
   },
   "scroll": {
     "main": "top",

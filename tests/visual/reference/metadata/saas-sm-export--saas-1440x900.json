@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "07a29bef8f89cdf7",
+    "digest": "3ae0a500fe9d3dea",
     "visibleElementCount": 353
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 127069,
+    "bytes": 127760,
     "path": "screenshots/saas-sm-export--saas-1440x900.png",
-    "sha256": "5ecfa17783d121224573c3b0d8bbc7fdca2a02b8f1bd866cc16f59eae106c31d"
+    "sha256": "64fbfd5a959d40b4e20d0f735eeaf5ddbfdacb1b7b2ca59db914a0891ea545ad"
   },
   "scroll": {
     "main": "top",

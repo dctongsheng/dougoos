@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "2c9d62ab1c0ad62f",
+    "digest": "e7c3d8aae6f260bc",
     "visibleElementCount": 394
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 211456,
+    "bytes": 210864,
     "path": "screenshots/saas-approval-denied--saas-1440x900.png",
-    "sha256": "0695b45441f0a1255bbab4d4f9af06038ba8cdeb8d1594ba7c7f647c2ee2b931"
+    "sha256": "366c081ec78be15f0a8c8cb473ccf89b69c98ff5df154107ed496c73770cba7e"
   },
   "scroll": {
     "main": "top",

@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "8d5caad6b918a0cc",
+    "digest": "4c117df05f3bc368",
     "visibleElementCount": 355
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 224594,
+    "bytes": 224706,
     "path": "screenshots/saas-home-light-green--saas-1280x800.png",
-    "sha256": "fdc371982e983e47ed61b1a1aa50eb34d128538d8cb5ad23720a2839694eca6d"
+    "sha256": "109dc9bbc0f31e186057b853f13067f9fc093f3d3f22ec7623a49a2cfd767ea9"
   },
   "scroll": {
     "main": "top",

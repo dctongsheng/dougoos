@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "393e9449e209c29b",
+    "digest": "ac289cc8175cebcc",
     "visibleElementCount": 374
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 147050,
+    "bytes": 146856,
     "path": "screenshots/saas-harness-rules--saas-1440x900.png",
-    "sha256": "faaaf9009ac6e1c3a2ab43087cb2266ec4e179eeb4b861d038570f6aee91432b"
+    "sha256": "873e7e5b3a9537f3c15f3cc68e0305b9b8e3786585ae2c05cb6035d83ad557b4"
   },
   "scroll": {
     "main": "top",

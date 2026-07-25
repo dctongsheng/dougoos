@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "3ee78115afc5fc3b",
+    "digest": "70dd40418d655df9",
     "visibleElementCount": 415
   },
   "externalRequests": [],
@@ -288,9 +288,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 131696,
+    "bytes": 131920,
     "path": "screenshots/saas-harness-mcp-off--saas-1440x900.png",
-    "sha256": "a7f8449b4bb0810feb853da8449605e20413c6ec94906576da7fba11424a3988"
+    "sha256": "4e83c280584a1606b9239ecd3f05c62e498279938c830831c784686071fb0a4f"
   },
   "scroll": {
     "main": "top",

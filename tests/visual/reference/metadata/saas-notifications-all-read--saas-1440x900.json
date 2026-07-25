@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "32b475289ba34162",
+    "digest": "bec51ff8ae38bce0",
     "visibleElementCount": 387
   },
   "externalRequests": [],
@@ -350,9 +350,9 @@
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 219953,
+    "bytes": 219545,
     "path": "screenshots/saas-notifications-all-read--saas-1440x900.png",
-    "sha256": "b46123430f096d987e5e0ec7333b3a45519f9b3eb14f9c168493fceb8379e1d5"
+    "sha256": "16367615ff09c94902ea91682a6448e7c3bf2fc3d5cf007fbbbf7b500c8a8fbc"
   },
   "scroll": {
     "main": "top",
