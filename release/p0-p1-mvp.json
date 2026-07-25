@@ -5,8 +5,9 @@
     "version": "0.1.0"
   },
   "source": {
-    "algorithm": "sha256(path-length:path:type:size:content; git releasable inputs; manifest excluded)",
+    "algorithm": "sha256(path-length:path:type:size:content; Git ref or releasable worktree inputs; current manifest excluded)",
     "fileCount": 588,
+    "ref": "p0-p1-mvp",
     "sha256": "19e99875b2061f652c4fbd69d3851695017461c3b0fffd9f2f623a980bb471f3"
   },
   "runtime": {

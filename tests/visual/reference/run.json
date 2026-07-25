@@ -27,14 +27,14 @@
   "schemaVersion": 1,
   "sources": [
     {
-      "bytes": 194641,
+      "bytes": 197889,
       "path": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-      "sha256": "8131d4a788fbbb49f4945329dfede493ef72bf4a3bd3063e731dcae3bf2e2370"
+      "sha256": "04777d854f0e1f0bea6e26dec0d1bc9c0fbc884d71de37796ed444ae5c70a0ad"
     },
     {
-      "bytes": 29687,
+      "bytes": 31061,
       "path": "prototypes/agentos/project/AgentOS Landing.dc.html",
-      "sha256": "f12d4170050b6869cb44153c18fb45135939a89bbb7070962c5e4265f2f62008"
+      "sha256": "3b3acdf63f7c4b795ffd1a7ddb9f6b5164ba7ee18926ad16651ccd65e0fcce9e"
     },
     {
       "bytes": 66404,

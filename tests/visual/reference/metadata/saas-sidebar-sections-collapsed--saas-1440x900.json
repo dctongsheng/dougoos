@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "7f23dc5eeb535cfe",
+    "digest": "771d47ac8560d370",
     "visibleElementCount": 113
   },
   "externalRequests": [],
@@ -96,7 +96,7 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ AGENTS ▶ HARNESS ▶ SESSIONS MANAGER ▶ 今日预算78% R Ryo Pro · 6 agents linked ⚙ 新建任务 new task 活跃 4/6 今日 $12.47 2.58M tok ◍ 2 12:05:06 下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Code ▼ ⌂~▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ AGENTS ▶ HARNESS ▶ SESSIONS MANAGER ▶ 今日预算78% R Ryo Pro · 6 agents linked ⚙ 新建任务 new task 活跃 4/6 今日 $12.47 2.58M tok ◍ 2 12:05:06 下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Code ▼ ⌂对话▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
     },
     {
       "boundingBox": {
@@ -282,15 +282,15 @@
         "width": "1200px",
         "z-index": "auto"
       },
-      "text": "下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Code ▼ ⌂~▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
+      "text": "下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Code ▼ ⌂对话▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 171443,
+    "bytes": 171256,
     "path": "screenshots/saas-sidebar-sections-collapsed--saas-1440x900.png",
-    "sha256": "f679cf036fb3f3d4b11cd0b519e2ca84b99d90a285239c361c1d240ba3046e9e"
+    "sha256": "cfafc65de06acd56b40c5c46ecc0a6a55781858b8390aca32464c14b047afde2"
   },
   "scroll": {
     "main": "top",
@@ -298,7 +298,7 @@
     "sidebar": "top"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "0718a6d5370d7754f15215a2b77447714aef0b1d66b85ee930b60659f6eee854",
+  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
   "surface": "saas",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",

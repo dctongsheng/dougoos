@@ -1,0 +1,93 @@
+name: Release macOS Early Access
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-macos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, verify, and publish Early Access
+    runs-on: macos-14
+    timeout-minutes: 90
+    environment: early-access
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout full release history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.16.0 --activate
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install pinned Chromium
+        run: pnpm exec playwright install chromium
+
+      - name: Verify release identity
+        run: |
+          node -e 'const p=require("./package.json"); const tag=process.env.GITHUB_REF_NAME; if(tag !== `v${p.version}`) throw new Error(`tag ${tag} must equal v${p.version}`)'
+          pnpm release:manifest:check
+          pnpm release:manifest:next:check
+
+      - name: Run workspace checks
+        run: pnpm check
+
+      - name: Run browser E2E
+        run: pnpm test:e2e
+
+      - name: Run deterministic visual regression
+        run: pnpm test:visual
+
+      - name: Run build smoke
+        run: pnpm smoke:build
+
+      - name: Build and smoke-test the ad-hoc DMG
+        run: pnpm smoke:package
+
+      - name: Verify macOS product metadata and DMG
+        run: node tooling/verify-early-access-package.mjs
+
+      - name: Sign Early Access release metadata
+        env:
+          DOUGOOS_RELEASE_PRIVATE_KEY: ${{ secrets.RELEASE_ED25519_PRIVATE_KEY }}
+        run: node tooling/prepare-early-access-release.mjs
+
+      - name: Retain release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: DougoOS-${{ github.ref_name }}-early-access
+          if-no-files-found: error
+          path: |
+            .artifacts/desktop-package.json
+            .artifacts/release/DougoOS-*-release.json
+            .artifacts/release/DougoOS-*.dmg.sig
+            .artifacts/release/SHA256SUMS
+            .artifacts/release/latest.json
+          retention-days: 30
+
+      - name: Publish immutable objects, verify, then promote aliases
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: node tooling/publish-early-access-release.mjs

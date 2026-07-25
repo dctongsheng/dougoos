@@ -61,4 +61,29 @@ describe("Cloud health-only Worker", () => {
     expect(assets.fetch).toHaveBeenCalledOnce();
     expect(assets.fetch).toHaveBeenCalledWith(request);
   });
+
+  it("retires the old shell installer with a non-executable 410 response", async () => {
+    assets.fetch.mockClear();
+    const response = await handleRequest(new Request("https://dougoos.com/install"), assets);
+
+    expect(response.status).toBe(410);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("content-type")).toContain("text/plain");
+    expect(await response.text()).toContain("https://dougoos.com");
+    expect(assets.fetch).not.toHaveBeenCalled();
+
+    const head = await handleRequest(
+      new Request("https://dougoos.com/install", { method: "HEAD" }),
+      assets,
+    );
+    expect(head.status).toBe(410);
+    expect(await head.text()).toBe("");
+
+    const post = await handleRequest(
+      new Request("https://dougoos.com/install", { method: "POST" }),
+      assets,
+    );
+    expect(post.status).toBe(405);
+    expect(post.headers.get("allow")).toBe("GET, HEAD");
+  });
 });

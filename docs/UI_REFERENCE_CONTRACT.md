@@ -407,7 +407,7 @@ Hermes 五个 tab 全部可达：
 固定 section 顺序：
 
 1. Header：brand、功能/Agents/Memory/文档、theme、登录/用户 pill、免费下载。
-2. Hero：version chip、H1、copy、双 CTA、install command。
+2. Hero：0.2.0 Early Access version chip、H1、copy、双 CTA、未公证提示与四步安装说明。
 3. 漂浮产品窗口：traffic lights、mini sidebar、4 KPI、3 cards、composer。
 4. 6 Agent chips。
 5. Features heading + 6 cards。
@@ -425,7 +425,9 @@ Landing 仅有以下真实原型事件：
 - 点击 overlay 背景或 close：关闭。
 - modal 登录/GitHub/Google：直接切 logged-in presentation。
 
-其余 nav/CTA 都没有 handler。生产在没有批准 URL 时只能保持无副作用演示或明确 disabled。
+三个下载 CTA 是唯一批准的外部导航，必须统一指向
+`https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg`，并明确标注未经
+Apple 公证；其余 nav/CTA 都没有 handler，继续保持无副作用演示或明确 disabled。
 
 ## 7. 控件数据模式
 

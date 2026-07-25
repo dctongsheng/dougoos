@@ -18,6 +18,11 @@
 ## 交付与发布
 
 - [任务体系](./plan/README.md)：后续任务的 develop/verify/review 流程。
+- [Early Access 发布分析](./plan/analysis/early-access-distribution.md)：零付费 macOS
+  分发、受限更新和未来正式更新边界。
+- [Early Access 0.2.0 任务](./plan/tasks/early-access-0.2.0.md)
+- [Early Access Review 01](./plan/reviews/early-access-0.2.0-01.md)：代码复审通过；
+  R2、生产部署与干净 Mac 验收仍阻塞 Tag。
 - [Release Baseline 分析](./plan/analysis/p1-release-baseline.md)
 - [视觉阻塞归因](./plan/analysis/ui-regression-release-blocker.md)
 - [视觉阻塞修复任务](./plan/tasks/ui-regression-001.md)
@@ -29,3 +34,5 @@
 - [Backlog](./plan/backlog.md)：已接受的非阻塞事项。
 - [P0/P1 验证报告](./VALIDATION_REPORT.md)
 - [P0/P1 Release Manifest](../release/p0-p1-mvp.json)：版本、发布输入 hash、锁定工具链与测试摘要。
+- [Early Access 发布公钥](../release/early-access-public-key.pem)：客户端内置 Ed25519
+  公钥的可审计副本；私钥不进入仓库。

@@ -235,6 +235,8 @@ test("Landing renders every reference section and preserves its two-column 1024 
   await expect(page.locator('[data-screen-label="落地页"]')).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/多个 Agent CLI\s*一个控制台/u);
   await expect(page.getByText("AgentOS — workspace / local", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "四步开始体验" })).toBeVisible();
+  await expect(page.locator(".early-access-install li")).toHaveCount(4);
   await expect(page.locator(".agent-chip")).toHaveCount(6);
   await expect(page.locator(".feature-card")).toHaveCount(6);
   await expect(page.locator(".route-row")).toHaveCount(3);
@@ -321,7 +323,7 @@ test("Landing renders every reference section and preserves its two-column 1024 
   expect(await page.locator("body").evaluate((element) => element.scrollWidth)).toBe(1024);
 });
 
-test("every Landing navigation and CTA control is a safe local presentation no-op", async ({
+test("only the three download CTAs expose the canonical Early Access artifact", async ({
   page,
 }) => {
   const dynamicRequests: string[] = [];
@@ -338,10 +340,22 @@ test("every Landing navigation and CTA control is a safe local presentation no-o
   for (const label of ["功能", "Agents", "Memory", "文档"]) {
     await page.locator(".landing-nav").getByRole("button", { exact: true, name: label }).click();
   }
-  await page.getByRole("button", { exact: true, name: "免费下载" }).click();
-  await page.getByRole("button", { exact: true, name: "下载桌面版" }).click();
+  const downloadUrl = "https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg";
+  const downloadLinks = page.locator(`a[href="${downloadUrl}"]`);
+  await expect(downloadLinks).toHaveCount(3);
+  await expect(page.getByRole("link", { exact: true, name: "免费下载" })).toHaveAttribute(
+    "href",
+    downloadUrl,
+  );
+  await expect(page.getByRole("link", { exact: true, name: "下载桌面版" })).toHaveAttribute(
+    "href",
+    downloadUrl,
+  );
+  await expect(page.getByRole("link", { exact: true, name: "下载 DougoOS" })).toHaveAttribute(
+    "href",
+    downloadUrl,
+  );
   await page.getByRole("button", { exact: true, name: "在线体验 →" }).click();
-  await page.getByRole("button", { exact: true, name: "下载 AgentOS" }).click();
   await page.getByRole("button", { exact: true, name: "GitHub ↗" }).click();
   const footer = page.locator(".landing-footer");
   await footer.getByRole("button", { exact: true, name: "dougoos.com" }).click();

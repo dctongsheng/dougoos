@@ -607,16 +607,50 @@
             "id": "landing-root",
             "kind": "visible",
             "locator": { "by": "css", "value": "[data-screen-label=\"落地页\"]" }
+          },
+          {
+            "equals": ["https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg"],
+            "id": "canonical-early-access-download",
+            "kind": "attribute-set",
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg\"]"
+            },
+            "name": "href"
           }
         ]
       },
       "expected": { "externalRequests": [], "runtimeEffects": [], "storageWrites": [] },
-      "description": "Landing production output before a target URL is approved for CTA actions.",
+      "description": "Landing keeps demo controls inert while exposing only the approved Early Access download.",
       "id": "landing-production-safe-cta",
       "kind": "production-only",
       "owner": "landing-ui-001",
       "probe": {
         "actions": [
+          {
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg\"]",
+              "index": 0
+            },
+            "type": "focus"
+          },
+          {
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg\"]",
+              "index": 1
+            },
+            "type": "focus"
+          },
+          {
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg\"]",
+              "index": "last"
+            },
+            "type": "focus"
+          },
           { "locator": { "by": "text", "exact": true, "value": "功能" }, "type": "click" },
           { "locator": { "by": "text", "exact": true, "value": "Agents" }, "type": "click" },
           { "locator": { "by": "text", "exact": true, "value": "Memory" }, "type": "click" },
@@ -624,10 +658,7 @@
             "locator": { "by": "text", "exact": true, "value": "文档", "index": 0 },
             "type": "click"
           },
-          { "locator": { "by": "text", "exact": true, "value": "免费下载" }, "type": "click" },
-          { "locator": { "by": "text", "exact": true, "value": "下载桌面版" }, "type": "click" },
           { "locator": { "by": "text", "exact": true, "value": "在线体验 →" }, "type": "click" },
-          { "locator": { "by": "text", "exact": true, "value": "下载 AgentOS" }, "type": "click" },
           { "locator": { "by": "text", "exact": true, "value": "GitHub ↗" }, "type": "click" },
           { "locator": { "by": "text", "exact": true, "value": "dougoos.com" }, "type": "click" },
           {
@@ -3674,7 +3705,7 @@
         },
         { "locator": { "by": "css", "value": "[data-screen-label=\"设置\"]" }, "name": "screen" },
         {
-          "locator": { "by": "css", "value": "[data-screen-label=\"设置\"] > div:nth-child(3)" },
+          "locator": { "by": "css", "value": "[data-screen-label=\"设置\"] > div:nth-child(4)" },
           "name": "settings-agent-section"
         }
       ],
@@ -3713,7 +3744,7 @@
         },
         { "locator": { "by": "css", "value": "[data-screen-label=\"设置\"]" }, "name": "screen" },
         {
-          "locator": { "by": "css", "value": "[data-screen-label=\"设置\"] > div:nth-child(3)" },
+          "locator": { "by": "css", "value": "[data-screen-label=\"设置\"] > div:nth-child(4)" },
           "name": "settings-agent-section"
         }
       ],
@@ -3976,7 +4007,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "~", "scope": "screen" },
+          "locator": { "by": "text", "exact": true, "value": "对话", "scope": "screen" },
           "type": "click"
         }
       ],
@@ -5065,7 +5096,7 @@
         },
         { "locator": { "by": "css", "value": "[data-screen-label=\"设置\"]" }, "name": "screen" },
         {
-          "locator": { "by": "css", "value": "[data-screen-label=\"设置\"] > div:nth-child(3)" },
+          "locator": { "by": "css", "value": "[data-screen-label=\"设置\"] > div:nth-child(4)" },
           "name": "settings-agent-section"
         }
       ],

@@ -70,10 +70,10 @@ test("SaaS and Landing production scenarios emit complete actual/diff/metadata e
   expect(allProductionOnlyCases).toHaveLength(16);
 
   const result = await captureProductionSet(browser);
+  expect(result.errors, result.errors.slice(0, 80).join("\n")).toEqual([]);
   expect(result.captures.size).toBe(
     allProductionReferenceCases.length + allProductionOnlyCases.length,
   );
-  expect(result.errors, result.errors.slice(0, 80).join("\n")).toEqual([]);
 });
 
 test("subscribed snapshots atomically rerender and old sources cannot publish after replacement", async ({

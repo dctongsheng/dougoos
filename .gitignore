@@ -38,6 +38,9 @@ diagnostics/provider-*/
 .env
 .env.*
 !.env.example
+.secrets/
+release/private/
+*.p8
 .DS_Store
 .idea/
 .vscode/

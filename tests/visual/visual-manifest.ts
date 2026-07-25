@@ -384,7 +384,7 @@ const pageCases: readonly ReferenceTemplate[] = [
       id === "agent"
         ? [
             {
-              locator: css('[data-screen-label="设置"] > div:nth-child(3)'),
+              locator: css('[data-screen-label="设置"] > div:nth-child(4)'),
               name: "settings-agent-section",
             },
           ]
@@ -406,7 +406,7 @@ const stateCases: readonly ReferenceTemplate[] = [
     tags: ["state", "dropdown", "real-p0-p1-provider-picker"],
   },
   {
-    actions: [click(screenText("~"))],
+    actions: [click(screenText("对话"))],
     description: "Home cwd picker overlay.",
     expectedScreenLabel: "新建任务",
     id: "saas-home-path-menu",
@@ -756,7 +756,7 @@ const stateCases: readonly ReferenceTemplate[] = [
     expectedScreenLabel: "设置",
     extraLandmarks: [
       {
-        locator: css('[data-screen-label="设置"] > div:nth-child(3)'),
+        locator: css('[data-screen-label="设置"] > div:nth-child(4)'),
         name: "settings-agent-section",
       },
     ],
@@ -1464,23 +1464,53 @@ export const productionOnlyCases: readonly ProductionOnlyCase[] = [
   },
   {
     ...productionContract(
-      [{ id: "landing-root", kind: "visible", locator: css('[data-screen-label="落地页"]') }],
+      [
+        { id: "landing-root", kind: "visible", locator: css('[data-screen-label="落地页"]') },
+        {
+          equals: ["https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg"],
+          id: "canonical-early-access-download",
+          kind: "attribute-set",
+          locator: css(
+            'a[href="https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg"]',
+          ),
+          name: "href",
+        },
+      ],
       [{ locator: css('[data-screen-label="落地页"]'), name: "landing-root" }],
     ),
-    description: "Landing production output before a target URL is approved for CTA actions.",
+    description:
+      "Landing keeps demo controls inert while exposing only the approved Early Access download.",
     id: "landing-production-safe-cta",
     kind: "production-only",
     owner: "landing-ui-001",
     probe: {
       actions: [
+        {
+          locator: css(
+            'a[href="https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg"]',
+            { index: 0 },
+          ),
+          type: "focus",
+        },
+        {
+          locator: css(
+            'a[href="https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg"]',
+            { index: 1 },
+          ),
+          type: "focus",
+        },
+        {
+          locator: css(
+            'a[href="https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg"]',
+            { index: "last" },
+          ),
+          type: "focus",
+        },
         click(text("功能")),
         click(text("Agents")),
         click(text("Memory")),
         click(text("文档", { index: 0 })),
-        click(text("免费下载")),
-        click(text("下载桌面版")),
         click(text("在线体验 →")),
-        click(text("下载 AgentOS")),
         click(text("GitHub ↗")),
         click(text("dougoos.com")),
         click(text("文档", { index: "last" })),

@@ -24,8 +24,8 @@
     "width": 1440
   },
   "dom": {
-    "digest": "880883c1dc6332c3",
-    "visibleElementCount": 379
+    "digest": "9b10c066817672c2",
+    "visibleElementCount": 363
   },
   "externalRequests": [],
   "fonts": {
@@ -96,7 +96,7 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ⚑ 限流方案对比 · 3 agents ⚑ users 表 schema 迁移 项目 ❒ 13_locla_session_manager ▶ 调整 AgentShare 客户端 ◆ 设计 agentshare 大改版方案 ❯ ❒ fyfactor ▶ 我想做个点子或者副业数据库 ◭ 验证 GitHub 子 agent ☿ ❒ douge_ship_tem_2 ▶ ❒ 001_bian_ai ▶ 对话 ▶ 今天 ▶ ◆ 迁移 users 表到新 schema ❯ 重构 auth 中间件为策略模式 昨天 ▶ ⌖ 修复 webapp 构建缓存失效 ◭ API 集成测试补全 更早 ▶ ☿ 重构日志管道与告警 π 依赖升级与安全审计 AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ⚑ 限流方案对比 · 3 agents ⚑ users 表 schema 迁移 ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07"
     },
     {
       "boundingBox": {
@@ -158,7 +158,7 @@
         "width": "240px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ⚑ 限流方案对比 · 3 agents ⚑ users 表 schema 迁移 项目 ❒ 13_locla_session_manager ▶ 调整 AgentShare 客户端 ◆ 设计 agentshare 大改版方案 ❯ ❒ fyfactor ▶ 我想做个点子或者副业数据库 ◭ 验证 GitHub 子 agent ☿ ❒ douge_ship_tem_2 ▶ ❒ 001_bian_ai ▶ 对话 ▶ 今天 ▶ ◆ 迁移 users 表到新 schema ❯ 重构 auth 中间件为策略模式 昨天 ▶ ⌖ 修复 webapp 构建缓存失效 ◭ API 集成测试补全 更早 ▶ ☿ 重构日志管道与告警 π 依赖升级与安全审计 AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ⚑ 限流方案对比 · 3 agents ⚑ users 表 schema 迁移 ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07"
     },
     {
       "boundingBox": {
@@ -282,15 +282,15 @@
         "width": "1200px",
         "z-index": "auto"
       },
-      "text": "下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Code ▼ ⌂~▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
+      "text": "下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Code ▼ ⌂对话▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 219863,
+    "bytes": 213965,
     "path": "screenshots/saas-sidebar-pinned-open--saas-1440x900.png",
-    "sha256": "a8c1b70db96f8a11cfea774531885e94e9dad8702346c99449aa9df8754277f9"
+    "sha256": "fef391c9a5d94bbf81dd6dd0ebceefd1b1024314ede1256a3ed5571d8d758e6e"
   },
   "scroll": {
     "main": "top",
@@ -298,7 +298,7 @@
     "sidebar": "middle"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "0718a6d5370d7754f15215a2b77447714aef0b1d66b85ee930b60659f6eee854",
+  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
   "surface": "saas",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",
