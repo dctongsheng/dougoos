@@ -38,7 +38,7 @@ jobs:
 
       - name: Build visual sites
         run: |
-          pnpm --filter @dougoos/web build
+          pnpm -r build
           pnpm --filter @dougoos/web build:visual
 
       - name: Diagnose settings geometry
