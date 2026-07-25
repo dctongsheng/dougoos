@@ -1,5 +1,13 @@
 import { featureFixtures } from "./feature-fixtures.js";
-import type { AgentFixture, AgentId, SaasDataSource, SaasFixture } from "./types.js";
+import type {
+  AgentFixture,
+  AgentId,
+  SaasDataSnapshot,
+  SaasDataSource,
+  SaasFixture,
+} from "./types.js";
+
+export const FIXTURE_CONVERSATION_DIRECTORY = "/Users/ryo/Documents/Dogoos";
 
 export const agentFixtures: readonly AgentFixture[] = [
   {
@@ -90,29 +98,6 @@ export const agentFixtures: readonly AgentFixture[] = [
 
 export const saasFixture: SaasFixture = {
   agents: agentFixtures,
-  conversations: [
-    {
-      label: "今天",
-      sessions: [
-        { agentId: "claude", title: "迁移 users 表到新 schema" },
-        { agentId: "codex", title: "重构 auth 中间件为策略模式" },
-      ],
-    },
-    {
-      label: "昨天",
-      sessions: [
-        { agentId: "cursor", title: "修复 webapp 构建缓存失效" },
-        { agentId: "grok", title: "API 集成测试补全" },
-      ],
-    },
-    {
-      label: "更早",
-      sessions: [
-        { agentId: "hermes", title: "重构日志管道与告警" },
-        { agentId: "pi", title: "依赖升级与安全审计" },
-      ],
-    },
-  ],
   features: featureFixtures,
   notifications: [
     {
@@ -141,37 +126,58 @@ export const saasFixture: SaasFixture = {
     },
   ],
   projects: [
-    { name: "webapp", path: "~/dev/webapp" },
-    { name: "api-server", path: "~/dev/api-server" },
-    { name: "ml-pipeline", path: "~/dev/ml-pipeline" },
-    { name: "dotfiles", path: "~/dotfiles" },
-  ],
-  sidebarProjects: [
     {
+      id: "conversation",
       initiallyOpen: true,
-      name: "13_locla_session_manager",
+      kind: "conversation",
+      name: "对话",
+      path: FIXTURE_CONVERSATION_DIRECTORY,
       sessions: [
-        { agentId: "claude", title: "调整 AgentShare 客户端" },
-        { agentId: "codex", title: "设计 agentshare 大改版方案" },
+        { agentId: "claude", title: "迁移 users 表到新 schema" },
+        { agentId: "codex", title: "重构 auth 中间件为策略模式" },
+        { agentId: "cursor", title: "修复 webapp 构建缓存失效" },
+        { agentId: "grok", title: "API 集成测试补全" },
+        { agentId: "hermes", title: "重构日志管道与告警" },
+        { agentId: "pi", title: "依赖升级与安全审计" },
       ],
     },
     {
+      id: "directory:webapp",
       initiallyOpen: true,
-      name: "fyfactor",
+      kind: "directory",
+      name: "webapp",
+      path: "~/dev/webapp",
       sessions: [
-        { agentId: "grok", title: "我想做个点子或者副业数据库" },
+        { agentId: "claude", title: "调整 AgentShare 客户端" },
+        { agentId: "cursor", title: "落地页动效与模板重构" },
+      ],
+    },
+    {
+      id: "directory:api-server",
+      initiallyOpen: false,
+      kind: "directory",
+      name: "api-server",
+      path: "~/dev/api-server",
+      sessions: [
+        { agentId: "codex", title: "设计 agentshare 大改版方案" },
         { agentId: "hermes", title: "验证 GitHub 子 agent" },
       ],
     },
     {
+      id: "directory:ml-pipeline",
       initiallyOpen: false,
-      name: "douge_ship_tem_2",
-      sessions: [{ agentId: "cursor", title: "落地页动效与模板重构" }],
+      kind: "directory",
+      name: "ml-pipeline",
+      path: "~/dev/ml-pipeline",
+      sessions: [{ agentId: "pi", title: "边缘推理 API 选型调研" }],
     },
     {
+      id: "directory:dotfiles",
       initiallyOpen: false,
-      name: "001_bian_ai",
-      sessions: [{ agentId: "pi", title: "边缘推理 API 选型调研" }],
+      kind: "directory",
+      name: "dotfiles",
+      path: "~/dotfiles",
+      sessions: [],
     },
   ],
   suggestions: [
@@ -184,14 +190,9 @@ export const saasFixture: SaasFixture = {
 
 export const cloneSaasFixture = (): SaasFixture => ({
   agents: saasFixture.agents.map((agent) => ({ ...agent })),
-  conversations: saasFixture.conversations.map((group) => ({
-    ...group,
-    sessions: group.sessions.map((session) => ({ ...session })),
-  })),
   features: structuredClone(saasFixture.features),
   notifications: saasFixture.notifications.map((notification) => ({ ...notification })),
-  projects: saasFixture.projects.map((project) => ({ ...project })),
-  sidebarProjects: saasFixture.sidebarProjects.map((project) => ({
+  projects: saasFixture.projects.map((project) => ({
     ...project,
     sessions: project.sessions.map((session) => ({ ...session })),
   })),
@@ -200,23 +201,47 @@ export const cloneSaasFixture = (): SaasFixture => ({
 
 export class FixtureDataSource implements SaasDataSource {
   readonly mode = "fixture" as const;
+  readonly #listeners = new Set<(snapshot: SaasDataSnapshot) => void>();
 
-  async execute(_command: Parameters<SaasDataSource["execute"]>[0], signal: AbortSignal) {
+  #conversationDirectory = FIXTURE_CONVERSATION_DIRECTORY;
+  #revision = 1;
+
+  #snapshot(): SaasDataSnapshot {
+    const fixture = cloneSaasFixture();
+    return {
+      conversationDirectory: this.#conversationDirectory,
+      fixture: {
+        ...fixture,
+        projects: fixture.projects.map((project) =>
+          project.kind === "conversation"
+            ? { ...project, path: this.#conversationDirectory }
+            : project,
+        ),
+      },
+      revision: this.#revision,
+    };
+  }
+
+  async execute(command: Parameters<SaasDataSource["execute"]>[0], signal: AbortSignal) {
     await Promise.resolve();
     if (signal.aborted) throw new DOMException("Fixture command aborted", "AbortError");
+    if (command.name === "preferences.conversation-directory.update") {
+      this.#conversationDirectory = command.conversationDirectory;
+      this.#revision += 1;
+      const snapshot = this.#snapshot();
+      for (const listener of this.#listeners) listener(snapshot);
+    }
   }
 
   async getSnapshot(signal: AbortSignal) {
     await Promise.resolve();
     if (signal.aborted) throw new DOMException("Fixture load aborted", "AbortError");
-    return {
-      fixture: cloneSaasFixture(),
-      revision: 1,
-    };
+    return this.#snapshot();
   }
 
-  subscribe(): () => void {
-    return () => undefined;
+  subscribe(listener: (snapshot: SaasDataSnapshot) => void): () => void {
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
   }
 }
 

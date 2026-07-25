@@ -58,7 +58,7 @@ const withFeatures = (
  * feature state from describing different revisions.
  *
  * UI-local preferences live outside this replacement (theme, accent, route,
- * sidebar visibility, dashboard visibility, Home draft/path/mode, in-progress
+ * sidebar visibility, dashboard visibility, Home draft/project/mode, in-progress
  * Agent drafts, and shell state), so a live server snapshot cannot silently
  * erase those choices. Rendered messages remain snapshot-owned.
  */
@@ -67,6 +67,7 @@ const replaceSourceSnapshot = (state: SaasState, snapshot: SaasDataSnapshot): Sa
   return {
     ...state,
     chat: snapshot.chat ?? null,
+    conversationDirectory: snapshot.conversationDirectory,
     dataRevision: snapshot.revision,
     features:
       state.features === null
@@ -84,6 +85,7 @@ export const initialSaasState: SaasState = {
   chat: null,
   collapsedSidebar: false,
   connection: { kind: "loading", stage: "正在加载本地工作区…" },
+  conversationDirectory: "",
   dataRevision: null,
   dashboardVisible: true,
   features: null,
@@ -92,7 +94,7 @@ export const initialSaasState: SaasState = {
   homeDraft: "",
   homeMenu: null,
   homeMode: "manual",
-  homePath: "~",
+  homeProject: { kind: "conversation" },
   notificationOpen: false,
   route: { kind: "home" },
   sidebarVisibility: {
@@ -254,8 +256,8 @@ export const saasReducer = (state: SaasState, action: SaasAction): SaasState => 
       };
     case "home.mode":
       return { ...state, homeMenu: null, homeMode: action.mode };
-    case "home.path":
-      return { ...state, homeMenu: null, homePath: action.path };
+    case "home.project":
+      return { ...state, homeMenu: null, homeProject: action.project };
     case "navigate":
       return { ...state, homeMenu: null, notificationOpen: false, route: action.route };
     case "notifications.read":

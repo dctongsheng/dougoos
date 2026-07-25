@@ -276,8 +276,8 @@ Landing 使用一套独立 token，不能直接拿 SaaS light/dark 值替换。
 | 任务编排 | 展开，badge 2 | 收起；定时任务；长程任务 |
 | PROJECTS | 展开 | 整段收起 |
 | 置顶 | 收起 | 展开 2 项 |
-| 项目 | 前 2 项展开 | 每个项目独立展开/收起 |
-| 对话 | 展开，今天/昨天/更早均展开 | 整段或各日期组收起 |
+| 对话（内置项目） | 始终存在且展开 | 独立展开/收起；无历史 Session 时仍保留项目入口 |
+| 目录项目 | 有历史 Session 的项目按最近顺序展示 | 每个项目独立展开/收起 |
 | AGENTS | 展开 | 整段或每个 Agent 的 session tree 收起 |
 | HARNESS | 展开 | 收起；8 子页 |
 | SESSIONS MANAGER | 展开 | 收起；7 子页 |
@@ -288,13 +288,33 @@ Landing 使用一套独立 token，不能直接拿 SaaS light/dark 值替换。
 
 ### 5.2 Home
 
-- 默认 manual，Claude Code，cwd `~`。
+- 默认 manual、Claude Code、项目“对话”。
 - manual/智能路由 segmented control。
 - Agent dropdown：6 个 Agent、状态、dot；与 path dropdown 互斥。
-- Path dropdown：`~`、webapp、api-server、ml-pipeline、dotfiles。
+- 项目 dropdown：第一项固定为“对话”，其后是最近使用过的目录项目与“选择其他项目目录…”。
 - 4 个 suggestion 会填充 textarea。
 - Prototype 发送：仅 Cmd/Ctrl+Enter 或圆形发送按钮。
 - 智能路由使用前端 regex mock；发送后跳 Agent 页面并模拟消息。
+
+#### 5.2.1 内置“对话”项目
+
+“对话”是一个逻辑项目，不是把真实目录名改成中文后的展示别名。合同如下：
+
+这是产品确认的 `production-only` 信息架构扩展；原型中的独立“对话/最近”树和裸 cwd
+选择器只保留为 source evidence，不能覆盖以下生产合同。
+
+1. “对话”始终存在，不依赖是否已有 Session；在 Sidebar `PROJECTS` 下默认展开。
+2. Home 默认选择“对话”，选择器按钮和菜单项都只显示“对话”，不得显示其真实目录。
+3. “对话”的 Session 直接列在该项目下，不再同时复制到独立的“最近/对话”树。
+4. “对话”的真实目录只允许在 Settings 的“对话项目”区域查看和更改。Home 与
+   Sidebar 不得把该路径写入可见文本、`title`、`aria-label` 或 `data-*` 展示属性。
+5. Desktop 的系统默认值是 `join(app.getPath("documents"), "Dogoos")`，通常对应
+   `~/Documents/Dogoos`；传给 Core/Provider 的值必须是展开后的绝对路径，不能传字面量
+   `~`。
+6. 修改目录只影响修改后从“对话”新建的 Session。已有 Session 保留创建时的 `cwd`；
+   不迁移数据库记录，不重写历史 Session，不移动旧目录中的文件。
+7. 普通目录项目仍以各自绝对 `cwd` 创建 Session；选择普通项目不得被“对话目录”的后续
+   修改覆盖。
 
 ### 5.3 Dashboard / Cron / Queue
 
@@ -368,16 +388,19 @@ Hermes 五个 tab 全部可达：
 
 ### 5.8 Settings 长页
 
-视觉基线分 6 个 scroll slice：
+视觉基线分 7 个 scroll slice：
 
 1. Appearance。
-2. Sidebar visibility / 界面自定义。
-3. Agent configuration。
-4. Usage + budget + notifications。
-5. Projects。
-6. Compare。
+2. 对话项目：显示当前目录并可调用 Electron 目录选择器更改。
+3. Sidebar visibility / 界面自定义。
+4. Agent configuration。
+5. Usage + budget + notifications。
+6. Projects。
+7. Compare。
 
-状态包括 dark/light、4 accents、隐藏 sidebar item、6 Agent chip、model 选中、enabled、auto-approve demo、notification toggles、compare adopted。
+状态包括 dark/light、4 accents、对话目录、隐藏 sidebar item、6 Agent chip、model
+选中、enabled、auto-approve demo、notification toggles、compare adopted。对话目录更新的
+选择中、保存中、失败提示和取消选择均须可达；取消不得改变当前目录。
 
 ## 6. Landing 信息架构与状态
 
@@ -414,6 +437,8 @@ Landing 仅有以下真实原型事件：
 | Theme / accent | 本地非敏感展示偏好，可真实保存 |
 | Claude Code/Codex provider 可用性 | `/api/providers` |
 | cwd 选择 | Electron 目录选择 + shared/Core DTO |
+| 内置“对话”项目 | 本地 Preferences + Core DTO；始终存在，Home 默认选中，真实目录只在 Settings 可见 |
+| 对话目录修改 | Electron 目录选择；修改只作用于未来新建 Session，旧 Session 的 `cwd` 不变 |
 | 新建 Claude/Codex session | Core API；只使用本 Goal 已约定的 create contract |
 | 当前 Claude/Codex session 选择与展示 | Core API 的当前 session/snapshot；不等同于恢复历史进程 |
 | Claude/Codex composer 发送 | shared/Core DTO 创建 Turn；发送态、busy 与错误来自真实 Core |
@@ -434,7 +459,7 @@ Landing 仅有以下真实原型事件：
 | Grok/Cursor/Pi/Hermes 页面与状态 | 本 Goal 只实现 Claude/Codex adapter |
 | 原型中的 Claude/Codex/Grok/Cursor/Pi/Hermes History 列表与历史内容 | 固定 fixture；不是 Core session catalog，也不证明历史进程可恢复 |
 | Dashboard 聚合 KPI/card fixture | P2+ 数据面 |
-| PROJECTS/Pinned/Conversation fixture tree | 外部 collector/项目管理后置 |
+| Pinned / 普通目录项目 fixture tree | 外部 collector/项目管理后置；不包含真实的内置“对话”项目语义 |
 | Sessions Manager 7 页 | P2/P5 |
 | Harness 8 页 | P3/P6 |
 | Memory 全页 | P7 |
@@ -531,6 +556,18 @@ Landing 登录、Cloud Sync、API Key 同理：可见结构必须复刻，但不
 ### 9.6 文案边界
 
 Landing 原型写“你的会话数据永远不离开你的机器”，架构允许未来严格 allowlist 的伪匿名 metrics。生产发布前应由产品确认文案；本任务不改原型 reference。
+
+### 9.7 内置“对话”项目与原型树冲突
+
+原型把目录项目和“对话/最近”渲染为两棵树，并在 Home 直接展示 cwd。生产合同已明确改为：
+“对话”是 `PROJECTS` 下始终存在的内置项目，Home 只显示逻辑名称，真实目录只在
+Settings 可见。
+
+- 不修改或重录原型 source reference 来伪造一致。
+- 为 Home 默认“对话”、空对话项目、Sidebar 展开态和 Settings 目录状态增加独立
+  `production-only` case。
+- 语义断言必须确认 Home/Sidebar DOM 不包含对话真实路径，而 Settings 可以读取该路径。
+- 目录修改回归必须确认只有后续新 Session 使用新 `cwd`，已有 Session 和旧目录文件不变。
 
 ## 10. 视觉 case manifest
 

@@ -5,6 +5,7 @@ import {
   CancelTurnRequestSchema,
   CancelTurnResponseSchema,
   CONTRACT_LIMITS,
+  ConversationDirectorySchema,
   CreateSessionRequestSchema,
   CreateSessionResponseSchema,
   CreateTurnRequestSchema,
@@ -15,6 +16,7 @@ import {
   HealthLiveResponseSchema,
   HealthReadyResponseSchema,
   ListProvidersResponseSchema,
+  PreferencesResponseSchema,
   ReplayGapErrorResponseSchema,
   ResolveApprovalRequestSchema,
   ResolveApprovalResponseSchema,
@@ -22,6 +24,7 @@ import {
   SessionBusyErrorResponseSchema,
   SessionSnapshotSchema,
   SnapshotQuerySchema,
+  UpdatePreferencesRequestSchema,
   checkGlobalSnapshotCoverage,
   parseEventStreamAfterSeq,
   redactDiagnosticText,
@@ -130,6 +133,47 @@ function promptPartsForUtf8Bytes(totalBytes: number) {
 }
 
 describe("REST request and response DTOs", () => {
+  it("accepts only strict absolute conversation-directory preferences", () => {
+    for (const conversationDirectory of [
+      "/Users/alice/Documents/Dogoos",
+      "C:\\Users\\alice\\Documents\\Dogoos",
+      "\\\\server\\share\\Dogoos",
+    ]) {
+      expect(ConversationDirectorySchema.safeParse(conversationDirectory).success).toBe(true);
+      expect(PreferencesResponseSchema.safeParse({ conversationDirectory }).success).toBe(true);
+      expect(UpdatePreferencesRequestSchema.safeParse({ conversationDirectory }).success).toBe(
+        true,
+      );
+    }
+
+    for (const conversationDirectory of [
+      "",
+      ".",
+      "../Dogoos",
+      "~/Documents/Dogoos",
+      "Documents/Dogoos",
+      "/tmp/Dogoos\u0000other",
+      "x".repeat(CONTRACT_LIMITS.pathChars + 1),
+    ]) {
+      expect(
+        UpdatePreferencesRequestSchema.safeParse({ conversationDirectory }).success,
+        conversationDirectory,
+      ).toBe(false);
+    }
+    expect(
+      UpdatePreferencesRequestSchema.safeParse({
+        conversationDirectory: "/tmp/Dogoos",
+        unexpected: true,
+      }).success,
+    ).toBe(false);
+    expect(
+      PreferencesResponseSchema.safeParse({
+        conversationDirectory: "/tmp/Dogoos",
+        source: "desktop",
+      }).success,
+    ).toBe(false);
+  });
+
   it("parses health responses without leaking readiness internals", () => {
     expect(
       HealthLiveResponseSchema.safeParse({

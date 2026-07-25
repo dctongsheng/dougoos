@@ -52,6 +52,7 @@ async function start(command: Extract<CoreWorkerCommand, { type: "core.start" }>
         appVersion: command.appVersion,
         bearerToken: command.token,
         databasePath: command.databasePath,
+        defaultConversationDirectory: command.defaultConversationDirectory,
         registry: createRegistry(dirname(command.databasePath)),
       });
       await candidate.ready;

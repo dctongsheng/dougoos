@@ -74,7 +74,7 @@ function registerIpc(manager: CoreProcessManager): void {
     if (window === null) throw new Error("Untrusted renderer");
     const result = await dialog.showOpenDialog(window, {
       properties: ["openDirectory", "createDirectory"],
-      title: "选择 Agent 工作目录",
+      title: "选择项目目录",
     });
     return result.canceled ? null : (result.filePaths[0] ?? null);
   });
@@ -136,6 +136,9 @@ async function startDesktop(): Promise<void> {
     appVersion: app.getVersion(),
     databasePath:
       process.env.DOUGOOS_DATABASE_PATH ?? join(app.getPath("userData"), "dougoos.sqlite"),
+    defaultConversationDirectory:
+      process.env.DOUGOOS_DEFAULT_CONVERSATION_DIRECTORY ??
+      join(app.getPath("documents"), "Dogoos"),
     spawn: () =>
       utilityProcess.fork(runtimePath("core-worker.js"), [], {
         cwd: app.getPath("userData"),

@@ -351,12 +351,12 @@ export function ProjectsPage({ fixture }: OperationsPageProps) {
       <section className="panel section-panel">
         <h1>项目</h1>
         {fixture.projects.map((project) => (
-          <div className="project-row" key={project.name}>
-            <span aria-hidden="true">❒</span>
+          <div className="project-row" key={project.id}>
+            <span aria-hidden="true">{project.kind === "conversation" ? "◫" : "❒"}</span>
             <strong>{project.name}</strong>
-            <code>{project.path}</code>
+            {project.kind === "directory" ? <code>{project.path}</code> : <span />}
             <small>
-              {fixture.agents.filter((agent) => agent.cwd === project.path).length} agents
+              {project.sessions.length} {project.kind === "conversation" ? "个对话" : "sessions"}
             </small>
           </div>
         ))}

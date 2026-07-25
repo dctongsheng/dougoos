@@ -8,6 +8,7 @@ import {
   AgentEventEnvelopeSchema,
   AgentRuntimeEventSchema,
   CONTRACT_LIMITS,
+  ConversationDirectorySchema,
   CreateTurnRequestSchema,
   DeviceIdentityResponseSchema,
   EventIdSchema,
@@ -67,6 +68,7 @@ export const SQLITE_SYNCHRONOUS = "FULL" as const;
 export const SQLITE_WAL_AUTOCHECKPOINT_PAGES = 1_000;
 export const JOURNAL_RETENTION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1_000;
 export const JOURNAL_RETENTION_MAX_EVENTS = 100_000;
+const CONVERSATION_DIRECTORY_SETTING_KEY = "conversation.directory";
 const JOURNAL_RETENTION_MAX_CONFIGURABLE_AGE_MS = 10 * 365 * 24 * 60 * 60 * 1_000;
 
 export interface StorageOpenOptions {
@@ -870,6 +872,36 @@ export class DougoStorage {
     } catch (error) {
       if (isStorageError(error)) throw error;
       throw new StorageError("CORRUPT_READ_MODEL", { cause: error });
+    }
+  }
+
+  getConversationDirectory(): string | null {
+    this.#assertOpen();
+    const row = this.#db
+      .prepare(`SELECT value_json AS valueJson FROM settings WHERE key = ?`)
+      .get(CONVERSATION_DIRECTORY_SETTING_KEY) as { readonly valueJson: string } | undefined;
+    if (row === undefined) return null;
+    try {
+      return ConversationDirectorySchema.parse(JSON.parse(row.valueJson) as unknown);
+    } catch (error) {
+      throw new StorageError("CORRUPT_READ_MODEL", { cause: error });
+    }
+  }
+
+  setConversationDirectory(conversationDirectory: string): string {
+    this.#assertOpen();
+    const parsed = parseInput(() => ConversationDirectorySchema.parse(conversationDirectory));
+    try {
+      this.#db
+        .prepare(
+          `INSERT INTO settings(key, value_json)
+           VALUES (?, ?)
+           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
+        )
+        .run(CONVERSATION_DIRECTORY_SETTING_KEY, canonicalJson(parsed));
+      return parsed;
+    } catch (error) {
+      throw asStorageWriteError(error);
     }
   }
 

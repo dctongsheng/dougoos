@@ -2,7 +2,7 @@ import { useRef } from "react";
 import type { CSSProperties } from "react";
 
 import { agentById } from "./fixtures.js";
-import { isAbsoluteWorkspacePath } from "./home-task.js";
+import { isAbsoluteWorkspacePath, resolveHomeProjectCwd } from "./home-task.js";
 import type { SaasAction, SaasState } from "./types.js";
 
 interface HomePageProps {
@@ -33,16 +33,16 @@ export function HomePage({
   const fixture = state.fixture;
   if (fixture === null) throw new Error("HomePage requires loaded fixture data");
   const selectedAgent = agentById(fixture, state.homeAgentId);
-  const pathOptions = [
+  const selectedPath = resolveHomeProjectCwd(state.homeProject, state.conversationDirectory);
+  const directoryPaths = [
     ...new Set([
-      ...(requiresAbsolutePath ? [] : ["~"]),
-      ...(isAbsoluteWorkspacePath(state.homePath) ? [state.homePath] : []),
+      ...(state.homeProject.kind === "directory" ? [state.homeProject.path] : []),
       ...fixture.projects
-        .map((project) => project.path)
-        .filter((path) => !requiresAbsolutePath || isAbsoluteWorkspacePath(path)),
+        .filter((project) => project.kind === "directory")
+        .map((project) => project.path),
     ]),
-  ];
-  const pathIsReady = !requiresAbsolutePath || isAbsoluteWorkspacePath(state.homePath);
+  ].filter((path) => !requiresAbsolutePath || isAbsoluteWorkspacePath(path));
+  const pathIsReady = !requiresAbsolutePath || isAbsoluteWorkspacePath(selectedPath);
   const sendIsReady = state.homeDraft.trim().length > 0 && pathIsReady;
 
   const pickSuggestion = (suggestion: string) => {
@@ -53,7 +53,12 @@ export function HomePage({
     if (writesDisabled || chooseDirectory === undefined) return;
     dispatch({ menu: "path", type: "home.menu" });
     void chooseDirectory().then((selected) => {
-      if (selected !== null) dispatch({ path: selected, type: "home.path" });
+      if (selected !== null) {
+        dispatch({
+          project: { kind: "directory", path: selected },
+          type: "home.project",
+        });
+      }
     });
   };
 
@@ -171,17 +176,40 @@ export function HomePage({
                 type="button"
               >
                 <span aria-hidden="true">⌂</span>
-                <span className="path-value">{state.homePath}</span>
+                <span className="path-value">
+                  {state.homeProject.kind === "conversation" ? "对话" : state.homeProject.path}
+                </span>
                 <span aria-hidden="true">▼</span>
               </button>
               {state.homeMenu === "path" ? (
                 <div className="picker-menu path-menu" role="menu">
-                  {pathOptions.map((path) => (
+                  <button
+                    className={state.homeProject.kind === "conversation" ? "is-selected" : ""}
+                    disabled={writesDisabled}
+                    onClick={() =>
+                      dispatch({ project: { kind: "conversation" }, type: "home.project" })
+                    }
+                    role="menuitem"
+                    type="button"
+                  >
+                    <span aria-hidden="true">◫</span>
+                    <strong>对话</strong>
+                  </button>
+                  {directoryPaths.map((path) => (
                     <button
-                      className={path === state.homePath ? "is-selected" : ""}
+                      className={
+                        state.homeProject.kind === "directory" && path === state.homeProject.path
+                          ? "is-selected"
+                          : ""
+                      }
                       disabled={writesDisabled}
                       key={path}
-                      onClick={() => dispatch({ path, type: "home.path" })}
+                      onClick={() =>
+                        dispatch({
+                          project: { kind: "directory", path },
+                          type: "home.project",
+                        })
+                      }
                       role="menuitem"
                       type="button"
                     >

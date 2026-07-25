@@ -382,11 +382,26 @@ const INITIAL_SCHEMA_SQL = `
   WHERE status = 'pending';
 `;
 
-export const DEFAULT_MIGRATIONS: readonly Migration[] = Object.freeze([
+const SETTINGS_SCHEMA_SQL = `
+  CREATE TABLE settings (
+    key TEXT PRIMARY KEY CHECK (length(key) BETWEEN 1 AND 128),
+    value_json TEXT NOT NULL CHECK (json_valid(value_json))
+  ) STRICT;
+`;
+
+const STORAGE_BASE_MIGRATIONS: readonly Migration[] = Object.freeze([
   Object.freeze({
     expectedCoreSchemaSha256: STORAGE_BASE_CORE_SCHEMA_SHA256,
     id: "storage:0001",
     sql: INITIAL_SCHEMA_SQL,
+  }),
+]);
+
+export const DEFAULT_MIGRATIONS: readonly Migration[] = Object.freeze([
+  ...STORAGE_BASE_MIGRATIONS,
+  Object.freeze({
+    id: "settings:0001",
+    sql: SETTINGS_SCHEMA_SQL,
   }),
 ]);
 
@@ -486,7 +501,7 @@ export function validateMigrationManifest(migrations: readonly Migration[]): voi
       });
     }
   }
-  for (const [index, base] of DEFAULT_MIGRATIONS.entries()) {
+  for (const [index, base] of STORAGE_BASE_MIGRATIONS.entries()) {
     const candidate = migrations[index];
     if (
       candidate === undefined ||

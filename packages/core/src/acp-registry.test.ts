@@ -332,6 +332,7 @@ describe("AcpCoreRegistry", () => {
     const runtime = createCoreRuntime(
       {
         appVersion: "integration-test",
+        defaultConversationDirectory: join(directory, "Dogoos"),
         registry,
         storage,
       },

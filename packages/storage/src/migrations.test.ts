@@ -89,14 +89,45 @@ describe("append-only migration runner and SQLite policy", () => {
     const { directory, filePath } = temporaryPath();
     try {
       const first = openStorage(filePath);
-      expect(first.appliedMigrations.map((migration) => migration.id)).toEqual(["storage:0001"]);
+      expect(first.appliedMigrations.map((migration) => migration.id)).toEqual(
+        DEFAULT_MIGRATIONS.map((migration) => migration.id),
+      );
       first.close();
       const before = readFileSync(filePath);
 
       const second = openStorage(filePath);
-      expect(second.appliedMigrations).toHaveLength(1);
+      expect(second.appliedMigrations).toHaveLength(DEFAULT_MIGRATIONS.length);
       second.close();
       expect(readFileSync(filePath)).toEqual(before);
+    } finally {
+      rmSync(directory, { force: true, recursive: true });
+    }
+  });
+
+  it("upgrades a storage:0001 database with the additive settings module", () => {
+    const { directory, filePath } = temporaryPath();
+    const base = DEFAULT_MIGRATIONS[0];
+    if (base === undefined) throw new Error("storage base migration is missing");
+    try {
+      openStorage(filePath, { migrations: [base] }).close();
+      const upgraded = openStorage(filePath);
+      expect(upgraded.appliedMigrations.map((migration) => migration.id)).toEqual([
+        "storage:0001",
+        "settings:0001",
+      ]);
+      upgraded.close();
+
+      const raw = new BetterSqlite3(filePath, { fileMustExist: true, readonly: true });
+      try {
+        expect(raw.prepare(`SELECT type FROM sqlite_schema WHERE name = 'settings'`).get()).toEqual(
+          { type: "table" },
+        );
+        expect(Number(raw.pragma("user_version", { simple: true }))).toBe(
+          DEFAULT_MIGRATIONS.length,
+        );
+      } finally {
+        raw.close();
+      }
     } finally {
       rmSync(directory, { force: true, recursive: true });
     }
@@ -154,7 +185,7 @@ describe("append-only migration runner and SQLite policy", () => {
       const raw = new BetterSqlite3(filePath, { fileMustExist: true, readonly: true });
       try {
         const applied = raw.prepare(`SELECT id FROM schema_migrations ORDER BY ordinal`).all();
-        expect(applied).toEqual([{ id: "storage:0001" }]);
+        expect(applied).toEqual(DEFAULT_MIGRATIONS.map((migration) => ({ id: migration.id })));
         expect(
           raw
             .prepare(
@@ -163,7 +194,9 @@ describe("append-only migration runner and SQLite policy", () => {
             )
             .get(),
         ).toBeUndefined();
-        expect(Number(raw.pragma("user_version", { simple: true }))).toBe(1);
+        expect(Number(raw.pragma("user_version", { simple: true }))).toBe(
+          DEFAULT_MIGRATIONS.length,
+        );
       } finally {
         raw.close();
       }
@@ -215,8 +248,15 @@ describe("append-only migration runner and SQLite policy", () => {
                  ORDER BY ordinal`,
             )
             .all(),
-        ).toEqual([{ id: "storage:0001", ordinal: 1 }]);
-        expect(Number(raw.pragma("user_version", { simple: true }))).toBe(1);
+        ).toEqual(
+          DEFAULT_MIGRATIONS.map((migration, index) => ({
+            id: migration.id,
+            ordinal: index + 1,
+          })),
+        );
+        expect(Number(raw.pragma("user_version", { simple: true }))).toBe(
+          DEFAULT_MIGRATIONS.length,
+        );
         expect(
           raw
             .prepare(
@@ -291,10 +331,10 @@ describe("append-only migration runner and SQLite policy", () => {
         raw
           .prepare(
             `INSERT INTO schema_migrations(id, ordinal, checksum, applied_at)
-             VALUES ('future:0001', 2, ?, '2026-07-24T00:00:00.000Z')`,
+             VALUES ('future:0001', ?, ?, '2026-07-24T00:00:00.000Z')`,
           )
-          .run("0".repeat(64));
-        raw.pragma("user_version = 2");
+          .run(DEFAULT_MIGRATIONS.length + 1, "0".repeat(64));
+        raw.pragma(`user_version = ${DEFAULT_MIGRATIONS.length + 1}`);
       } finally {
         raw.close();
       }
@@ -529,12 +569,12 @@ describe("append-only migration runner and SQLite policy", () => {
     try {
       const first = openStorage(filePath, { migrations: manifest });
       expect(first.appliedMigrations.map((migration) => migration.id)).toEqual([
-        "storage:0001",
+        ...DEFAULT_MIGRATIONS.map((migration) => migration.id),
         "harness-demo:0001",
       ]);
       first.close();
       const second = openStorage(filePath, { migrations: manifest });
-      expect(second.appliedMigrations).toHaveLength(2);
+      expect(second.appliedMigrations).toHaveLength(DEFAULT_MIGRATIONS.length + 1);
       second.close();
     } finally {
       rmSync(directory, { force: true, recursive: true });
@@ -600,8 +640,15 @@ describe("append-only migration runner and SQLite policy", () => {
       try {
         expect(
           raw.prepare(`SELECT id, ordinal FROM schema_migrations ORDER BY ordinal`).all(),
-        ).toEqual([{ id: "storage:0001", ordinal: 1 }]);
-        expect(Number(raw.pragma("user_version", { simple: true }))).toBe(1);
+        ).toEqual(
+          DEFAULT_MIGRATIONS.map((migration, index) => ({
+            id: migration.id,
+            ordinal: index + 1,
+          })),
+        );
+        expect(Number(raw.pragma("user_version", { simple: true }))).toBe(
+          DEFAULT_MIGRATIONS.length,
+        );
         expect(
           raw
             .prepare(
@@ -655,11 +702,13 @@ describe("append-only migration runner and SQLite policy", () => {
       ];
       try {
         if (mode === "upgrade from storage:0001") {
-          openStorage(filePath).close();
+          const base = DEFAULT_MIGRATIONS[0];
+          if (base === undefined) throw new Error("storage base migration is missing");
+          openStorage(filePath, { migrations: [base] }).close();
         }
         const upgraded = openStorage(filePath, { migrations: manifest });
         expect(upgraded.appliedMigrations.map((migration) => migration.id)).toEqual([
-          "storage:0001",
+          ...DEFAULT_MIGRATIONS.map((migration) => migration.id),
           "storage:0002",
         ]);
         upgraded.close();
@@ -677,7 +726,9 @@ describe("append-only migration runner and SQLite policy", () => {
               )
               .get(),
           ).toEqual({ type: "index" });
-          expect(Number(raw.pragma("user_version", { simple: true }))).toBe(2);
+          expect(Number(raw.pragma("user_version", { simple: true }))).toBe(
+            DEFAULT_MIGRATIONS.length + 1,
+          );
         } finally {
           raw.close();
         }

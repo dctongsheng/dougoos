@@ -17,6 +17,7 @@ import {
   GlobalSeqSchema,
   IsoTimestampSchema,
   OpaqueIdSchema,
+  PathSchema,
   PromptSchema,
   ProviderIdSchema,
   SessionIdSchema,
@@ -104,6 +105,31 @@ export const HealthReadyResponseSchema = z.discriminatedUnion("status", [
   HealthNotReadySchema,
 ]);
 export type HealthReadyResponse = z.infer<typeof HealthReadyResponseSchema>;
+
+const ABSOLUTE_DIRECTORY_PATTERN = /^(?:\/|[A-Za-z]:[\\/]|\\\\[^\\/]+[\\/][^\\/]+)/u;
+
+export const ConversationDirectorySchema = PathSchema.refine(
+  (value) => ABSOLUTE_DIRECTORY_PATTERN.test(value),
+  {
+    error: "conversation directory must be an absolute path",
+  },
+);
+export type ConversationDirectory = z.infer<typeof ConversationDirectorySchema>;
+
+export const PreferencesResponseSchema = z
+  .object({
+    conversationDirectory: ConversationDirectorySchema,
+  })
+  .strict();
+export type PreferencesResponse = z.infer<typeof PreferencesResponseSchema>;
+
+export const UpdatePreferencesRequestSchema = z
+  .object({
+    conversationDirectory: ConversationDirectorySchema,
+  })
+  .strict()
+  .superRefine((value, context) => addBodyLimitIssue(value, context));
+export type UpdatePreferencesRequest = z.infer<typeof UpdatePreferencesRequestSchema>;
 
 export const ListProvidersResponseSchema = z
   .object({
@@ -618,6 +644,7 @@ export type ResetDeviceIdentityResponse = DeviceIdentityResponse;
 export const RestSuccessResponseSchema = z.union([
   HealthLiveResponseSchema,
   HealthReadyResponseSchema,
+  PreferencesResponseSchema,
   ListAgentCliInstallationsResponseSchema,
   ListProvidersResponseSchema,
   ProviderDoctorResponseSchema,

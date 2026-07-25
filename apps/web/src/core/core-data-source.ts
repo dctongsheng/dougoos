@@ -192,6 +192,7 @@ export function fixtureFromCoreState(
   state: CoreViewState,
   providers: readonly Provider[],
   selectedSessionIds: ReadonlyMap<AgentId, string> = new Map(),
+  conversationDirectory = "",
 ): SaasFixture {
   const base = cloneSaasFixture();
   const assignments = assignProviders(providers);
@@ -254,26 +255,38 @@ export function fixtureFromCoreState(
   const summaries = Object.values(state.summaries).sort((left, right) =>
     right.updatedAt.localeCompare(left.updatedAt),
   );
-  const sessions = summaries.flatMap((summary) => {
-    const agentId = assignments.get(summary.providerId);
-    return agentId === undefined
-      ? []
-      : [{ agentId, sessionId: summary.id, title: sessionDisplayTitle(summary) }];
-  });
-  const paths = [...new Set(summaries.map((summary) => summary.cwd))];
-  const projects = paths.map((path) => ({ name: basename(path), path }));
-  const sidebarProjects = paths.map((path) => ({
-    initiallyOpen: true,
-    name: basename(path),
-    sessions: summaries
+  const sessionsForPath = (path: string) =>
+    summaries
       .filter((summary) => summary.cwd === path)
       .flatMap((summary) => {
         const agentId = assignments.get(summary.providerId);
         return agentId === undefined
           ? []
           : [{ agentId, sessionId: summary.id, title: sessionDisplayTitle(summary) }];
-      }),
-  }));
+      });
+  const paths = [
+    ...new Set(
+      summaries.map((summary) => summary.cwd).filter((path) => path !== conversationDirectory),
+    ),
+  ];
+  const projects = [
+    {
+      id: "conversation",
+      initiallyOpen: true,
+      kind: "conversation" as const,
+      name: "对话",
+      path: conversationDirectory,
+      sessions: sessionsForPath(conversationDirectory),
+    },
+    ...paths.map((path) => ({
+      id: `directory:${path}`,
+      initiallyOpen: true,
+      kind: "directory" as const,
+      name: basename(path),
+      path,
+      sessions: sessionsForPath(path),
+    })),
+  ];
   const notifications = Object.values(state.pendingApprovals).map((approval) => {
     const summary = state.summaries[approval.sessionId];
     return {
@@ -306,7 +319,6 @@ export function fixtureFromCoreState(
   return {
     ...base,
     agents,
-    conversations: sessions.length === 0 ? [] : [{ label: "最近", sessions }],
     features: {
       ...base.features,
       agent: {
@@ -317,7 +329,6 @@ export function fixtureFromCoreState(
     },
     notifications,
     projects,
-    sidebarProjects,
   };
 }
 
@@ -381,6 +392,7 @@ export class CoreDataSource implements SaasDataSource {
   #client: CoreApiClient | null = null;
   #cliInstallations: readonly AgentCliInstallation[] = [];
   #closed = false;
+  #conversationDirectory = "";
   #generation = 0;
   #lifecycle: AbortController | null = null;
   #openedSessionIds = new Set<string>();
@@ -435,6 +447,15 @@ export class CoreDataSource implements SaasDataSource {
           this.#cliInstallations = (await client.refreshAgentCliInstallations(signal)).clis;
           this.#publish();
           return;
+        case "preferences.conversation-directory.update": {
+          const preferences = await client.updatePreferences(
+            { conversationDirectory: command.conversationDirectory },
+            signal,
+          );
+          this.#conversationDirectory = preferences.conversationDirectory;
+          this.#publish();
+          return;
+        }
         case "provider.doctor":
           await client.doctor(command.providerId, signal);
           this.#providers = (await client.listProviders(signal)).providers;
@@ -534,8 +555,9 @@ export class CoreDataSource implements SaasDataSource {
     const connection = await this.#connectionProvider.getCoreConnection();
     signal.throwIfAborted();
     const client = new CoreApiClient(connection, this.#fetch);
-    const [ready, providers, cliInstallations, snapshot] = await Promise.all([
+    const [ready, preferences, providers, cliInstallations, snapshot] = await Promise.all([
       client.getReady(signal),
+      client.getPreferences(signal),
       client.listProviders(signal),
       client.listAgentCliInstallations(signal),
       client.getGlobalSnapshot([...this.#openedSessionIds], signal),
@@ -552,6 +574,7 @@ export class CoreDataSource implements SaasDataSource {
       throw new DOMException("Superseded Core load", "AbortError");
     }
     this.#client = client;
+    this.#conversationDirectory = preferences.conversationDirectory;
     this.#providers = providers.providers;
     this.#cliInstallations = cliInstallations.clis;
     this.#state = stateFromGlobalSnapshot(snapshot);
@@ -608,7 +631,13 @@ export class CoreDataSource implements SaasDataSource {
         this.#selectedSessionIds,
         this.#cliInstallations,
       ),
-      fixture: fixtureFromCoreState(state, this.#providers, this.#selectedSessionIds),
+      conversationDirectory: this.#conversationDirectory,
+      fixture: fixtureFromCoreState(
+        state,
+        this.#providers,
+        this.#selectedSessionIds,
+        this.#conversationDirectory,
+      ),
       revision: ++this.#revision,
     };
   }
@@ -822,8 +851,9 @@ export class CoreDataSource implements SaasDataSource {
       const connection = await this.#connectionProvider.getCoreConnection();
       if (lifecycle.signal.aborted || generation !== this.#generation) return;
       const client = new CoreApiClient(connection, this.#fetch);
-      const [ready, providers, cliInstallations, snapshot] = await Promise.all([
+      const [ready, preferences, providers, cliInstallations, snapshot] = await Promise.all([
         client.getReady(lifecycle.signal),
+        client.getPreferences(lifecycle.signal),
         client.listProviders(lifecycle.signal),
         client.listAgentCliInstallations(lifecycle.signal),
         client.getGlobalSnapshot([...this.#openedSessionIds], lifecycle.signal),
@@ -832,6 +862,7 @@ export class CoreDataSource implements SaasDataSource {
         throw new Error("Core restart identity mismatch");
       }
       this.#client = client;
+      this.#conversationDirectory = preferences.conversationDirectory;
       this.#providers = providers.providers;
       this.#cliInstallations = cliInstallations.clis;
       this.#state = stateFromGlobalSnapshot(snapshot);

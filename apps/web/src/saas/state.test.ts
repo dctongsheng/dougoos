@@ -1,19 +1,28 @@
 import { describe, expect, it } from "vitest";
 
-import { saasFixture } from "./fixtures.js";
+import { FIXTURE_CONVERSATION_DIRECTORY, saasFixture } from "./fixtures.js";
 import { routeTask } from "./home-routing.js";
 import { initialSaasState, routeMeta, saasReducer } from "./state.js";
 import type { Route, SidebarVisibilityKey } from "./types.js";
 
 describe("saasReducer", () => {
+  it("starts Home on the logical conversation project", () => {
+    expect(initialSaasState.homeProject).toEqual({ kind: "conversation" });
+  });
+
   it("loads fixture data through the explicit fixture mode boundary", () => {
     const state = saasReducer(initialSaasState, {
       mode: "fixture",
-      snapshot: { fixture: saasFixture, revision: 1 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: saasFixture,
+        revision: 1,
+      },
       type: "data.loaded",
     });
 
     expect(state.fixture).toEqual(saasFixture);
+    expect(state.conversationDirectory).toBe(FIXTURE_CONVERSATION_DIRECTORY);
     expect(state.connection).toEqual({ kind: "ready", mode: "fixture" });
   });
 
@@ -45,7 +54,11 @@ describe("saasReducer", () => {
   it("marks notification fixture rows read without mutating the source fixture", () => {
     const loaded = saasReducer(initialSaasState, {
       mode: "fixture",
-      snapshot: { fixture: saasFixture, revision: 1 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: saasFixture,
+        revision: 1,
+      },
       type: "data.loaded",
     });
     const read = saasReducer(loaded, { type: "notifications.mark-all" });
@@ -57,7 +70,11 @@ describe("saasReducer", () => {
   it("persists every Settings visibility row and cross-route mutable feature state", () => {
     const loaded = saasReducer(initialSaasState, {
       mode: "fixture",
-      snapshot: { fixture: saasFixture, revision: 1 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: saasFixture,
+        revision: 1,
+      },
       type: "data.loaded",
     });
     const visibilityKeys: readonly SidebarVisibilityKey[] = [
@@ -118,13 +135,18 @@ describe("saasReducer", () => {
   it("supports real snapshots and clears source-owned state during source replacement", () => {
     const loaded = saasReducer(initialSaasState, {
       mode: "real",
-      snapshot: { fixture: saasFixture, revision: 1 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: saasFixture,
+        revision: 1,
+      },
       type: "data.loaded",
     });
     const replacing = saasReducer(loaded, { type: "data.source-changing" });
     const replaced = saasReducer(replacing, {
       mode: "real",
       snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
         fixture: {
           ...saasFixture,
           suggestions: ["source-b"],
@@ -143,7 +165,11 @@ describe("saasReducer", () => {
   it("atomically replaces every source-derived feature while preserving UI-local preferences", () => {
     const loaded = saasReducer(initialSaasState, {
       mode: "real",
-      snapshot: { fixture: saasFixture, revision: 1 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: saasFixture,
+        revision: 1,
+      },
       type: "data.loaded",
     });
     const themed = saasReducer(
@@ -203,7 +229,11 @@ describe("saasReducer", () => {
       suggestions: ["LIVE_R2"],
     };
     const updated = saasReducer(locallyMutated, {
-      snapshot: { fixture: revisionTwoFixture, revision: 2 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: revisionTwoFixture,
+        revision: 2,
+      },
       type: "data.snapshot",
     });
 
@@ -224,6 +254,7 @@ describe("saasReducer", () => {
 
     const stale = saasReducer(updated, {
       snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
         fixture: { ...saasFixture, suggestions: ["STALE_R1"] },
         revision: 1,
       },
@@ -231,6 +262,7 @@ describe("saasReducer", () => {
     });
     const duplicate = saasReducer(updated, {
       snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
         fixture: { ...saasFixture, suggestions: ["DUPLICATE_R2"] },
         revision: 2,
       },
@@ -246,12 +278,20 @@ describe("saasReducer", () => {
       suggestions: ["SUBSCRIPTION_R2"],
     };
     const subscribed = saasReducer(initialSaasState, {
-      snapshot: { fixture: revisionTwoFixture, revision: 2 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: revisionTwoFixture,
+        revision: 2,
+      },
       type: "data.snapshot",
     });
     const lateInitialLoad = saasReducer(subscribed, {
       mode: "real",
-      snapshot: { fixture: saasFixture, revision: 1 },
+      snapshot: {
+        conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+        fixture: saasFixture,
+        revision: 1,
+      },
       type: "data.loaded",
     });
 

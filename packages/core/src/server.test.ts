@@ -1,5 +1,5 @@
 import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { ProviderSchema, type ProviderDoctorResult } from "@dougoos/shared";
@@ -127,6 +127,14 @@ describe("real loopback Core server", () => {
     });
     expect(providers.status).toBe(200);
     expect(await providers.json()).toEqual({ providers: [PROVIDER] });
+
+    const preferences = await fetch(`${url}/api/preferences`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(preferences.status).toBe(200);
+    expect(await preferences.json()).toEqual({
+      conversationDirectory: join(homedir(), "Documents", "Dogoos"),
+    });
 
     await expect(server.close()).resolves.toBeUndefined();
     await expect(server.close()).resolves.toBeUndefined();

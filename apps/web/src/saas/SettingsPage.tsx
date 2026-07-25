@@ -15,6 +15,7 @@ import type {
 
 interface SettingsPageProps {
   readonly chat: ChatViewSnapshot | null;
+  readonly chooseDirectory: () => Promise<string | null>;
   readonly dataMode: DataMode;
   readonly dispatch: (action: SaasAction) => void;
   readonly execute: (command: SaasDataCommand) => Promise<void>;
@@ -22,6 +23,27 @@ interface SettingsPageProps {
   readonly initialAgentId: AgentId;
   readonly state: SaasState;
   readonly writesDisabled: boolean;
+}
+
+interface ConversationDirectoryUpdateInput {
+  readonly chooseDirectory: () => Promise<string | null>;
+  readonly execute: (command: SaasDataCommand) => Promise<void>;
+  readonly onDirectorySelected?: () => void;
+}
+
+export async function chooseAndUpdateConversationDirectory({
+  chooseDirectory,
+  execute,
+  onDirectorySelected,
+}: ConversationDirectoryUpdateInput): Promise<"cancelled" | "updated"> {
+  const selectedPath = await chooseDirectory();
+  if (selectedPath === null) return "cancelled";
+  onDirectorySelected?.();
+  await execute({
+    conversationDirectory: selectedPath,
+    name: "preferences.conversation-directory.update",
+  });
+  return "updated";
 }
 
 const visibilityKeyByName: Readonly<Record<string, "dashboard" | SidebarVisibilityKey>> = {
@@ -51,6 +73,7 @@ const visibilityKeyByName: Readonly<Record<string, "dashboard" | SidebarVisibili
 
 export function SettingsPage({
   chat,
+  chooseDirectory,
   dataMode,
   dispatch,
   execute,
@@ -59,6 +82,10 @@ export function SettingsPage({
   state,
   writesDisabled,
 }: SettingsPageProps) {
+  const [conversationDirectoryError, setConversationDirectoryError] = useState<string | null>(null);
+  const [conversationDirectoryUpdate, setConversationDirectoryUpdate] = useState<
+    "choosing" | "idle" | "saving"
+  >("idle");
   const [refreshingClis, setRefreshingClis] = useState(false);
   const settingsFixture = fixture.features.settings;
   const settingsState = state.features;
@@ -138,6 +165,61 @@ export function SettingsPage({
             </div>
           </div>
         </div>
+      </section>
+
+      <section
+        aria-labelledby="conversation-project-heading"
+        className="panel settings-section conversation-project-settings-section"
+      >
+        <header>
+          <div>
+            <h2 id="conversation-project-heading">对话项目</h2>
+            <p>新建对话默认在这个目录中运行，Agent 可以在这里读取和创建文件。</p>
+          </div>
+          <span>内置项目</span>
+        </header>
+        <div className="conversation-directory-card">
+          <span aria-hidden="true" className="conversation-project-icon">
+            ◇
+          </span>
+          <div>
+            <strong>对话目录</strong>
+            <code aria-label="当前对话目录" title={state.conversationDirectory}>
+              {state.conversationDirectory || "目录尚未加载"}
+            </code>
+            <small>修改只影响之后新建的对话，不会移动已有对话或文件。</small>
+          </div>
+          <button
+            aria-label="更改对话项目目录"
+            disabled={writesDisabled || conversationDirectoryUpdate !== "idle"}
+            onClick={() => {
+              if (writesDisabled || conversationDirectoryUpdate !== "idle") return;
+              setConversationDirectoryError(null);
+              setConversationDirectoryUpdate("choosing");
+              void chooseAndUpdateConversationDirectory({
+                chooseDirectory,
+                execute,
+                onDirectorySelected: () => setConversationDirectoryUpdate("saving"),
+              })
+                .catch(() => {
+                  setConversationDirectoryError("无法更新对话目录，请重试。");
+                })
+                .finally(() => setConversationDirectoryUpdate("idle"));
+            }}
+            type="button"
+          >
+            {conversationDirectoryUpdate === "choosing"
+              ? "选择中…"
+              : conversationDirectoryUpdate === "saving"
+                ? "保存中…"
+                : "选择目录"}
+          </button>
+        </div>
+        {conversationDirectoryError === null ? null : (
+          <p className="conversation-directory-error" role="alert">
+            {conversationDirectoryError}
+          </p>
+        )}
       </section>
 
       <section className="panel settings-section customize-section">

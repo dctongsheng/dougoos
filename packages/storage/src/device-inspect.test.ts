@@ -230,10 +230,12 @@ describe("safe database inspector", () => {
     try {
       openStorage(databasePath, { migrations: manifest }).close();
       expect(inspectDatabase(databasePath).migrations.map((migration) => migration.id)).toEqual([
-        "storage:0001",
+        ...DEFAULT_MIGRATIONS.map((migration) => migration.id),
         "harness-demo:0001",
       ]);
-      expect(inspectDatabase(databasePath, manifest).migrations).toHaveLength(2);
+      expect(inspectDatabase(databasePath, manifest).migrations).toHaveLength(
+        DEFAULT_MIGRATIONS.length + 1,
+      );
       expectCode(() => inspectDatabase(databasePath, DEFAULT_MIGRATIONS), "MIGRATION_UNKNOWN");
 
       const raw = new BetterSqlite3(databasePath);
@@ -278,7 +280,9 @@ describe("safe database inspector", () => {
       const before = directoryHashes(directory);
 
       const inspection = inspectDatabase(databasePath);
-      expect(inspection.migrations.map((migration) => migration.id)).toEqual(["storage:0001"]);
+      expect(inspection.migrations.map((migration) => migration.id)).toEqual(
+        DEFAULT_MIGRATIONS.map((migration) => migration.id),
+      );
       expect(inspection.counts.devices).toBe(1);
       expect(directoryHashes(directory)).toEqual(before);
     } finally {

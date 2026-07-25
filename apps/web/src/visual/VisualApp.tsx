@@ -9,7 +9,7 @@ import type {
   SaasDataSnapshot,
   SaasFixture,
 } from "../saas/types.js";
-import { FixtureDataSource } from "../saas/fixtures.js";
+import { FIXTURE_CONVERSATION_DIRECTORY, FixtureDataSource } from "../saas/fixtures.js";
 import type { AgentMessage } from "../saas/feature-fixtures.js";
 
 export const visualScenarioIds = [
@@ -199,6 +199,7 @@ class SourceSwapDataSource implements SaasDataSource {
             suggestions: [`${this.label}_R${revision}`],
           };
     return {
+      conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
       fixture,
       revision,
     };

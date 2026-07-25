@@ -3,7 +3,11 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { AgentPage } from "./AgentPage.js";
 import { FixtureDataSource } from "./fixtures.js";
 import { HomePage } from "./HomePage.js";
-import { buildHomeChatCommand, isAbsoluteWorkspacePath } from "./home-task.js";
+import {
+  buildHomeChatCommand,
+  isAbsoluteWorkspacePath,
+  resolveHomeProjectCwd,
+} from "./home-task.js";
 import { HarnessPage } from "./HarnessPage.js";
 import { routeTask } from "./home-routing.js";
 import { MemoryPage } from "./MemoryPage.js";
@@ -267,11 +271,12 @@ export function App({ dataSource, initialRoute, runtimePresentation }: AppProps)
       ? requestedAgentId
       : state.homeAgentId;
     const provider = state.chat?.providers.find((candidate) => candidate.agentId === agentId);
+    const homeCwd = resolveHomeProjectCwd(state.homeProject, state.conversationDirectory);
     const command =
       source.mode === "real"
         ? buildHomeChatCommand({
             agentId,
-            cwd: state.homePath,
+            cwd: homeCwd,
             provider,
             requestId: crypto.randomUUID(),
             text,
@@ -279,9 +284,7 @@ export function App({ dataSource, initialRoute, runtimePresentation }: AppProps)
         : null;
     if (source.mode === "real" && command === null) return;
     const launchCwd =
-      source.mode === "real" && isAbsoluteWorkspacePath(state.homePath)
-        ? state.homePath
-        : undefined;
+      source.mode === "real" && isAbsoluteWorkspacePath(homeCwd) ? homeCwd : undefined;
     dispatch({ draft: "", type: "home.draft" });
     dispatch({ agentId, draft: command === null ? text : "", type: "agent.draft" });
     dispatch({
@@ -415,6 +418,7 @@ export function App({ dataSource, initialRoute, runtimePresentation }: AppProps)
           ) : state.route.kind === "settings" ? (
             <SettingsPage
               chat={state.chat}
+              chooseDirectory={() => source.chooseDirectory?.() ?? Promise.resolve(null)}
               dataMode={source.mode}
               dispatch={dispatch}
               execute={execute}

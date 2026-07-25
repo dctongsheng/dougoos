@@ -104,7 +104,6 @@ function NavButton({
 export function Shell({ children, dispatch, onSessionSelect, state, writesDisabled }: ShellProps) {
   const [sections, setSections] = useState({
     agents: true,
-    conversations: true,
     harness: true,
     projects: true,
     queue: true,
@@ -271,105 +270,59 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
                       </button>
                     </details>
                   ) : null}
-                  {state.sidebarVisibility["project-list"] ? (
-                    <>
-                      <p className="tree-label">项目</p>
-                      {fixture.sidebarProjects.map((project) => (
-                        <details
-                          className="project-tree"
-                          key={project.name}
-                          open={project.initiallyOpen}
-                        >
-                          <summary>
-                            <span aria-hidden="true" className="project-icon">
-                              ❒
-                            </span>
-                            <span className="project-name">{project.name}</span>
-                          </summary>
-                          {project.sessions.map((session) => {
-                            const sessionAgent = agentById(fixture, session.agentId);
-                            return (
-                              <button
-                                data-session-id={session.sessionId}
-                                key={`${project.name}-${session.sessionId ?? session.title}`}
-                                onClick={() => {
-                                  if (state.chat !== null && session.sessionId !== undefined) {
-                                    onSessionSelect(session.agentId, session.sessionId);
-                                    return;
-                                  }
-                                  navigate({
-                                    agentId: session.agentId,
-                                    kind: "agent",
-                                    tab: "session",
-                                  });
-                                }}
-                                type="button"
-                              >
-                                <span>{session.title}</span>
-                                <span
-                                  className="agent-glyph tree-agent"
-                                  style={{ "--agent-tone": sessionAgent.tone } as CSSProperties}
-                                >
-                                  {sessionAgent.glyph}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </details>
-                      ))}
-                    </>
-                  ) : null}
-                  {state.sidebarVisibility["project-conversations"] ? (
-                    <>
-                      <button
-                        aria-expanded={sections.conversations}
-                        className="tree-label conversation-heading"
-                        onClick={() => toggleSection("conversations")}
-                        type="button"
+                  {fixture.projects
+                    .filter((project) =>
+                      project.kind === "conversation"
+                        ? state.sidebarVisibility["project-conversations"]
+                        : state.sidebarVisibility["project-list"],
+                    )
+                    .map((project) => (
+                      <details
+                        className={
+                          project.kind === "conversation"
+                            ? "project-tree conversation-project"
+                            : "project-tree"
+                        }
+                        key={project.id}
+                        open={project.initiallyOpen}
                       >
-                        对话
-                        <span className={sections.conversations ? "is-open" : ""}>▶</span>
-                      </button>
-                      {sections.conversations
-                        ? fixture.conversations.map((group) => (
-                            <details className="conversation-tree" key={group.label} open>
-                              <summary>
-                                <span>{group.label}</span>
-                              </summary>
-                              {group.sessions.map((session) => {
-                                const sessionAgent = agentById(fixture, session.agentId);
-                                return (
-                                  <button
-                                    data-session-id={session.sessionId}
-                                    key={`${group.label}-${session.sessionId ?? session.title}`}
-                                    onClick={() => {
-                                      if (state.chat !== null && session.sessionId !== undefined) {
-                                        onSessionSelect(session.agentId, session.sessionId);
-                                        return;
-                                      }
-                                      navigate({
-                                        agentId: session.agentId,
-                                        kind: "agent",
-                                        tab: "session",
-                                      });
-                                    }}
-                                    type="button"
-                                  >
-                                    <span
-                                      className="agent-glyph tree-agent"
-                                      style={{ "--agent-tone": sessionAgent.tone } as CSSProperties}
-                                    >
-                                      {sessionAgent.glyph}
-                                    </span>
-                                    <span>{session.title}</span>
-                                  </button>
-                                );
-                              })}
-                            </details>
-                          ))
-                        : null}
-                    </>
-                  ) : null}
+                        <summary>
+                          <span aria-hidden="true" className="project-icon">
+                            {project.kind === "conversation" ? "◫" : "❒"}
+                          </span>
+                          <span className="project-name">{project.name}</span>
+                        </summary>
+                        {project.sessions.map((session) => {
+                          const sessionAgent = agentById(fixture, session.agentId);
+                          return (
+                            <button
+                              data-session-id={session.sessionId}
+                              key={`${project.id}-${session.sessionId ?? session.title}`}
+                              onClick={() => {
+                                if (state.chat !== null && session.sessionId !== undefined) {
+                                  onSessionSelect(session.agentId, session.sessionId);
+                                  return;
+                                }
+                                navigate({
+                                  agentId: session.agentId,
+                                  kind: "agent",
+                                  tab: "session",
+                                });
+                              }}
+                              type="button"
+                            >
+                              <span>{session.title}</span>
+                              <span
+                                className="agent-glyph tree-agent"
+                                style={{ "--agent-tone": sessionAgent.tone } as CSSProperties}
+                              >
+                                {sessionAgent.glyph}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </details>
+                    ))}
                 </>
               ) : null}
             </>

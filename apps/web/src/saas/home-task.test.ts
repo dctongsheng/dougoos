@@ -4,6 +4,7 @@ import type { ChatProviderView } from "./types.js";
 import {
   buildHomeChatCommand,
   isAbsoluteWorkspacePath,
+  resolveHomeProjectCwd,
   resolveInitialAgentCwd,
 } from "./home-task.js";
 
@@ -16,6 +17,18 @@ const provider: ChatProviderView = {
 };
 
 describe("Home task handoff", () => {
+  it("resolves the built-in conversation project without exposing its directory as UI state", () => {
+    expect(resolveHomeProjectCwd({ kind: "conversation" }, "/Users/tester/Documents/Dogoos")).toBe(
+      "/Users/tester/Documents/Dogoos",
+    );
+    expect(
+      resolveHomeProjectCwd(
+        { kind: "directory", path: "/workspace/project-b" },
+        "/Users/tester/Documents/Dogoos",
+      ),
+    ).toBe("/workspace/project-b");
+  });
+
   it("creates one chat command with the Agent and absolute project selected on Home", () => {
     expect(
       buildHomeChatCommand({

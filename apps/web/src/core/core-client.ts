@@ -7,6 +7,7 @@ import {
   HealthReadyResponseSchema,
   ListAgentCliInstallationsResponseSchema,
   ListProvidersResponseSchema,
+  PreferencesResponseSchema,
   ProviderDoctorResponseSchema,
   ResolveApprovalResponseSchema,
   RestErrorResponseSchema,
@@ -21,10 +22,12 @@ import {
   type HealthReadyResponse,
   type ListAgentCliInstallationsResponse,
   type ListProvidersResponse,
+  type PreferencesResponse,
   type ProviderDoctorResponse,
   type ResolveApprovalResponse,
   type RestErrorResponse,
   type SessionSnapshot,
+  type UpdatePreferencesRequest,
 } from "@dougoos/shared";
 
 const MAX_SSE_BUFFER_BYTES = 4 * 1_048_576;
@@ -219,6 +222,10 @@ export class CoreApiClient {
     return this.#request("/api/health/ready", HealthReadyResponseSchema, requestSignal(signal));
   }
 
+  getPreferences(signal?: AbortSignal): Promise<PreferencesResponse> {
+    return this.#request("/api/preferences", PreferencesResponseSchema, requestSignal(signal));
+  }
+
   getSession(sessionId: string, signal?: AbortSignal): Promise<SessionSnapshot> {
     return this.#request(
       `/api/sessions/${encodeURIComponent(sessionId)}`,
@@ -241,6 +248,17 @@ export class CoreApiClient {
 
   refreshAgentCliInstallations(signal?: AbortSignal): Promise<ListAgentCliInstallationsResponse> {
     return this.#request("/api/clis/refresh", ListAgentCliInstallationsResponseSchema, {
+      method: "POST",
+      ...requestSignal(signal),
+    });
+  }
+
+  updatePreferences(
+    request: UpdatePreferencesRequest,
+    signal?: AbortSignal,
+  ): Promise<PreferencesResponse> {
+    return this.#request("/api/preferences", PreferencesResponseSchema, {
+      ...jsonBody(request),
       method: "POST",
       ...requestSignal(signal),
     });

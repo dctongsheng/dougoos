@@ -200,6 +200,9 @@ function routeResponse(
   if (path === "/api/health/ready") {
     return Response.json({ checkedAt: NOW, instanceId, status: "ready" });
   }
+  if (path === "/api/preferences") {
+    return Response.json({ conversationDirectory: SESSION.cwd });
+  }
   if (path === "/api/providers") return Response.json({ providers });
   if (path === "/api/clis") return Response.json({ checkedAt: NOW, clis: [CLI] });
   if (path === "/api/snapshot") return Response.json(snapshot);
@@ -360,17 +363,81 @@ describe("CoreDataSource", () => {
         sessionId: SESSION.id,
         summary: "fix flaky login",
       });
-      expect(snapshot.fixture.sidebarProjects[0]?.sessions[0]).toEqual({
-        agentId: "claude",
-        sessionId: SESSION.id,
-        title: "fix flaky login",
+      expect(snapshot.fixture.projects[0]).toMatchObject({
+        id: "conversation",
+        kind: "conversation",
+        name: "对话",
       });
-      expect(snapshot.fixture.conversations[0]?.sessions[0]).toEqual({
-        agentId: "claude",
-        sessionId: SESSION.id,
-        title: "fix flaky login",
-      });
+      expect(
+        snapshot.fixture.projects.flatMap((project) =>
+          project.sessions.filter((session) => session.sessionId === SESSION.id),
+        ),
+      ).toEqual([
+        {
+          agentId: "claude",
+          sessionId: SESSION.id,
+          title: "fix flaky login",
+        },
+      ]);
       expect(snapshot.chat?.sessions[0]?.title).toBe("fix flaky login");
+    } finally {
+      source.close();
+    }
+  });
+
+  it("loads and updates the conversation project preference through the Core", async () => {
+    const provider = new FakeConnectionProvider();
+    let conversationDirectory: string = SESSION.cwd;
+    let updateBody: unknown;
+    const source = new CoreDataSource(provider, {
+      fetch: (input, init) => {
+        const path = new URL(String(input)).pathname;
+        if (path === "/api/preferences") {
+          if ((init?.method ?? "GET") === "POST") {
+            updateBody = JSON.parse(String(init?.body));
+            conversationDirectory = (updateBody as { readonly conversationDirectory: string })
+              .conversationDirectory;
+          }
+          return Promise.resolve(Response.json({ conversationDirectory }));
+        }
+        return Promise.resolve(routeResponse(input, init, "instance:a", populatedSnapshot()));
+      },
+    });
+    try {
+      const initial = await source.getSnapshot(new AbortController().signal);
+      expect(initial.conversationDirectory).toBe(SESSION.cwd);
+      expect(initial.fixture.projects[0]).toMatchObject({
+        id: "conversation",
+        path: SESSION.cwd,
+        sessions: [expect.objectContaining({ sessionId: SESSION.id })],
+      });
+
+      let published: typeof initial | undefined;
+      const unsubscribe = source.subscribe((snapshot) => {
+        published = snapshot;
+      });
+      const nextDirectory = "/workspace/next-conversations";
+      await source.execute(
+        {
+          conversationDirectory: nextDirectory,
+          name: "preferences.conversation-directory.update",
+        },
+        new AbortController().signal,
+      );
+      unsubscribe();
+
+      expect(updateBody).toEqual({ conversationDirectory: nextDirectory });
+      expect(published?.conversationDirectory).toBe(nextDirectory);
+      expect(published?.fixture.projects[0]).toMatchObject({
+        id: "conversation",
+        path: nextDirectory,
+        sessions: [],
+      });
+      expect(
+        published?.fixture.projects.flatMap((project) =>
+          project.sessions.filter((session) => session.sessionId === SESSION.id),
+        ),
+      ).toHaveLength(1);
     } finally {
       source.close();
     }
@@ -533,6 +600,9 @@ describe("CoreDataSource", () => {
       observed.push({ body, method, path });
       if (path === "/api/health/ready") {
         return Response.json({ checkedAt: NOW, instanceId: "instance:a", status: "ready" });
+      }
+      if (path === "/api/preferences") {
+        return Response.json({ conversationDirectory: SESSION.cwd });
       }
       if (path === "/api/providers") return Response.json({ providers: [PROVIDER] });
       if (path === "/api/clis") return Response.json({ checkedAt: NOW, clis: [CLI] });

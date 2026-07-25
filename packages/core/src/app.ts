@@ -1,4 +1,5 @@
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { mkdir, stat } from "node:fs/promises";
 
 import type { HttpBindings } from "@hono/node-server";
 import {
@@ -6,6 +7,7 @@ import {
   CancelTurnRequestSchema,
   CancelTurnResponseSchema,
   CONTRACT_LIMITS,
+  ConversationDirectorySchema,
   CreateSessionRequestSchema,
   CreateSessionResponseSchema,
   CreateTurnRequestSchema,
@@ -21,12 +23,14 @@ import {
   ProviderIdSchema,
   ResolveApprovalRequestSchema,
   ResolveApprovalResponseSchema,
+  PreferencesResponseSchema,
   SessionRouteParamsSchema,
   SessionIdSchema,
   SessionSchema,
   SnapshotQuerySchema,
   TurnIdSchema,
   TurnRouteParamsSchema,
+  UpdatePreferencesRequestSchema,
   isTerminalTurnStatus,
   parseEventStreamAfterSeq,
   type Session,
@@ -167,6 +171,22 @@ function parseWith<T>(schema: { parse(value: unknown): T }, value: unknown): T {
   }
 }
 
+function invalidConversationDirectory(): CoreError {
+  return new CoreError("INVALID_REQUEST", {
+    details: { phase: "request" },
+    httpStatus: 400,
+    retryable: false,
+  });
+}
+
+async function isExistingDirectory(directory: string): Promise<boolean> {
+  try {
+    return (await stat(directory)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 export function generateBearerToken(): string {
   return randomBytes(32).toString("base64url");
 }
@@ -180,6 +200,7 @@ export class CoreRuntime {
 
   readonly #allowedOrigins: ReadonlySet<string>;
   readonly #clock: () => string;
+  readonly #defaultConversationDirectory: string;
   readonly #deps: CoreDependencies;
   readonly #eventIdFactory: () => string;
   readonly #messageIdFactory: () => string;
@@ -199,8 +220,15 @@ export class CoreRuntime {
     if (dependencies.appVersion.length === 0 || dependencies.appVersion.length > 128) {
       throw new TypeError("appVersion must contain 1..128 characters");
     }
+    const defaultConversationDirectory = ConversationDirectorySchema.safeParse(
+      dependencies.defaultConversationDirectory,
+    );
+    if (!defaultConversationDirectory.success) {
+      throw new TypeError("defaultConversationDirectory must be an absolute directory path");
+    }
     this.#deps = dependencies;
     this.#clock = dependencies.clock ?? (() => new Date().toISOString());
+    this.#defaultConversationDirectory = defaultConversationDirectory.data;
     this.#eventIdFactory = dependencies.eventIdFactory ?? randomUUID;
     this.#messageIdFactory = dependencies.messageIdFactory ?? randomUUID;
     this.#sessionIdFactory = dependencies.sessionIdFactory ?? randomUUID;
@@ -310,6 +338,32 @@ export class CoreRuntime {
     }
   }
 
+  #preferences() {
+    return PreferencesResponseSchema.parse({
+      conversationDirectory:
+        this.#deps.storage.getConversationDirectory() ?? this.#defaultConversationDirectory,
+    });
+  }
+
+  async #prepareConversationDirectoryForSession(cwd: string): Promise<void> {
+    const configured = this.#deps.storage.getConversationDirectory();
+    const effective = configured ?? this.#defaultConversationDirectory;
+    if (cwd !== effective) return;
+    if (configured !== null) {
+      if (!(await isExistingDirectory(configured))) throw invalidConversationDirectory();
+      return;
+    }
+    try {
+      await mkdir(this.#defaultConversationDirectory, { mode: 0o700, recursive: true });
+      if (!(await isExistingDirectory(this.#defaultConversationDirectory))) {
+        throw invalidConversationDirectory();
+      }
+    } catch (error) {
+      if (error instanceof CoreError) throw error;
+      throw invalidConversationDirectory();
+    }
+  }
+
   #buildApp(): Hono<CoreBindings> {
     const app = new Hono<CoreBindings>();
 
@@ -412,6 +466,17 @@ export class CoreRuntime {
       return jsonResponse(ListProvidersResponseSchema.parse({ providers }));
     });
 
+    app.get("/api/preferences", () => jsonResponse(this.#preferences()));
+
+    app.post("/api/preferences", async (c) => {
+      const request = parseWith(UpdatePreferencesRequestSchema, await parseJson(c));
+      if (!(await isExistingDirectory(request.conversationDirectory))) {
+        throw invalidConversationDirectory();
+      }
+      this.#deps.storage.setConversationDirectory(request.conversationDirectory);
+      return jsonResponse(this.#preferences());
+    });
+
     app.get("/api/clis", async () => {
       const result =
         (await this.#deps.registry.listAgentCliInstallations?.()) ??
@@ -448,6 +513,7 @@ export class CoreRuntime {
       const sessionId = this.#newSessionId();
       let createdRegistrySession = false;
       try {
+        await this.#prepareConversationDirectoryForSession(request.cwd);
         const runtime = await this.#deps.registry.createSession({ ...request, sessionId });
         createdRegistrySession = true;
         const now = this.#now();

@@ -90,8 +90,12 @@ export interface NotificationFixture {
 }
 
 export interface ProjectFixture {
+  readonly id: string;
+  readonly initiallyOpen: boolean;
+  readonly kind: "conversation" | "directory";
   readonly name: string;
   readonly path: string;
+  readonly sessions: readonly SidebarSessionFixture[];
 }
 
 export interface SidebarSessionFixture {
@@ -100,24 +104,11 @@ export interface SidebarSessionFixture {
   readonly title: string;
 }
 
-export interface SidebarProjectFixture {
-  readonly initiallyOpen: boolean;
-  readonly name: string;
-  readonly sessions: readonly SidebarSessionFixture[];
-}
-
-export interface ConversationGroupFixture {
-  readonly label: string;
-  readonly sessions: readonly SidebarSessionFixture[];
-}
-
 export interface SaasFixture {
   readonly agents: readonly AgentFixture[];
-  readonly conversations: readonly ConversationGroupFixture[];
   readonly features: FeatureFixtures;
   readonly notifications: readonly NotificationFixture[];
   readonly projects: readonly ProjectFixture[];
-  readonly sidebarProjects: readonly SidebarProjectFixture[];
   readonly suggestions: readonly string[];
 }
 
@@ -155,6 +146,7 @@ export interface ChatViewSnapshot {
 
 export interface SaasDataSnapshot {
   readonly chat?: ChatViewSnapshot;
+  readonly conversationDirectory: string;
   readonly fixture: SaasFixture;
   /**
    * Monotonically increases within one SaasDataSource instance. A replacement
@@ -174,6 +166,10 @@ export type SaasDataCommand =
       readonly text: string;
     }
   | { readonly name: "clis.refresh" }
+  | {
+      readonly conversationDirectory: string;
+      readonly name: "preferences.conversation-directory.update";
+    }
   | {
       readonly name: "approval.resolve";
       readonly optionId: string;
@@ -214,6 +210,9 @@ export type ConnectionState =
   | { readonly kind: "error"; readonly message: string };
 
 export type MenuKind = "agent" | "path" | null;
+
+export type HomeProjectSelection =
+  { readonly kind: "conversation" } | { readonly kind: "directory"; readonly path: string };
 
 export type SidebarVisibilityKey =
   | AgentId
@@ -315,6 +314,7 @@ export interface SaasState {
   readonly chat: ChatViewSnapshot | null;
   readonly collapsedSidebar: boolean;
   readonly connection: ConnectionState;
+  readonly conversationDirectory: string;
   readonly dataRevision: number | null;
   readonly dashboardVisible: boolean;
   readonly features: SaasFeatureState | null;
@@ -323,7 +323,7 @@ export interface SaasState {
   readonly homeDraft: string;
   readonly homeMenu: MenuKind;
   readonly homeMode: "auto" | "manual";
-  readonly homePath: string;
+  readonly homeProject: HomeProjectSelection;
   readonly notificationOpen: boolean;
   readonly route: Route;
   readonly sidebarVisibility: Readonly<Record<SidebarVisibilityKey, boolean>>;
@@ -387,7 +387,7 @@ export type SaasAction =
   | { readonly draft: string; readonly type: "home.draft" }
   | { readonly menu: MenuKind; readonly type: "home.menu" }
   | { readonly mode: "auto" | "manual"; readonly type: "home.mode" }
-  | { readonly path: string; readonly type: "home.path" }
+  | { readonly project: HomeProjectSelection; readonly type: "home.project" }
   | { readonly route: Route; readonly type: "navigate" }
   | { readonly agentId: AgentId; readonly type: "notifications.read-agent" }
   | { readonly id: string; readonly type: "notifications.read" }

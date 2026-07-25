@@ -62,6 +62,7 @@ export interface CoreRegistry {
 export interface CoreDependencies {
   readonly appVersion: string;
   readonly clock?: () => string;
+  readonly defaultConversationDirectory: string;
   /** Test seam; production always uses the 15-second default. */
   readonly eventStreamHeartbeatMs?: number;
   readonly eventIdFactory?: () => string;

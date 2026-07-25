@@ -391,6 +391,12 @@ storage 暴露 `EventJournalStore.appendAndProject(runtimeEvent)`：在单事务
 
 ### 2.5 `@dougoos/task-agent` — 新建任务（智能路由 + 任务 Agent）
 
+`ProjectCatalog` 必须包含一个固定 identity 的内置逻辑项目“对话”。它不依赖历史 Session
+是否存在，也不以目录 basename 作为 identity。Desktop 在 Core 启动时以
+`join(app.getPath("documents"), "Dogoos")` 提供系统默认目录；Home 默认选择该逻辑项目，
+但只有 Settings 可以展示和更改其真实绝对路径。修改目录只改变未来新建 Session 的
+`cwd`，历史 Session 的 `cwd` 与文件均不迁移。普通目录项目继续使用自身绝对 `cwd`。
+
 ```ts
 export interface TaskRouter {
   readonly kind: "rules" | "llm";
@@ -488,7 +494,7 @@ UI 只建立一条全局事件流，再按 sessionId 分发，避免多会话各
 **单独调试**：`core dev` 起 headless server，curl 即测——core 不感知 Electron。
 
 ### 2.9 apps
-- **desktop**：薄壳。`utilityProcess.fork` 拉起 core，通过 parentPort 完成 ready/restart 握手；处理静态资源 cwd、asar unpack、better-sqlite3 ABI、macOS arm64/x64 与 Windows 进程树等打包问题。启动时可用登录 shell 读取一次环境快照，但只能用 `execFile(shell, ["-ilc", "env -0"])` 一类固定参数调用，禁止把用户输入插进 shell 命令。preload 只暴露 Core 连接状态、目录选择器和窗口控制。
+- **desktop**：薄壳。`utilityProcess.fork` 拉起 core，通过 parentPort 完成 ready/restart 握手；处理静态资源 cwd、asar unpack、better-sqlite3 ABI、macOS arm64/x64 与 Windows 进程树等打包问题。启动命令同时把 `join(app.getPath("documents"), "Dogoos")` 作为系统默认对话目录传给 Core；该值不是 Sidebar/Home 文案。启动时可用登录 shell 读取一次环境快照，但只能用 `execFile(shell, ["-ilc", "env -0"])` 一类固定参数调用，禁止把用户输入插进 shell 命令。preload 只暴露 Core 连接状态、目录选择器和窗口控制。
 - **web**：Vite + React 19 + TanStack Query + Recharts；Harness 8 tab 中 7 个渲染"占位卡 + 注册状态"。
 - **cloud**：Cloudflare Worker + 同域静态落地页。本期 Worker 只处理 `GET/HEAD /v1/health`，其他 `/v1/*` 稳定返回 `404`；不读取请求体，不接入 Hono、D1、KV、Queue、账号、遥测或业务 payload。`device_id` 仅保存在本地 SQLite，可生成和重置。真实 ingest 与持久化属于 P3+，必须先补协议、隐私评审、限流和保留策略，不能从当前 health 桩推断为已实现。
 

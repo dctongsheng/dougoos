@@ -17,6 +17,7 @@ export interface UtilityProcessLike {
 export interface CoreProcessManagerOptions {
   readonly appVersion: string;
   readonly databasePath: string;
+  readonly defaultConversationDirectory: string;
   readonly handshakeTimeoutMs?: number;
   readonly random?: () => number;
   readonly restartBaseDelayMs?: number;
@@ -31,6 +32,7 @@ type ConnectionListener = (connection: CoreConnection) => void;
 export class CoreProcessManager {
   readonly #appVersion: string;
   readonly #databasePath: string;
+  readonly #defaultConversationDirectory: string;
   readonly #handshakeTimeoutMs: number;
   readonly #listeners = new Set<ConnectionListener>();
   readonly #random: () => number;
@@ -52,6 +54,7 @@ export class CoreProcessManager {
   constructor(options: CoreProcessManagerOptions) {
     this.#appVersion = options.appVersion;
     this.#databasePath = options.databasePath;
+    this.#defaultConversationDirectory = options.defaultConversationDirectory;
     // Core readiness includes bounded, parallel doctor checks for every
     // installed Provider. Eight local CLIs can legitimately need more than
     // twenty seconds on a cold launch even though each individual probe is
@@ -136,6 +139,7 @@ export class CoreProcessManager {
         process.postMessage({
           appVersion: this.#appVersion,
           databasePath: this.#databasePath,
+          defaultConversationDirectory: this.#defaultConversationDirectory,
           ...(previousPort === undefined ? {} : { previousPort }),
           token,
           type: "core.start",

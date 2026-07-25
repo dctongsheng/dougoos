@@ -8,6 +8,7 @@ export type CoreWorkerCommand =
   | {
       readonly appVersion: string;
       readonly databasePath: string;
+      readonly defaultConversationDirectory: string;
       readonly previousPort?: number;
       readonly token: string;
       readonly type: "core.start";

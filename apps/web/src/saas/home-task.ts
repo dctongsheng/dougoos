@@ -1,9 +1,16 @@
-import type { AgentId, ChatProviderView, SaasDataCommand } from "./types.js";
+import type { AgentId, ChatProviderView, HomeProjectSelection, SaasDataCommand } from "./types.js";
 
 export type ChatSendCommand = Extract<SaasDataCommand, { readonly name: "chat.send" }>;
 
 export function isAbsoluteWorkspacePath(value: string): boolean {
   return value.startsWith("/") || /^[A-Za-z]:[\\/]/u.test(value);
+}
+
+export function resolveHomeProjectCwd(
+  project: HomeProjectSelection,
+  conversationDirectory: string,
+): string {
+  return project.kind === "conversation" ? conversationDirectory : project.path;
 }
 
 export function buildHomeChatCommand(input: {

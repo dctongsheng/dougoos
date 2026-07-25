@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { agentById, FixtureDataSource, saasFixture } from "./fixtures.js";
+import {
+  agentById,
+  FIXTURE_CONVERSATION_DIRECTORY,
+  FixtureDataSource,
+  saasFixture,
+} from "./fixtures.js";
 import { PROTOTYPE_AGENT_IDS } from "./types.js";
 
 describe("FixtureDataSource", () => {
@@ -13,7 +18,11 @@ describe("FixtureDataSource", () => {
     const first = await source.getSnapshot(new AbortController().signal);
     const second = await source.getSnapshot(new AbortController().signal);
 
-    expect(first).toEqual({ fixture: saasFixture, revision: 1 });
+    expect(first).toEqual({
+      conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
+      fixture: saasFixture,
+      revision: 1,
+    });
     expect(first).not.toBe(second);
     expect(first.fixture.agents).not.toBe(second.fixture.agents);
   });
@@ -25,6 +34,29 @@ describe("FixtureDataSource", () => {
 
     await expect(source.getSnapshot(controller.signal)).rejects.toMatchObject({
       name: "AbortError",
+    });
+  });
+
+  it("publishes an updated built-in conversation project after a preference change", async () => {
+    const source = new FixtureDataSource();
+    let published: Awaited<ReturnType<FixtureDataSource["getSnapshot"]>> | undefined;
+    const unsubscribe = source.subscribe((snapshot) => {
+      published = snapshot;
+    });
+
+    await source.execute(
+      {
+        conversationDirectory: "/Users/ryo/Workspace/Conversations",
+        name: "preferences.conversation-directory.update",
+      },
+      new AbortController().signal,
+    );
+    unsubscribe();
+
+    expect(published?.conversationDirectory).toBe("/Users/ryo/Workspace/Conversations");
+    expect(published?.fixture.projects[0]).toMatchObject({
+      id: "conversation",
+      path: "/Users/ryo/Workspace/Conversations",
     });
   });
 });

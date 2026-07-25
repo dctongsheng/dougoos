@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -200,6 +200,7 @@ describe("Core Hono REST baseline", () => {
       {
         appVersion: "0.0.0-test",
         clock: () => NOW,
+        defaultConversationDirectory: join(directory, "Dogoos"),
         instanceId: "instance-test",
         registry,
         storage,
@@ -372,6 +373,81 @@ describe("Core Hono REST baseline", () => {
       includedSessions: [{ session: { id: createdBody.session.id } }],
       sessions: [{ id: createdBody.session.id }],
     });
+  });
+
+  it("reads and persists an existing custom conversation directory without leaking rejected paths", async () => {
+    await context.runtime.initialize();
+    const defaultDirectory = join(context.directory, "Dogoos");
+    expect(existsSync(defaultDirectory)).toBe(false);
+
+    const initial = await api(context.runtime, "/api/preferences");
+    expect(initial.status).toBe(200);
+    expect(await initial.json()).toEqual({ conversationDirectory: defaultDirectory });
+    expect(existsSync(defaultDirectory)).toBe(false);
+
+    const relative = await jsonPost(context.runtime, "/api/preferences", {
+      conversationDirectory: "relative/private-directory",
+    });
+    expect(relative.status).toBe(400);
+    expect(JSON.stringify(await relative.json())).not.toContain("relative/private-directory");
+
+    const missingDirectory = join(context.directory, "missing-private-directory");
+    const missing = await jsonPost(context.runtime, "/api/preferences", {
+      conversationDirectory: missingDirectory,
+    });
+    expect(missing.status).toBe(400);
+    expect(JSON.stringify(await missing.json())).not.toContain(missingDirectory);
+    expect(existsSync(missingDirectory)).toBe(false);
+
+    const customDirectory = join(context.directory, "custom-conversations");
+    mkdirSync(customDirectory);
+    const updated = await jsonPost(context.runtime, "/api/preferences", {
+      conversationDirectory: customDirectory,
+    });
+    expect(updated.status).toBe(200);
+    expect(await updated.json()).toEqual({ conversationDirectory: customDirectory });
+    expect(context.storage.getConversationDirectory()).toBe(customDirectory);
+
+    const strict = await jsonPost(context.runtime, "/api/preferences", {
+      conversationDirectory: customDirectory,
+      source: "renderer",
+    });
+    expect(strict.status).toBe(400);
+  });
+
+  it("creates only the default conversation directory on its first Session attempt", async () => {
+    await context.runtime.initialize();
+    const defaultDirectory = join(context.directory, "Dogoos");
+
+    const ordinary = await jsonPost(context.runtime, "/api/sessions", {
+      cwd: context.directory,
+      providerId: "fake",
+    });
+    expect(ordinary.status).toBe(201);
+    expect(existsSync(defaultDirectory)).toBe(false);
+
+    const conversation = await jsonPost(context.runtime, "/api/sessions", {
+      cwd: defaultDirectory,
+      providerId: "fake",
+    });
+    expect(conversation.status).toBe(201);
+    expect(existsSync(defaultDirectory)).toBe(true);
+    expect(context.registry.createInputs.at(-1)?.cwd).toBe(defaultDirectory);
+  });
+
+  it("never auto-creates a configured custom conversation directory", async () => {
+    await context.runtime.initialize();
+    const removedCustomDirectory = join(context.directory, "removed-custom-directory");
+    context.storage.setConversationDirectory(removedCustomDirectory);
+
+    const response = await jsonPost(context.runtime, "/api/sessions", {
+      cwd: removedCustomDirectory,
+      providerId: "fake",
+    });
+    expect(response.status).toBe(400);
+    expect(JSON.stringify(await response.json())).not.toContain(removedCustomDirectory);
+    expect(existsSync(removedCustomDirectory)).toBe(false);
+    expect(context.registry.createInputs).toHaveLength(0);
   });
 
   it("returns 202 without waiting for the Turn and preserves idempotency and SESSION_BUSY", async () => {
@@ -554,6 +630,7 @@ describe("Core Hono REST baseline", () => {
       {
         appVersion: "0.0.0-test",
         clock: () => NOW,
+        defaultConversationDirectory: join(directory, "Dogoos"),
         registry,
         sessionIdFactory: () => "",
         storage,

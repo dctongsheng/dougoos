@@ -1,6 +1,8 @@
 import {
   AgentEventEnvelopeSchema,
   GlobalSnapshotSchema,
+  PreferencesResponseSchema,
+  UpdatePreferencesRequestSchema,
   type AgentEventEnvelope,
 } from "@dougoos/shared";
 import { describe, expect, it } from "vitest";
@@ -44,6 +46,54 @@ describe("CoreApiClient", () => {
     expect(requests[0]?.url).toContain("includeSessionId=session+one");
     expect(requests[0]?.url).not.toContain(TOKEN);
     expect(new Headers(requests[0]?.init?.headers).get("authorization")).toBe(`Bearer ${TOKEN}`);
+  });
+
+  it("gets preferences with an authenticated GET without putting the bearer in the URL", async () => {
+    const preferences = PreferencesResponseSchema.parse({
+      conversationDirectory: "/Users/example/Documents/Dogoos",
+    });
+    const requests: Array<{ readonly init: RequestInit | undefined; readonly url: string }> = [];
+    const fakeFetch: CoreFetch = async (input, init) => {
+      requests.push({ init, url: String(input) });
+      return Response.json(preferences);
+    };
+    const client = new CoreApiClient(connection, fakeFetch);
+
+    await expect(client.getPreferences()).resolves.toEqual(preferences);
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.url).toBe("http://127.0.0.1:41337/api/preferences");
+    expect(requests[0]?.url).not.toContain(TOKEN);
+    expect(requests[0]?.init?.method ?? "GET").toBe("GET");
+    expect(requests[0]?.init?.body).toBeUndefined();
+    expect(new Headers(requests[0]?.init?.headers).get("authorization")).toBe(`Bearer ${TOKEN}`);
+  });
+
+  it("posts the strict preferences JSON body and parses the response schema", async () => {
+    const update = UpdatePreferencesRequestSchema.parse({
+      conversationDirectory: "/Users/example/Workspace/Chats",
+    });
+    const preferences = PreferencesResponseSchema.parse({
+      conversationDirectory: update.conversationDirectory,
+    });
+    const requests: Array<{ readonly init: RequestInit | undefined; readonly url: string }> = [];
+    const fakeFetch: CoreFetch = async (input, init) => {
+      requests.push({ init, url: String(input) });
+      return Response.json(preferences);
+    };
+    const client = new CoreApiClient(connection, fakeFetch);
+
+    await expect(client.updatePreferences(update)).resolves.toEqual(preferences);
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.url).toBe("http://127.0.0.1:41337/api/preferences");
+    expect(requests[0]?.url).not.toContain(TOKEN);
+    expect(requests[0]?.init?.method).toBe("POST");
+    expect(new Headers(requests[0]?.init?.headers).get("authorization")).toBe(`Bearer ${TOKEN}`);
+    expect(new Headers(requests[0]?.init?.headers).get("content-type")).toBe("application/json");
+    expect(requests[0]?.init?.body).toBe(
+      JSON.stringify({ conversationDirectory: "/Users/example/Workspace/Chats" }),
+    );
   });
 
   it("returns a safe structured error without leaking credentials", async () => {

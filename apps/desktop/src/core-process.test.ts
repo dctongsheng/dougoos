@@ -57,6 +57,7 @@ function setup(overrides: Partial<CoreProcessManagerOptions> = {}): {
   const manager = new CoreProcessManager({
     appVersion: "test",
     databasePath: "/tmp/test.sqlite",
+    defaultConversationDirectory: "/tmp/Documents/Dogoos",
     handshakeTimeoutMs: 500,
     random: () => 0.5,
     restartBaseDelayMs: 1,
@@ -87,6 +88,7 @@ describe("CoreProcessManager", () => {
       {
         appVersion: "test",
         databasePath: "/tmp/test.sqlite",
+        defaultConversationDirectory: "/tmp/Documents/Dogoos",
         token: "token-0",
         type: "core.start",
       },

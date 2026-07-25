@@ -1,3 +1,6 @@
+import { homedir } from "node:os";
+import { join } from "node:path";
+
 import { serve, type ServerType } from "@hono/node-server";
 import { openStorage } from "@dougoos/storage";
 
@@ -9,6 +12,7 @@ export interface StartCoreOptions {
   readonly appVersion: string;
   readonly bearerToken: string;
   readonly databasePath: string;
+  readonly defaultConversationDirectory?: string;
   readonly instanceId?: string;
   readonly registry: CoreRegistry;
 }
@@ -39,6 +43,8 @@ export async function startCore(options: StartCoreOptions): Promise<CoreServer> 
     runtime = createCoreRuntime(
       {
         appVersion: options.appVersion,
+        defaultConversationDirectory:
+          options.defaultConversationDirectory ?? join(homedir(), "Documents", "Dogoos"),
         ...(options.instanceId === undefined ? {} : { instanceId: options.instanceId }),
         registry: options.registry,
         storage,

@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -437,6 +437,100 @@ test("hands the Home project to Fake Agent and renders Markdown without raw reas
     await agentTree.locator(`[data-session-id="${targetSession?.id ?? ""}"]`).click();
     await expect(cwdInput).toHaveValue(targetSession?.cwd ?? "");
     await expect(page.getByText(targetSession?.id ?? "", { exact: false }).first()).toBeVisible();
+  } finally {
+    await application.close();
+    await rm(temporaryDirectory, { force: true, recursive: true });
+  }
+});
+
+test("uses the persisted conversation project directory without exposing it on Home", async () => {
+  const root = join(import.meta.dirname, "../../..");
+  const desktopPath = join(root, "apps/desktop");
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "dougoos-conversation-project-e2e-"));
+  const databasePath = join(temporaryDirectory, "fake.sqlite");
+  const defaultConversationDirectory = join(temporaryDirectory, "missing-parent", "Dogoos");
+  const nextConversationDirectory = await mkdtemp(join(temporaryDirectory, "next-conversations-"));
+  const application = await electron.launch({
+    args: [`--user-data-dir=${join(temporaryDirectory, "user-data")}`, desktopPath],
+    env: {
+      ...process.env,
+      DOUGOOS_DATABASE_PATH: databasePath,
+      DOUGOOS_DEFAULT_CONVERSATION_DIRECTORY: defaultConversationDirectory,
+      DOUGOOS_TEST_FAKE_PROVIDER: "1",
+    },
+  });
+
+  try {
+    const page = await application.firstWindow();
+    await expect(page).toHaveTitle("AgentOS", { timeout: 30_000 });
+    await expect(page.locator("[data-production-ready=true]")).toBeVisible();
+
+    const projectPicker = page.locator(".path-button");
+    await expect(projectPicker).toContainText("对话");
+    await expect(projectPicker).not.toContainText(defaultConversationDirectory);
+    await expect(page.locator(".conversation-project")).toContainText("对话");
+    await expect(page.locator(".conversation-project")).not.toContainText(
+      defaultConversationDirectory,
+    );
+
+    await projectPicker.click();
+    await expect(
+      page.locator(".path-menu").getByRole("menuitem").filter({ hasText: "对话" }),
+    ).toHaveCount(1);
+    await expect(page.locator(".path-menu")).not.toContainText(defaultConversationDirectory);
+    await projectPicker.click();
+
+    await page.getByLabel("任务内容").fill("[fake:markdown] 默认对话目录");
+    await page.getByLabel("发送任务").click();
+    await expect(page.locator('[data-screen-label="Agent 会话"]')).toBeVisible();
+
+    let firstSession: { cwd: string; id: string } | undefined;
+    await expect
+      .poll(async () => {
+        const snapshot = await coreRequest(page, "/api/snapshot");
+        firstSession = (snapshot.body as { sessions: readonly { cwd: string; id: string }[] })
+          .sessions[0];
+        return firstSession?.cwd;
+      })
+      .toBe(defaultConversationDirectory);
+    expect((await stat(defaultConversationDirectory)).isDirectory()).toBe(true);
+    if (firstSession === undefined) throw new Error("Default conversation Session was not created");
+
+    const update = await coreRequest(page, "/api/preferences", {
+      body: { conversationDirectory: nextConversationDirectory },
+      method: "POST",
+    });
+    expect(update).toEqual({
+      body: { conversationDirectory: nextConversationDirectory },
+      status: 200,
+    });
+
+    await page.reload();
+    await expect(page.locator("[data-production-ready=true]")).toBeVisible();
+    await page.getByLabel("设置").click();
+    await expect(page.getByLabel("当前对话目录")).toHaveText(nextConversationDirectory);
+    await page
+      .locator(".sidebar")
+      .getByRole("button", { exact: true, name: "新建任务" })
+      .first()
+      .click();
+    await expect(projectPicker).toContainText("对话");
+    await expect(projectPicker).not.toContainText(nextConversationDirectory);
+
+    await page.getByLabel("任务内容").fill("[fake:markdown] 新对话目录");
+    await page.getByLabel("发送任务").click();
+    await expect
+      .poll(async () => {
+        const snapshot = await coreRequest(page, "/api/snapshot");
+        const sessions = (snapshot.body as { sessions: readonly { cwd: string; id: string }[] })
+          .sessions;
+        return sessions.map((session) => session.cwd).sort();
+      })
+      .toEqual([defaultConversationDirectory, nextConversationDirectory].sort());
+
+    await expect(page.locator(`.project-tree [data-session-id="${firstSession.id}"]`)).toHaveCount(
+      1,
+    );
   } finally {
     await application.close();
     await rm(temporaryDirectory, { force: true, recursive: true });
