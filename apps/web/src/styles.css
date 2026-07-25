@@ -4998,6 +4998,7 @@ input:focus-visible,
   gap: 7px;
   height: 30px;
   padding: 6px 12px;
+  white-space: nowrap;
 }
 
 .settings-page .agent-config-tabs button:nth-child(1) {
