@@ -4837,6 +4837,14 @@ input:focus-visible,
   height: 30px;
 }
 
+.settings-page .visibility-grid button[style]:nth-child(2) {
+  width: 131px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(3) {
+  width: 105px;
+}
+
 .settings-page .visibility-grid button[style][aria-pressed="true"] {
   background: color-mix(in srgb, var(--agent-tone) 8%, transparent);
   border-color: color-mix(in srgb, var(--agent-tone) 45%, transparent);
