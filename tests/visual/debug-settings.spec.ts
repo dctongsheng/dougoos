@@ -21,6 +21,13 @@ test("debug settings geometry", async ({ browser }) => {
         },
         name: `section-${String(index + 1)}`,
       })),
+      ...Array.from({ length: 6 }, (_, index) => ({
+        locator: {
+          by: "css" as const,
+          value: `[data-screen-label="设置"] > :nth-child(3) > :nth-child(${String(index + 1)})`,
+        },
+        name: `customize-child-${String(index + 1)}`,
+      })),
     ],
   };
   const [reference, production] = await Promise.all([
