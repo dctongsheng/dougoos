@@ -4838,15 +4838,19 @@ input:focus-visible,
 }
 
 .settings-page .visibility-grid button[style]:nth-child(2) {
-  width: 130px;
+  width: 129.781px;
 }
 
 .settings-page .visibility-grid button[style]:nth-child(3) {
-  width: 104px;
+  width: 104.953px;
 }
 
 .settings-page .visibility-grid button[style]:nth-child(4) {
-  width: 121px;
+  width: 120.328px;
+}
+
+.settings-page .visibility-grid button[style]:nth-child(5) {
+  width: 64.719px;
 }
 
 .settings-page .visibility-grid button[style][aria-pressed="true"] {
