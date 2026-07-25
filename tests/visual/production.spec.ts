@@ -15,6 +15,21 @@ import {
   startVisualTestServer,
 } from "./production-harness.js";
 
+const readCanonicalRun = async (): Promise<Buffer | null> => {
+  try {
+    return await readFile(productionPaths.runPath);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+    ) {
+      return null;
+    }
+    throw error;
+  }
+};
+
 test("Landing production references pass their dedicated 15 plus 1 evidence gate", async ({
   browser,
   browserName,
@@ -24,22 +39,22 @@ test("Landing production references pass their dedicated 15 plus 1 evidence gate
   expect(landingProductionReferenceCases).toHaveLength(15);
   expect(landingProductionOnlyCases).toHaveLength(1);
 
-  const canonicalRunBefore = await readFile(productionPaths.runPath);
+  const canonicalRunBefore = await readCanonicalRun();
   const result = await captureProductionSet(browser, {
     cases: landingProductionReferenceCases,
     productionCases: landingProductionOnlyCases,
     write: false,
   });
-  const canonicalRunAfter = await readFile(productionPaths.runPath);
+  const canonicalRunAfter = await readCanonicalRun();
   expect(result.captures.size).toBe(16);
   expect(result.errors, result.errors.join("\n")).toEqual([]);
-  expect(canonicalRunAfter.equals(canonicalRunBefore)).toBe(true);
+  expect(canonicalRunAfter).toEqual(canonicalRunBefore);
 });
 
 test("partial production evidence writes are rejected without touching the canonical run", async ({
   browser,
 }) => {
-  const canonicalRunBefore = await readFile(productionPaths.runPath);
+  const canonicalRunBefore = await readCanonicalRun();
   await expect(
     captureProductionSet(browser, {
       cases: landingProductionReferenceCases,
@@ -47,8 +62,8 @@ test("partial production evidence writes are rejected without touching the canon
       write: true,
     }),
   ).rejects.toThrow(/complete canonical/u);
-  const canonicalRunAfter = await readFile(productionPaths.runPath);
-  expect(canonicalRunAfter.equals(canonicalRunBefore)).toBe(true);
+  const canonicalRunAfter = await readCanonicalRun();
+  expect(canonicalRunAfter).toEqual(canonicalRunBefore);
 });
 
 test("origin matching rejects similar host-port prefixes", () => {

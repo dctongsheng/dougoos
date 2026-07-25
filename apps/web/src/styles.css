@@ -1271,9 +1271,11 @@ input:focus-visible,
 }
 
 .send-button:disabled {
+  background: var(--hov);
+  color: var(--faint);
   cursor: not-allowed;
-  filter: grayscale(0.7);
-  opacity: 0.45;
+  filter: none;
+  opacity: 0.7;
 }
 
 .suggestion-list {
@@ -4688,7 +4690,13 @@ input:focus-visible,
 .conversation-project-settings-section > header {
   align-items: flex-start;
   display: flex;
+  flex: none;
   gap: 12px;
+  height: 35px;
+}
+
+.conversation-project-settings-section {
+  height: 159px;
 }
 
 .conversation-project-settings-section > header > div {
@@ -4722,7 +4730,9 @@ input:focus-visible,
   border: 1px solid var(--bd);
   border-radius: 12px;
   display: flex;
+  flex: none;
   gap: 12px;
+  height: 78px;
   padding: 12px 13px;
 }
 
