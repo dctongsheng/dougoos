@@ -5010,33 +5010,34 @@ input:focus-visible,
 }
 
 .settings-page .agent-config-tabs button:nth-child(1) {
-  width: 114px;
+  width: 114.109px;
 }
 
 .settings-page .agent-config-tabs button:nth-child(2) {
-  width: 134px;
+  width: 133.688px;
 }
 
 .settings-page .agent-config-tabs button:nth-child(3) {
-  width: 105px;
+  width: 104.313px;
 }
 
 .settings-page .agent-config-tabs button:nth-child(4) {
-  width: 119px;
+  width: 119.688px;
 }
 
 .settings-page .agent-config-tabs button:nth-child(5) {
-  width: 64px;
+  width: 64.094px;
 }
 
 .settings-page .agent-config-tabs button:nth-child(6) {
-  width: 100px;
+  width: 99.422px;
 }
 
 .settings-page .agent-config-tabs button > span {
   color: var(--agent-tone);
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
+  font-weight: 400;
 }
 
 .settings-page .agent-config-tabs button > i {
