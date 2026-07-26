@@ -1393,7 +1393,7 @@ class Component extends DCLogic {
       theme:null, accent:null, settingsAgent:'codex', settingsEnabled:{}, prefs:{notifyDone:true,notifyWait:true},
       agents:{
         codex:{id:'codex',name:'Codex CLI',glyph:'❯',hue:'#4fd8e0',bin:'/usr/local/bin/codex · v3.4.1',enabled:true,model:'gpt-5-codex',models:['gpt-5-codex','o4','o4-mini'],cwd:'~/dev/api-server',status:'executing',task:'重构 auth 中间件为策略模式',tok:182400,cost:4.21,secs:1380,last:'▸ 重写 middleware/auth.ts',auto:true,key:'codex-••••••••7f21',hist:[hist('#c2e8','07-20 21:02','修复 CI 缓存键漂移',22,'188k','api-server'),hist('#b011','07-18 10:33','gRPC 网关脚手架',41,'520k','api-server')]},
-        claude:{id:'claude',name:'Claude Code',glyph:'◆',hue:'#ff9d66',bin:'/usr/local/bin/claude · v2.8.0',enabled:true,model:'claude-4.5-sonnet',models:['claude-4.5-opus','claude-4.5-sonnet','claude-4-haiku'],cwd:'~/dev/webapp',status:'waiting',task:'迁移 users 表到新 schema',tok:96300,cost:1.84,secs:660,last:'⚠ 等待确认: prisma migrate deploy',auto:false,key:'sk-ant-••••••••a4f2',hist:[hist('#a3f2','07-20 22:14','重构支付 webhook 重试逻辑',34,'412k','webapp'),hist('#98c1','07-19 16:40','修复 SSR hydration 报错',18,'156k','webapp')]},
+        claude:{id:'claude',name:'Claude Agent',glyph:'◆',hue:'#ff9d66',bin:'Claude Agent SDK · bundled runtime',enabled:true,model:'claude-4.5-sonnet',models:['claude-4.5-opus','claude-4.5-sonnet','claude-4-haiku'],cwd:'~/dev/webapp',status:'waiting',task:'迁移 users 表到新 schema',tok:96300,cost:1.84,secs:660,last:'⚠ 等待确认: prisma migrate deploy',auto:false,key:'sk-ant-••••••••a4f2',hist:[hist('#a3f2','07-20 22:14','重构支付 webhook 重试逻辑',34,'412k','webapp'),hist('#98c1','07-19 16:40','修复 SSR hydration 报错',18,'156k','webapp')]},
         grok:{id:'grok',name:'Grok CLI',glyph:'◭',hue:'#b48cff',bin:'~/.grok/bin/grok · v1.9.2',enabled:true,model:'grok-4',models:['grok-4','grok-4-fast'],cwd:'~/dev/ml-pipeline',status:'thinking',task:'分析生产环境 crash 日志',tok:54100,cost:0.63,secs:240,last:'…扫描 log/2026-07-21.gz',auto:false,key:'xai-••••••••90bd',hist:[hist('#77de','07-17 09:12','训练数据去重脚本',26,'302k','ml-pipeline')]},
         cursor:{id:'cursor',name:'Cursor CLI',glyph:'⌖',hue:'#6aa5ff',bin:'/usr/local/bin/cursor-agent · v0.52',enabled:true,model:'composer-2',models:['composer-2','auto'],cwd:'~/dev/webapp',status:'executing',task:'为 parser 补全单元测试',tok:77800,cost:0.94,secs:1020,last:'✓ tests/parser.spec.ts 14/14',auto:true,key:'cur-••••••••11c8',hist:[hist('#61aa','07-20 15:27','抽离表单校验 hooks',15,'98k','webapp')]},
         pi:{id:'pi',name:'Pi',glyph:'π',hue:'#49e0c0',bin:'~/.pi/bin/pi · v0.9.4',enabled:true,model:'pi-3',models:['pi-3'],cwd:'~',status:'idle',task:'待命',tok:0,cost:0,secs:0,last:'—',auto:false,key:'pi-••••••••3e60',hist:[]},
@@ -1434,7 +1434,7 @@ class Component extends DCLogic {
         pi:[], hermes:[]
       },
       notifs:[
-        {id:'n1',agent:'claude',title:'Claude Code 等待确认',text:'请求执行 prisma migrate deploy',time:'刚刚',read:false},
+        {id:'n1',agent:'claude',title:'Claude Agent 等待确认',text:'请求执行 prisma migrate deploy',time:'刚刚',read:false},
         {id:'n2',agent:'cursor',title:'Cursor CLI 任务完成',text:'parser 单元测试 14/14 通过',time:'6 分钟前',read:false},
         {id:'n3',agent:null,title:'预算提醒',text:'今日费用已达预算 78%',time:'1 小时前',read:true}
       ],
@@ -1486,7 +1486,7 @@ class Component extends DCLogic {
     ];
     this.hzGenomeData=[
       {agent:'claude',file:'~/.claude/CLAUDE.md + system',chars:6062,mods:[
-        {k:'identity',mass:420,ex:'You are Claude Code, an agentic coding assistant operating in the user\u2019s terminal.'},
+        {k:'identity',mass:420,ex:'You are Claude Agent, an agentic coding assistant operating in the user\u2019s terminal.'},
         {k:'tools',mass:3300,ex:'5 个子代理(Explore / general-purpose / Plan …)+ 13 项技能;并发派发时放同一条消息里并行运行。'},
         {k:'rules',mass:1900,ex:'Keep edits minimal; never commit unless asked; prefer str_replace over rewrites.'},
         {k:'tone',mass:260,ex:'Be concise. Avoid preamble. Answer in ≤4 lines unless detail is requested.'},
@@ -1548,8 +1548,8 @@ class Component extends DCLogic {
       {id:'c4',title:'AI 行业周报',agent:'hermes',sched:'每周五 17:00',next:'07-24 17:00',last:'✓ 上周五'}
     ];
     this.hzSubData=[
-      {name:'Explore',host:'Claude Code',agent:'claude',model:'claude-4-haiku',desc:'只读侦察兵:快速扫仓库结构与关键实现,产出摘要供主 Agent 规划。',tools:['read','grep','ls'],spawns:214},
-      {name:'Plan',host:'Claude Code',agent:'claude',model:'claude-4.5-sonnet',desc:'先出实施计划与风险点,主 Agent 确认后才动手改代码。',tools:['read','grep'],spawns:87},
+      {name:'Explore',host:'Claude Agent',agent:'claude',model:'claude-4-haiku',desc:'只读侦察兵:快速扫仓库结构与关键实现,产出摘要供主 Agent 规划。',tools:['read','grep','ls'],spawns:214},
+      {name:'Plan',host:'Claude Agent',agent:'claude',model:'claude-4.5-sonnet',desc:'先出实施计划与风险点,主 Agent 确认后才动手改代码。',tools:['read','grep'],spawns:87},
       {name:'Reviewer',host:'Codex CLI',agent:'codex',model:'o4-mini',desc:'diff 审查分身:安全 → 性能 → 可读性,输出分级意见。',tools:['read','diff'],spawns:63},
       {name:'Repro',host:'Grok CLI',agent:'grok',model:'grok-4-fast',desc:'专职复现:循环运行失败用例并采集最小复现命令。',tools:['bash','tail'],spawns:41},
       {name:'Drafter',host:'Hermes',agent:'hermes',model:'hermes-4-70b',desc:'低成本初稿分身:邮件/文案先出 3 版草稿,主体只做终审。',tools:['notion','browser'],spawns:52}
@@ -1704,7 +1704,7 @@ class Component extends DCLogic {
       this.after(2400,()=>{
         this.pushMsg(aid,{t:'note',body:'✓ 迁移完成:users_v2 已上线,2 个阶段全部成功'});
         this.setAgent(aid,{status:'idle',last:'✓ users_v2 迁移完成'});
-        this.addNotif({agent:aid,title:'Claude Code 任务完成',text:'users_v2 迁移已部署'});
+        this.addNotif({agent:aid,title:'Claude Agent 任务完成',text:'users_v2 迁移已部署'});
       });
     } else {
       this.pushMsg(aid,{t:'note',body:'✕ 已拒绝执行,任务挂起等待新指示'});

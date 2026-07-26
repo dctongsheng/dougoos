@@ -39,7 +39,7 @@ test("runs a real Provider through the visible Desktop UI and restores the conve
   expect(browserName).toBe("chromium");
   test.setTimeout(180_000);
 
-  const providerId = process.env.DOUGOOS_REAL_PROVIDER_ID ?? "claude-code";
+  const providerId = process.env.DOUGOOS_REAL_PROVIDER_ID ?? "codex";
   const root = join(import.meta.dirname, "../../..");
   const desktopPath = join(root, "apps/desktop");
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "dougoos-real-ui-e2e-"));

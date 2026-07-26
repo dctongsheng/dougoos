@@ -3,10 +3,15 @@ import { delimiter } from "node:path";
 import type { AgentProvider } from "@dougoos/acp";
 import { describe, expect, it, vi } from "vitest";
 
-import { ClaudeCodeProvider } from "./claude-code.js";
+import {
+  CLAUDE_AGENT_DISABLED_REASON,
+  CLAUDE_AGENT_DISABLED_REMEDIATION,
+  ClaudeCodeProvider,
+} from "./claude-code.js";
 import { CodexProvider } from "./codex.js";
 import { CursorAgentProvider } from "./cursor-agent.js";
 import { unpackedAdapterEntry } from "./bundled-provider.js";
+import { providerProcessEnvironment } from "./environment.js";
 import { GrokProvider } from "./grok.js";
 import { HermesProvider } from "./hermes.js";
 import { OpenClawProvider } from "./openclaw.js";
@@ -16,7 +21,6 @@ import { AgentProviderRegistry } from "./registry.js";
 
 const readable = vi.fn(() => Promise.resolve());
 const commandsByProvider = {
-  "claude-code": "claude",
   codex: "codex",
   "cursor-agent": "cursor-agent",
   grok: "grok",
@@ -91,41 +95,36 @@ describe("Agent providers", () => {
     expect(unpackedAdapterEntry("/safe/source/adapter.js")).toBe("/safe/source/adapter.js");
   });
 
-  it("reports exact availability and resolves a shell-free allowlisted Claude command", async () => {
-    readable.mockClear();
-    const provider = new ClaudeCodeProvider({
-      access: readable,
-      adapterEntry: "/safe/claude-adapter.js",
-      cliDiscovery: installedClis,
-      electronRunAsNode: true,
-      nodeExecutable: "/safe/node",
-    });
+  it("keeps Claude Agent unavailable in 0.2.0 without resolving any runtime command", async () => {
+    const provider = new ClaudeCodeProvider();
 
     await expect(provider.available()).resolves.toEqual({
-      ok: true,
-      version: "0.61.0",
+      kind: "unavailable",
+      ok: false,
+      reason: CLAUDE_AGENT_DISABLED_REASON,
+      remediation: CLAUDE_AGENT_DISABLED_REMEDIATION,
     });
     expect(
-      provider.resolveCommand({
-        env: {
-          ANTHROPIC_API_KEY: "secret",
-          HOME: "/safe/home",
-          MALICIOUS_UNDECLARED_VALUE: "must-not-pass",
-          OPENAI_API_KEY: "other-provider-secret",
-        },
+      provider.chooseAuthMethod(initialize(["claude-ai-login", "console-login"]), {}),
+    ).toBeNull();
+
+    for (const env of [
+      {},
+      { ANTHROPIC_API_KEY: "secret" },
+      { CLAUDE_CODE_USE_BEDROCK: "1" },
+      { CLAUDE_CODE_USE_VERTEX: "1" },
+      { CLAUDE_CODE_OAUTH_TOKEN: "consumer-token" },
+      { ANTHROPIC_AUTH_TOKEN: "gateway-token" },
+      { CLAUDE_CODE_EXECUTABLE: "/unsafe/local/claude" },
+    ]) {
+      expect(() => provider.resolveCommand({ env })).toThrow(CLAUDE_AGENT_DISABLED_REASON);
+    }
+    expect(
+      providerProcessEnvironment({
+        CLAUDE_CODE_EXECUTABLE: "/unsafe/local/claude",
+        CLAUDE_CODE_OAUTH_TOKEN: "consumer-token",
       }),
-    ).toEqual({
-      args: ["/safe/claude-adapter.js"],
-      command: "/safe/node",
-      env: {
-        ANTHROPIC_API_KEY: "secret",
-        CLAUDE_CODE_EXECUTABLE: "/safe/bin/claude",
-        ELECTRON_RUN_AS_NODE: "1",
-        HOME: "/safe/home",
-        PATH: "/safe/bin",
-      },
-    });
-    expect(readable).toHaveBeenCalledTimes(2);
+    ).toEqual({});
   });
 
   it("distinguishes an incompatible adapter version from an unavailable executable", async () => {
@@ -150,9 +149,9 @@ describe("Agent providers", () => {
   });
 
   it("does not mark a bundled adapter available when its local Agent CLI is missing", async () => {
-    const provider = new ClaudeCodeProvider({
+    const provider = new CodexProvider({
       access: readable,
-      adapterEntry: "/safe/claude-adapter.js",
+      adapterEntry: "/safe/codex-adapter.js",
       cliDiscovery: {
         detectIntegrated: () => Promise.resolve(null),
         scan: installedClis.scan,

@@ -1,6 +1,7 @@
 {
   "name": "@dougoos/cloud",
   "version": "0.0.0",
+  "license": "AGPL-3.0-only",
   "private": true,
   "type": "module",
   "engines": {
@@ -16,7 +17,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && vite build && pnpm run build:worker && node ../../tooling/assert-cloud-release.mjs",
+    "build": "node ../../tooling/generate-frontend-licenses.mjs --check && tsc -p tsconfig.build.json && vite build && pnpm run build:worker && node ../../tooling/assert-cloud-release.mjs",
     "build:worker": "wrangler deploy --dry-run --outdir dist/worker",
     "dev": "vite",
     "dev:worker": "wrangler dev --local",

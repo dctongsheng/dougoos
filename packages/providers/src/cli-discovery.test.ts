@@ -27,13 +27,12 @@ afterEach(async () => {
 });
 
 describe("Agent CLI discovery", () => {
-  it("maps every built-in Provider to one bounded known CLI command", () => {
+  it("maps every executable built-in Provider to one bounded known CLI command", () => {
     expect(
       KNOWN_AGENT_CLIS.filter(({ integratedProviderId }) => integratedProviderId !== undefined).map(
         ({ command, integratedProviderId }) => [integratedProviderId, command],
       ),
     ).toEqual([
-      ["claude-code", "claude"],
       ["codex", "codex"],
       ["cursor-agent", "cursor-agent"],
       ["grok", "grok"],
@@ -66,19 +65,19 @@ describe("Agent CLI discovery", () => {
 
   it("uses explicit Provider overrides before PATH", async () => {
     const directory = await temporaryDirectory();
-    const configured = join(directory, "company-claude");
+    const configured = join(directory, "company-codex");
     await writeFile(configured, "#!/bin/sh\nexit 0\n", "utf8");
     await chmod(configured, 0o755);
 
     await expect(
       resolveAgentCliExecutable(
         {
-          command: "claude",
-          displayName: "Claude Code",
-          environmentOverride: "CLAUDE_CODE_EXECUTABLE",
+          command: "codex",
+          displayName: "Codex",
+          environmentOverride: "CODEX_PATH",
         },
         {
-          CLAUDE_CODE_EXECUTABLE: configured,
+          CODEX_PATH: configured,
           HOME: directory,
           PATH: "/missing",
         },
@@ -99,11 +98,6 @@ describe("Agent CLI discovery", () => {
       readVersion,
       resolveExecutable,
       specs: [
-        {
-          command: "claude",
-          displayName: "Claude Code",
-          integratedProviderId: "claude-code",
-        },
         {
           command: "codex",
           displayName: "Codex",
@@ -126,9 +120,9 @@ describe("Agent CLI discovery", () => {
       ],
     });
     await discovery.scan();
-    expect(resolveExecutable).toHaveBeenCalledTimes(2);
+    expect(resolveExecutable).toHaveBeenCalledOnce();
     await discovery.scan({ force: true });
-    expect(resolveExecutable).toHaveBeenCalledTimes(4);
+    expect(resolveExecutable).toHaveBeenCalledTimes(2);
   });
 
   it("bounds a hanging version probe instead of blocking discovery", async () => {

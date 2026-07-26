@@ -32,7 +32,7 @@ export const agentFixtures: readonly AgentFixture[] = [
     id: "claude",
     last: "⚠ 等待确认: prisma migrate deploy",
     model: "claude-4.5-sonnet",
-    name: "Claude Code",
+    name: "Claude Agent",
     status: "waiting",
     task: "迁移 users 表到新 schema",
     tokenCount: 96_300,
@@ -106,7 +106,7 @@ export const saasFixture: SaasFixture = {
       read: false,
       text: "请求执行 prisma migrate deploy",
       time: "刚刚",
-      title: "Claude Code 等待确认",
+      title: "Claude Agent 等待确认",
     },
     {
       agentId: "cursor",

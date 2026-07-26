@@ -1,35 +1,66 @@
-import { fileURLToPath } from "node:url";
+import {
+  AcpRuntimeError,
+  errorPayload,
+  type AgentProvider,
+  type ProviderAvailability,
+  type ResolvedAgentCommand,
+} from "@dougoos/acp";
+import type { PermissionEnforcement, ProviderProcessPolicy } from "@dougoos/shared";
 
-import type { AgentProvider } from "@dougoos/acp";
+export const CLAUDE_AGENT_DISABLED_REASON = "Claude Agent 在 DougoOS 0.2.0 中暂不可用。";
+export const CLAUDE_AGENT_DISABLED_REMEDIATION =
+  "当前版本不包含或启动 Claude Agent adapter；请先使用其他 Provider。consumer、OAuth、API key、云凭据和本机 Claude CLI 都不会启用此集成。";
 
-import { BundledAcpProvider, type BundledProviderOptions } from "./bundled-provider.js";
-import { CLAUDE_PROCESS_ENV } from "./environment.js";
+export class ClaudeAgentIntegrationDisabledError extends AcpRuntimeError {
+  constructor() {
+    super(
+      errorPayload("PROVIDER_UNAVAILABLE", false, {
+        operation: "initialize",
+        phase: "auth",
+        providerId: "claude-code",
+      }),
+    );
+    this.name = "ClaudeAgentIntegrationDisabledError";
+    this.message = `${CLAUDE_AGENT_DISABLED_REASON} ${CLAUDE_AGENT_DISABLED_REMEDIATION}`;
+  }
+}
 
-export const CLAUDE_AGENT_ACP_VERSION = "0.61.0";
-const CLAUDE_AGENT_ACP_ENTRY = fileURLToPath(
-  import.meta.resolve("@agentclientprotocol/claude-agent-acp/dist/index.js"),
-);
-
-export class ClaudeCodeProvider extends BundledAcpProvider {
-  readonly displayName = "Claude Code";
+/**
+ * Release-safe placeholder for the Claude Agent product slot.
+ *
+ * The reviewed adapter could apply local settings after a host preflight.
+ * DougoOS 0.2.0 therefore does not distribute or spawn that adapter under any
+ * credential configuration.
+ */
+export class ClaudeCodeProvider implements AgentProvider {
+  readonly displayName = "Claude Agent";
   readonly id = "claude-code";
-  readonly providerEnvironmentNames = CLAUDE_PROCESS_ENV;
-  readonly supportedAdapterVersion = CLAUDE_AGENT_ACP_VERSION;
+  readonly permissionEnforcement: PermissionEnforcement = "requests_permission";
+  readonly processPolicy: ProviderProcessPolicy = {
+    maxSessionsPerProcess: 1,
+    multiSessionPerProcess: false,
+  };
 
-  constructor(options?: BundledProviderOptions) {
-    super({
-      adapterEntry: CLAUDE_AGENT_ACP_ENTRY,
-      adapterVersion: CLAUDE_AGENT_ACP_VERSION,
-      cliExecutableEnvironmentName: "CLAUDE_CODE_EXECUTABLE",
-      cliProviderId: "claude-code",
-      ...(options === undefined ? {} : { options }),
+  available(): Promise<ProviderAvailability> {
+    return Promise.resolve({
+      kind: "unavailable",
+      ok: false,
+      reason: CLAUDE_AGENT_DISABLED_REASON,
+      remediation: CLAUDE_AGENT_DISABLED_REMEDIATION,
     });
   }
 
-  chooseAuthMethod(): ReturnType<AgentProvider["chooseAuthMethod"]> {
-    // Claude's adapter consumes an existing CLI login or explicitly allowlisted
-    // non-interactive environment. Its interactive terminal/gateway methods
-    // require client capabilities DougoOS does not advertise.
+  chooseAuthMethod(
+    _initialize: Parameters<AgentProvider["chooseAuthMethod"]>[0],
+    _environment: Parameters<AgentProvider["chooseAuthMethod"]>[1],
+  ): ReturnType<AgentProvider["chooseAuthMethod"]> {
+    void _initialize;
+    void _environment;
     return null;
+  }
+
+  resolveCommand(_context: Parameters<AgentProvider["resolveCommand"]>[0]): ResolvedAgentCommand {
+    void _context;
+    throw new ClaudeAgentIntegrationDisabledError();
   }
 }

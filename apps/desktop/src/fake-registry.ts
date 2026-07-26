@@ -159,14 +159,6 @@ export class FakeRegistry implements CoreRegistry {
       checkedAt: detectedAt,
       clis: [
         AgentCliInstallationSchema.parse({
-          command: "claude",
-          detectedAt,
-          displayName: "Claude Code",
-          executablePath: "/fixture/bin/claude",
-          integratedProviderId: "claude-code",
-          version: "fixture-claude",
-        }),
-        AgentCliInstallationSchema.parse({
           command: "codex",
           detectedAt,
           displayName: "Codex",

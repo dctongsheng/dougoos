@@ -322,7 +322,7 @@ export const runtimeStateNotices: Readonly<
   },
   "provider-probing-unavailable": {
     action: "运行 doctor",
-    body: "Claude Code 尚未通过本机认证检查;Codex 可用。",
+    body: "Claude Agent 在 0.2.0 中暂不可用；当前版本不包含或启动 Anthropic adapter。Codex 可用。",
     title: "正在探测 Provider · 1 个不可用",
     tone: "warning",
   },
@@ -1074,7 +1074,7 @@ export const harnessFeatureFixtures = {
       file: "~/.claude/CLAUDE.md + system",
       segments: [
         {
-          body: "You are Claude Code, an agentic coding assistant operating in the user’s terminal.",
+          body: "You are Claude Agent, an agentic coding assistant operating in the user’s terminal.",
           category: "identity",
           mass: 420,
         },
@@ -1293,7 +1293,7 @@ export const harnessFeatureFixtures = {
     {
       agentId: "claude",
       description: "只读侦察兵:快速扫仓库结构与关键实现,产出摘要供主 Agent 规划。",
-      host: "Claude Code",
+      host: "Claude Agent",
       model: "claude-4-haiku",
       name: "Explore",
       spawns: 214,
@@ -1302,7 +1302,7 @@ export const harnessFeatureFixtures = {
     {
       agentId: "claude",
       description: "先出实施计划与风险点,主 Agent 确认后才动手改代码。",
-      host: "Claude Code",
+      host: "Claude Agent",
       model: "claude-4.5-sonnet",
       name: "Plan",
       spawns: 87,
@@ -1381,7 +1381,7 @@ export const harnessFeatureFixtures = {
 export const settingsFeatureFixtures = {
   accents: ["#3ddc84", "#4fd8e0", "#ffb454", "#b48cff"],
   agentBinaries: {
-    claude: "/usr/local/bin/claude · v2.8.0",
+    claude: "DougoOS 0.2.0 · 暂不可用",
     codex: "/usr/local/bin/codex · v3.4.1",
     cursor: "/usr/local/bin/cursor-agent · v0.52",
     grok: "~/.grok/bin/grok · v1.9.2",
@@ -1391,7 +1391,7 @@ export const settingsFeatureFixtures = {
     pi: "~/.pi/bin/pi · v0.9.4",
   } satisfies Readonly<Record<AgentId, string>>,
   apiKeyMasks: {
-    claude: "sk-ant-••••••••a4f2",
+    claude: "当前版本不接受凭据",
     codex: "codex-••••••••7f21",
     cursor: "cursor-••••••••7f21",
     grok: "grok-••••••••7f21",

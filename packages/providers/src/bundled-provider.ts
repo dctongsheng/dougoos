@@ -45,8 +45,8 @@ export abstract class BundledAcpProvider implements AgentProvider {
   readonly #adapterEntry: string;
   readonly #adapterVersion: string;
   readonly #cliDiscovery: AgentCliDiscoveryPort;
-  readonly #cliExecutableEnvironmentName: string;
-  readonly #cliProviderId: string;
+  readonly #cliExecutableEnvironmentName: string | undefined;
+  readonly #cliProviderId: string | undefined;
   #cliExecutablePath: string | null = null;
   readonly #electronRunAsNode: boolean;
   readonly #nodeExecutable: string;
@@ -55,8 +55,8 @@ export abstract class BundledAcpProvider implements AgentProvider {
   protected constructor(defaults: {
     readonly adapterEntry: string;
     readonly adapterVersion: string;
-    readonly cliExecutableEnvironmentName: string;
-    readonly cliProviderId: string;
+    readonly cliExecutableEnvironmentName?: string;
+    readonly cliProviderId?: string;
     readonly options?: BundledProviderOptions;
   }) {
     const options = defaults.options;
@@ -106,6 +106,9 @@ export abstract class BundledAcpProvider implements AgentProvider {
         version: this.#adapterVersion,
       };
     }
+    if (this.#cliExecutableEnvironmentName === undefined || this.#cliProviderId === undefined) {
+      return { ok: true, version: this.#adapterVersion };
+    }
     const installation = await this.#cliDiscovery.detectIntegrated(this.#cliProviderId);
     if (installation === null) {
       this.#cliExecutablePath = null;
@@ -122,15 +125,20 @@ export abstract class BundledAcpProvider implements AgentProvider {
   }
 
   resolveCommand(context: { readonly env: SanitizedProcessEnv }): ResolvedAgentCommand {
-    if (this.#cliExecutablePath === null) {
+    if (this.#cliProviderId !== undefined && this.#cliExecutablePath === null) {
       throw new Error(`${this.displayName} CLI availability must be checked before invocation`);
     }
+    const pickedEnvironment = pickEnvironment(context.env, [
+      ...COMMON_PROCESS_ENV,
+      ...this.providerEnvironmentNames,
+    ]);
     const env = {
-      ...prependExecutableDirectory(
-        pickEnvironment(context.env, [...COMMON_PROCESS_ENV, ...this.providerEnvironmentNames]),
-        this.#cliExecutablePath,
-      ),
-      [this.#cliExecutableEnvironmentName]: this.#cliExecutablePath,
+      ...(this.#cliExecutablePath === null
+        ? pickedEnvironment
+        : prependExecutableDirectory(pickedEnvironment, this.#cliExecutablePath)),
+      ...(this.#cliExecutableEnvironmentName === undefined || this.#cliExecutablePath === null
+        ? {}
+        : { [this.#cliExecutableEnvironmentName]: this.#cliExecutablePath }),
       ...(this.#electronRunAsNode ? { ELECTRON_RUN_AS_NODE: "1" } : {}),
     };
     return {

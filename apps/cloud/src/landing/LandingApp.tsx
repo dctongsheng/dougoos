@@ -28,6 +28,10 @@ type CustomProperties = CSSProperties & Readonly<Record<`--${string}`, string>>;
 
 const EARLY_ACCESS_DOWNLOAD_URL =
   "https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg";
+const SOURCE_REPOSITORY_URL = "https://github.com/dctongsheng/dougoos";
+const SOURCE_RELEASE_URL = `${SOURCE_REPOSITORY_URL}/tree/v0.2.0`;
+const SOURCE_LICENSE_URL = `${SOURCE_REPOSITORY_URL}/blob/v0.2.0/LICENSE`;
+const THIRD_PARTY_NOTICES_URL = "/legal/THIRD_PARTY_NOTICES.md";
 
 const blockDemoNavigation = (event: MouseEvent<HTMLElement>): void => {
   event.preventDefault();
@@ -209,7 +213,8 @@ const LoginOverlay = ({
           </button>
         </div>
         <div className="login-copy">
-          登录后可跨设备同步已提炼的知识与配置——原始会话数据始终留在本机。
+          Early Access 暂不提供跨设备同步。会话记录保存在本机；使用 Provider
+          时，所选上下文会发送到对应服务。
         </div>
         <input
           aria-label="邮箱"
@@ -346,8 +351,8 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
             一个控制台
           </h1>
           <p>
-            Codex、Claude Code、Grok、Cursor、Pi、Hermes
-            的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。
+            Codex、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——
+            不再切换多个终端窗口。Claude Agent 在 0.2.0 中暂不可用，当前下载不包含或启动其 adapter。
           </p>
           <div className="hero-actions">
             <a className="primary-action" href={EARLY_ACCESS_DOWNLOAD_URL}>
@@ -377,7 +382,7 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
 
         <ProductWindow />
 
-        <section className="agent-strip" aria-label="已接入的 Agent CLI">
+        <section className="agent-strip" aria-label="Agent 集成状态">
           <div className="agent-chips">
             {landingAgents.map((agent) => (
               <div className="agent-chip" key={agent.name}>
@@ -387,7 +392,7 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
               </div>
             ))}
           </div>
-          <p>已接入的 Agent CLI——检测本机安装,一键接管</p>
+          <p>5 个可用 Agent CLI；Claude Agent 在 0.2.0 中暂不可用</p>
         </section>
 
         <section aria-labelledby="features-title">
@@ -411,8 +416,8 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
             <div className="eyebrow">SMART ROUTING</div>
             <h3 id="routing-title">描述任务,系统选人</h3>
             <p>
-              按任务类型、Agent 负载与历史成功率自动路由:重构给 Claude Code,脚本给 Codex,压测给
-              Grok。也可以手动指定,或同题多发做结果对比。
+              按任务类型、Agent 负载与历史成功率自动路由:重构给 Cursor,脚本给 Codex,压测给 Grok。
+              也可以手动指定,或同题多发做结果对比。0.2.0 不会把任务路由给 Claude Agent。
             </p>
           </div>
           <div className="route-card">
@@ -470,18 +475,14 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
 
         <section className="final-cta">
           <h2>把所有终端窗口,收进一个 OS</h2>
-          <p>免费、开源、本地优先。你的会话数据永远不离开你的机器。</p>
+          <p>免费、开源、本地优先。会话记录保存在本机；Provider 请求按对应服务边界传输。</p>
           <div>
             <a className="primary-action final-primary" href={EARLY_ACCESS_DOWNLOAD_URL}>
               下载 DougoOS
             </a>
-            <button
-              className="secondary-action final-secondary"
-              onClick={blockDemoNavigation}
-              type="button"
-            >
+            <a className="secondary-action final-secondary" href={SOURCE_REPOSITORY_URL}>
               GitHub ↗
-            </button>
+            </a>
           </div>
         </section>
 
@@ -497,7 +498,9 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
           <button onClick={blockDemoNavigation} type="button">
             更新日志
           </button>
-          <span>许可证 MIT</span>
+          <a href={SOURCE_RELEASE_URL}>源代码 v0.2.0</a>
+          <a href={SOURCE_LICENSE_URL}>许可证 AGPL-3.0-only</a>
+          <a href={THIRD_PARTY_NOTICES_URL}>第三方许可</a>
         </footer>
       </div>
 

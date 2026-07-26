@@ -288,7 +288,9 @@ Landing 使用一套独立 token，不能直接拿 SaaS light/dark 值替换。
 
 ### 5.2 Home
 
-- 默认 manual、Claude Code、项目“对话”。
+- 本节描述用于视觉回归的 prototype fixture；DougoOS 0.2.0 production real mode 会用
+  `/api/providers` 覆盖状态，并把 Claude Agent 固定显示为不可用。
+- fixture 默认 manual、Claude Agent、项目“对话”。
 - manual/智能路由 segmented control。
 - Agent dropdown：6 个 Agent、状态、dot；与 path dropdown 互斥。
 - 项目 dropdown：第一项固定为“对话”，其后是最近使用过的目录项目与“选择其他项目目录…”。
@@ -327,7 +329,7 @@ Landing 使用一套独立 token，不能直接拿 SaaS light/dark 值替换。
 | Agent | Session fixture | History | 独有 tab |
 |---|---|---|---|
 | Codex CLI | user/tool/text/tool/note | 2 | — |
-| Claude Code | user/tool/tool/text/diff/approval | 2 | — |
+| Claude Agent | user/tool/tool/text/diff/approval | 2 | — |
 | Grok CLI | user/think | 1 | — |
 | Cursor CLI | user/tool/text/note | 1 | — |
 | Pi | empty | empty | — |
@@ -425,9 +427,13 @@ Landing 仅有以下真实原型事件：
 - 点击 overlay 背景或 close：关闭。
 - modal 登录/GitHub/Google：直接切 logged-in presentation。
 
-三个下载 CTA 是唯一批准的外部导航，必须统一指向
+三个下载 CTA 必须统一指向
 `https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg`，并明确标注未经
-Apple 公证；其余 nav/CTA 都没有 handler，继续保持无副作用演示或明确 disabled。
+Apple 公证。GitHub CTA 与 Footer 的源码/许可证链接是另外批准的外部导航，必须指向
+公开仓库；Footer 必须固定到 `v0.2.0` Tag 的源码树及 `LICENSE`，以提供与下载版本严格
+对应且不可变的 AGPL 源码入口。Footer 的“第三方许可”只指向随站点发布的
+`/legal/THIRD_PARTY_NOTICES.md`；其余 nav/CTA 都没有 handler，继续保持无副作用演示
+或明确 disabled。
 
 ## 7. 控件数据模式
 
@@ -437,14 +443,15 @@ Apple 公证；其余 nav/CTA 都没有 handler，继续保持无副作用演示
 |---|---|
 | Shell 连接状态 | 来自 Electron/Core；ready 前不能开放聊天 |
 | Theme / accent | 本地非敏感展示偏好，可真实保存 |
-| Claude Code/Codex provider 可用性 | `/api/providers` |
+| Claude Agent 状态槽位 | `/api/providers`；0.2.0 固定为 `unavailable`，不开放创建或发送 |
+| 可执行 provider 可用性 | `/api/providers` |
 | cwd 选择 | Electron 目录选择 + shared/Core DTO |
 | 内置“对话”项目 | 本地 Preferences + Core DTO；始终存在，Home 默认选中，真实目录只在 Settings 可见 |
 | 对话目录修改 | Electron 目录选择；修改只作用于未来新建 Session，旧 Session 的 `cwd` 不变 |
-| 新建 Claude/Codex session | Core API；只使用本 Goal 已约定的 create contract |
-| 当前 Claude/Codex session 选择与展示 | Core API 的当前 session/snapshot；不等同于恢复历史进程 |
-| Claude/Codex composer 发送 | shared/Core DTO 创建 Turn；发送态、busy 与错误来自真实 Core |
-| 当前 Claude/Codex session 消息 | snapshot + ordered envelope |
+| 新建可用 Provider session | Core API；只使用本 Goal 已约定的 create contract |
+| 当前可用 Provider session 选择与展示 | Core API 的当前 session/snapshot；不等同于恢复历史进程 |
+| 可用 Provider composer 发送 | shared/Core DTO 创建 Turn；发送态、busy 与错误来自真实 Core |
+| 当前可用 Provider session 消息 | snapshot + ordered envelope |
 | user/text/note/tool/diff/approval | shared DTO；不能有第二套 UI |
 | real provider think | 本地 journal/snapshot 可保留协议事件，但 raw reasoning 不得进入 DOM、日志或持久化 UI 配置 |
 | approval option | 只发服务端 optionId；一次性解决 |
@@ -477,7 +484,8 @@ Fixture 必须通过显式 DataSource；不得从组件内部用“如果没有 
 | 控件/区域 | 强制边界 |
 |---|---|
 | Landing 登录/GitHub/Google/注册 | 不发认证请求，不保存邮箱/密码 |
-| Landing nav/下载/在线体验/GitHub CTA | 无批准目标时无外部副作用 |
+| Landing 下载/GitHub/源码/许可证 | 只允许前述固定下载与公开仓库目标，不发后台请求 |
+| Landing nav/在线体验/其余 Footer 控件 | 无批准目标时无外部副作用 |
 | Ryo/Profile/Pro | 纯展示，无账号体系 |
 | Cloud Sync toggle/同步 | 不建账号、设备同步或快照上报 |
 | Settings API Key/更换 | 不读写真实 secret |
@@ -557,7 +565,9 @@ Landing 登录、Cloud Sync、API Key 同理：可见结构必须复刻，但不
 
 ### 9.6 文案边界
 
-Landing 原型写“你的会话数据永远不离开你的机器”，架构允许未来严格 allowlist 的伪匿名 metrics。生产发布前应由产品确认文案；本任务不改原型 reference。
+Landing 不得承诺“所有会话数据永远不离开机器”：SQLite 与会话记录保存在本机，
+但使用 Provider 时，用户选择的提示词与上下文会按对应第三方服务边界传输。Early
+Access 也不得暗示已有 DougoOS 账号或云端同步；原型和生产文案都必须明确这一边界。
 
 ### 9.7 内置“对话”项目与原型树冲突
 

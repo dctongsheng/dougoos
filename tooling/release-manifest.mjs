@@ -45,7 +45,7 @@ const releaseDefinitions = {
   },
   "v0.2.0": {
     manifestRelativePath: "release/v0.2.0.json",
-    recordedOn: "2026-07-25",
+    recordedOn: "2026-07-26",
     sourceRef: "v0.2.0",
     verification: {
       gates: [

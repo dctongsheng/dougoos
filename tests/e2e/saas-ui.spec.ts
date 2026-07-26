@@ -143,7 +143,7 @@ test("Home keyboard contract preserves newline and IME, then Ctrl/Cmd+Enter send
   await composer.fill("迁移 users 数据库 schema");
   await composer.press("Control+Enter");
   await expect(page.locator('[data-screen-label="Agent 会话"]')).toBeVisible();
-  await expect(page.locator(".agent-header")).toContainText("Claude Code");
+  await expect(page.locator(".agent-header")).toContainText("Claude Agent");
 });
 
 test("fixture Agent composer sends on Enter and renders only its safe canned think", async ({
@@ -178,7 +178,7 @@ test("approval is single-use and notification click marks read while navigating"
   const notification = page.locator(".notification-button");
   await expect(notification).toContainText("2");
   await notification.click();
-  await page.getByText("Claude Code 等待确认", { exact: true }).click();
+  await page.getByText("Claude Agent 等待确认", { exact: true }).click();
   await expect(page.locator('[data-screen-label="Agent 会话"]')).toBeVisible();
   await expect(notification).toContainText("1");
 
@@ -262,7 +262,7 @@ test("Agent, Settings, Queue, and Sessions state survives routes without stale a
 
   await sidebarNav(page, "长程任务").click();
   const firstQueue = page.locator(".queue-card").first();
-  await firstQueue.getByTitle("Claude Code").click();
+  await firstQueue.getByTitle("Claude Agent").click();
   await firstQueue.getByRole("button", { exact: true, name: "派发 →" }).click();
   await expect(firstQueue).toContainText("执行中");
   await sidebarNav(page, "新建任务").click();
@@ -300,9 +300,9 @@ test("queue, export, sync, workflow, skill, and Settings controls stay local-onl
 
   await sidebarNav(page, "长程任务").click();
   const firstQueue = page.locator(".queue-card").first();
-  await firstQueue.getByTitle("Claude Code").click();
+  await firstQueue.getByTitle("Claude Agent").click();
   await firstQueue.getByRole("button", { exact: true, name: "派发 →" }).click();
-  await expect(firstQueue).toContainText("Claude Code 执行中");
+  await expect(firstQueue).toContainText("Claude Agent 执行中");
   await expect(firstQueue).toContainText("✓ 已完成", { timeout: 6_000 });
 
   await sidebarNav(page, "Export").scrollIntoViewIfNeeded();

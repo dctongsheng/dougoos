@@ -334,12 +334,12 @@ describe("routeMeta", () => {
       { kind: "usage" },
     ];
 
-    expect(routes.map((route) => routeMeta(route, () => "Claude Code").label)).toEqual([
+    expect(routes.map((route) => routeMeta(route, () => "Claude Agent").label)).toEqual([
       "新建任务",
       "总览",
       "定时任务",
       "长程任务",
-      "Claude Code",
+      "Claude Agent",
       "Memory",
       "Sessions 总览",
       "System Prompt",

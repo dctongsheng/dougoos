@@ -1,6 +1,7 @@
 {
   "name": "@dougoos/providers",
   "version": "0.0.0",
+  "license": "AGPL-3.0-only",
   "private": true,
   "type": "module",
   "engines": {
@@ -27,7 +28,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@agentclientprotocol/claude-agent-acp": "0.61.0",
     "@agentclientprotocol/codex-acp": "1.1.7",
     "@dougoos/acp": "workspace:*",
     "@dougoos/shared": "workspace:*",

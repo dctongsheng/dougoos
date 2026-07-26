@@ -4,9 +4,11 @@
 
 ## 结论
 
-P0/P1 功能实现的历史 checkpoint 已完成，真实 Claude Code 已通过 Desktop UI → Core →
-ACP → Agent → Journal → SSE → UI 全链路；Landing 与 health-only Worker 已发布到
-<https://dougoos.com>。
+P0/P1 功能实现的历史 checkpoint 已完成；当时的 Claude Agent 验证曾通过 Desktop UI →
+Core → ACP → Agent → Journal → SSE → UI 全链路。该历史证据不代表 DougoOS 0.2.0
+当前支持 Claude Agent：后续认证边界复核无法证明宿主认证不受本机/项目设置改写，因此
+0.2.0 已 fail-closed，并从生产依赖与桌面包移除相关 adapter/SDK。Landing 与
+health-only Worker 已发布到 <https://dougoos.com>。
 
 2026-07-24 的 P0/P1 release baseline 已完成。视觉修复通过独立 `ui-regression-001`
 review；release review 01 的 Node provenance blocker 已关闭，review 02/03 均为 `pass`。
@@ -78,14 +80,14 @@ production actual/diff/metadata/run 是本地可再生证据，受 `.gitignore` 
 
 ## 真实 Provider
 
-### Claude Code
+### Claude Agent（历史证据，非 0.2.0 可用性）
 
-- adapter：0.61.0
-- ACP protocol：1
-- doctor：available
-- Desktop UI E2E：通过
-- package Provider smoke：`completed` / `end_turn`
-- 可见 UI 证据覆盖持久化重载、真实 tool/diff/approval、拒绝和取消
+- 历史验证 adapter：0.61.0（DougoOS 0.2.0 不再依赖或分发）
+- 历史 ACP protocol：1
+- 历史 doctor：available；0.2.0 当前 doctor：`unavailable`
+- 历史 Desktop UI E2E：通过
+- 历史 package Provider smoke：`completed` / `end_turn`
+- 历史可见 UI 证据覆盖持久化重载、真实 tool/diff/approval、拒绝和取消
 - 脱敏证据：`.artifacts/real-provider-ui-e2e.json`
 
 ### Codex
@@ -96,8 +98,8 @@ production actual/diff/metadata/run 是本地可再生证据，受 `.gitignore` 
 - real smoke：已执行
 - 结果：`AGENT_FAILED` / `usage_limit` / JSON-RPC `-32603`
 
-Codex 当前是外部额度限制，不是适配器、握手或认证失败。Claude Code 已满足至少一个真实
-Provider 完整 Desktop UI 链路的完成下限。
+Codex 当时的结果是外部额度限制，不是适配器、握手或认证失败。Claude Agent 的记录只
+证明历史 checkpoint 曾完成真实 Desktop UI 链路，不能用于声称 0.2.0 当前可用。
 
 ## Cloud 与隐私边界
 

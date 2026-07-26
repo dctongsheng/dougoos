@@ -27,7 +27,7 @@ task-required gates pass. No blocking finding was found.
 ## Requirement Review
 
 1. **Fixture remains six Agents — pass.**
-   `agentFixtures` contains Codex, Claude Code, Grok, Cursor, Pi, and Hermes only.
+   `agentFixtures` contains Codex, Claude Agent, Grok, Cursor, Pi, and Hermes only.
    `PROTOTYPE_AGENT_IDS` and `fixtures.test.ts` lock that list.
 2. **Real Provider discovery retains OpenClaw/OpenCode — pass.**
    `AGENT_IDS` still includes both IDs. `fixtureFromCoreState` appends non-prototype Providers from

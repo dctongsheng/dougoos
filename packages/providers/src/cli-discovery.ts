@@ -28,12 +28,6 @@ export interface AgentCliSpec {
  */
 export const KNOWN_AGENT_CLIS: readonly AgentCliSpec[] = [
   { command: "agy", displayName: "Antigravity" },
-  {
-    command: "claude",
-    displayName: "Claude Code",
-    environmentOverride: "CLAUDE_CODE_EXECUTABLE",
-    integratedProviderId: "claude-code",
-  },
   { command: "codebuddy", displayName: "CodeBuddy" },
   {
     command: "codex",

@@ -15,7 +15,7 @@ P0–P3 见 ARCHITECTURE.md 第 5 节。以下是 P4 起的功能 backlog，**�
 
 | 功能 | 使用的扩展点 | 说明 |
 |---|---|---|
-| AgentProvider 基线（已完成） | 扩展点 a（AgentProvider） | Claude Code / Codex / Cursor / Grok / Hermes / OpenClaw / OpenCode / Pi 已按 Checklist A 接入；后续 Provider 继续复用同一注册表与 doctor 门禁 |
+| AgentProvider 基线（已完成） | 扩展点 a（AgentProvider） | Codex / Cursor / Grok / Hermes / OpenClaw / OpenCode / Pi 已按 Checklist A 接入；Claude Agent 在 0.2.0 中是 fail-closed、不可启动的状态槽位；后续 Provider 继续复用同一注册表与 doctor 门禁 |
 | GenericAcpProvider（用户自定义 CLI） | 扩展点 a | 设置页 JSON 配置（command/args/env）→ 动态注册；校验失败要给出 doctor 级诊断信息 |
 | LlmTaskRouter | TaskRouter 策略接口 | 最小 agent loop + Vercel AI SDK structured output；置信度 < 阈值时 UI 弹确认；保留 RulesTaskRouter 作为降级路径 |
 | 会话恢复（session/load / resume / list / close） | @dougoos/acp | 只按 initialize 实际协商能力启用；load 与 resume 语义不同。不支持时允许用户显式创建新会话并附带历史摘要，禁止静默伪装成原会话恢复 |

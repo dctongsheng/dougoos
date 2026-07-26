@@ -49,6 +49,16 @@ let quitting = false;
 
 app.setName("DougoOS");
 
+const SOURCE_REPOSITORY_URL = "https://github.com/dctongsheng/dougoos";
+
+function sourceReleaseUrl(): string {
+  return `${SOURCE_REPOSITORY_URL}/tree/v${app.getVersion()}`;
+}
+
+function sourceLicenseUrl(): string {
+  return `${SOURCE_REPOSITORY_URL}/blob/v${app.getVersion()}/LICENSE`;
+}
+
 function runtimePath(name: "preload.cjs" | "core-worker.js"): string {
   return fileURLToPath(new URL(`./${name}`, import.meta.url));
 }
@@ -57,6 +67,18 @@ function webRoot(): string {
   if (process.env.DOUGOOS_WEB_DIST !== undefined) return process.env.DOUGOOS_WEB_DIST;
   if (app.isPackaged) return join(process.resourcesPath, "web");
   return fileURLToPath(new URL("../../web/dist/site/", import.meta.url));
+}
+
+function thirdPartyNoticesPath(): string {
+  if (app.isPackaged) {
+    return join(process.resourcesPath, "legal", "THIRD_PARTY_NOTICES.md");
+  }
+  return fileURLToPath(new URL("../../../THIRD_PARTY_NOTICES.md", import.meta.url));
+}
+
+async function openThirdPartyNotices(): Promise<void> {
+  const error = await shell.openPath(thirdPartyNoticesPath());
+  if (error !== "") dialog.showErrorBox("无法打开第三方许可", error);
 }
 
 function senderIsTrusted(event: IpcMainEvent | IpcMainInvokeEvent): boolean {
@@ -220,6 +242,25 @@ function configureApplicationMenu(updates: UpdateManager): void {
         { type: "separator" },
         {
           click: () => {
+            void shell.openExternal(sourceReleaseUrl());
+          },
+          label: "查看源代码…",
+        },
+        {
+          click: () => {
+            void shell.openExternal(sourceLicenseUrl());
+          },
+          label: "开源许可证（AGPL-3.0-only）…",
+        },
+        {
+          click: () => {
+            void openThirdPartyNotices();
+          },
+          label: "第三方许可…",
+        },
+        { type: "separator" },
+        {
+          click: () => {
             void updates.check({ manual: true });
           },
           label: "检查更新…",
@@ -247,6 +288,13 @@ async function maybeWriteDevToken(connection: CoreConnection): Promise<void> {
 
 async function startDesktop(): Promise<void> {
   await app.whenReady();
+  app.setAboutPanelOptions({
+    applicationName: "DougoOS",
+    applicationVersion: app.getVersion(),
+    copyright: "Copyright © 2026 DougoOS contributors · AGPL-3.0-only · No warranty",
+    version: app.getVersion(),
+    website: sourceReleaseUrl(),
+  });
   configureSession();
   protocol.handle("app", (request) => handleAppRequest(request, webRoot()));
 

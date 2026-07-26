@@ -69,12 +69,16 @@ if (packageJsonPaths.size === 0) {
 }
 
 const workspaces = new Map();
+const workspaceLicense = "AGPL-3.0-only";
 
 for (const packageJsonPath of [...packageJsonPaths].sort()) {
   const workspacePath = relative(root, dirname(join(root, packageJsonPath)));
   const packageJson = JSON.parse(await readFile(join(root, packageJsonPath), "utf8"));
   if (typeof packageJson.name !== "string" || packageJson.name.length === 0) {
     throw new Error(`${workspacePath}/package.json must declare a package name`);
+  }
+  if (packageJson.license !== workspaceLicense) {
+    throw new Error(`${workspacePath}/package.json must declare license ${workspaceLicense}`);
   }
   if (workspaces.has(packageJson.name)) {
     throw new Error(`duplicate workspace package name: ${packageJson.name}`);
@@ -148,6 +152,9 @@ for (const packageName of [...packages.keys()].sort()) {
 }
 
 const rootPackageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+if (rootPackageJson.license !== workspaceLicense) {
+  throw new Error(`root package.json must declare license ${workspaceLicense}`);
+}
 for (const [name, version] of Object.entries(rootPackageJson.devDependencies ?? {})) {
   if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)) {
     throw new Error(`root devDependency ${name} must use an exact version, got ${version}`);

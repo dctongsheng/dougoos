@@ -15,7 +15,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { arch, platform } from "node:process";
-import { dirname, join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { promisify } from "node:util";
 
 import { createPackageWithOptions, getRawHeader } from "@electron/asar";
@@ -25,6 +25,7 @@ import { generateDesktopIcon } from "./generate-desktop-icon.mjs";
 
 const execute = promisify(execFile);
 const root = process.cwd();
+const sourceRepositoryUrl = "https://github.com/dctongsheng/dougoos";
 const artifactsRoot = join(root, ".artifacts");
 const stagePath = join(artifactsRoot, "desktop-stage");
 const packageOutput = join(artifactsRoot, "desktop");
@@ -37,6 +38,8 @@ const desktopPackage = JSON.parse(
   await readFile(join(root, "apps", "desktop", "package.json"), "utf8"),
 );
 const appVersion = rootPackage.version;
+const sourceTag = `v${appVersion}`;
+const sourceArchiveUrl = `${sourceRepositoryUrl}/archive/refs/tags/${sourceTag}.tar.gz`;
 if (
   typeof appVersion !== "string" ||
   !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u.test(appVersion) ||
@@ -219,6 +222,66 @@ if (macInfoPath !== undefined) {
   ]);
 }
 await cp(webResource, join(resourcesPath, "web"), { recursive: true });
+const legalPath = join(resourcesPath, "legal");
+await mkdir(legalPath, { recursive: true });
+await cp(join(root, "LICENSE"), join(legalPath, "DougoOS-LICENSE.txt"));
+await cp(join(root, "THIRD_PARTY_NOTICES.md"), join(legalPath, "THIRD_PARTY_NOTICES.md"));
+for (const [path, expectedSha256] of [
+  [
+    join(root, "legal", "OpenAI-Codex-Apache-2.0.txt"),
+    "d17f227e4df5da1600391338865ce0f3055211760a36688f816941d58232d8dc",
+  ],
+  [
+    join(root, "legal", "OpenAI-Codex-NOTICE.txt"),
+    "9d71575ecfd9a843fc1677b0efb08053c6ba9fd686a0de1a6f5382fd3c220915",
+  ],
+]) {
+  const actualSha256 = createHash("sha256")
+    .update(await readFile(path))
+    .digest("hex");
+  if (actualSha256 !== expectedSha256) {
+    throw new Error(`${relative(root, path)} does not match the OpenAI Codex rust-v0.145.0 source`);
+  }
+}
+for (const [source, destination] of [
+  [join(root, "legal", "Instrument-Sans-OFL.txt"), join(legalPath, "Instrument-Sans-OFL.txt")],
+  [join(root, "legal", "JetBrains-Mono-OFL.txt"), join(legalPath, "JetBrains-Mono-OFL.txt")],
+  [
+    join(root, "legal", "FRONTEND_THIRD_PARTY_LICENSES.txt"),
+    join(legalPath, "FRONTEND_THIRD_PARTY_LICENSES.txt"),
+  ],
+  [
+    join(root, "legal", "OpenAI-Codex-Apache-2.0.txt"),
+    join(legalPath, "OpenAI-Codex-Apache-2.0.txt"),
+  ],
+  [join(root, "legal", "OpenAI-Codex-NOTICE.txt"), join(legalPath, "OpenAI-Codex-NOTICE.txt")],
+]) {
+  await cp(source, destination);
+}
+const electronDistributionPath =
+  platform === "darwin"
+    ? dirname(dirname(dirname(dirname(electronExecutable))))
+    : dirname(electronExecutable);
+await cp(join(electronDistributionPath, "LICENSE"), join(legalPath, "Electron-LICENSE.txt"));
+await cp(
+  join(electronDistributionPath, "LICENSES.chromium.html"),
+  join(legalPath, "LICENSES.chromium.html"),
+);
+await writeFile(
+  join(legalPath, "SOURCE.txt"),
+  [
+    `DougoOS ${appVersion} corresponding source`,
+    "",
+    `Repository: ${sourceRepositoryUrl}`,
+    `Release tag: ${sourceTag}`,
+    `Source archive: ${sourceArchiveUrl}`,
+    "",
+    "DougoOS original source is licensed under AGPL-3.0-only.",
+    "Third-party components retain their respective licenses and terms.",
+    "",
+  ].join("\n"),
+  "utf8",
+);
 
 let dmgPath;
 let dmgSha256;
@@ -232,6 +295,10 @@ if (platform === "darwin" && appPath !== undefined && macInfoPath !== undefined)
   await execute("codesign", ["--verify", "--deep", "--strict", appPath]);
   signing = "ad-hoc";
 
+  await cp(join(legalPath, "DougoOS-LICENSE.txt"), join(buildPath, "LICENSE.txt"));
+  await cp(join(legalPath, "SOURCE.txt"), join(buildPath, "SOURCE.txt"));
+  await cp(join(legalPath, "THIRD_PARTY_NOTICES.md"), join(buildPath, "THIRD_PARTY_NOTICES.md"));
+  await cp(legalPath, join(buildPath, "legal"), { recursive: true });
   await symlink("/Applications", join(buildPath, "Applications"), "dir");
   await mkdir(releaseOutput, { recursive: true });
   dmgPath = join(releaseOutput, `DougoOS-${appVersion}-arm64.dmg`);
@@ -269,10 +336,12 @@ await writeFile(
       dmgSize,
       electronVersion: "43.2.0",
       executablePath,
+      legalPath,
       minimumMacOS: platform === "darwin" ? "13.0" : undefined,
       notarized: false,
       platform,
       signing,
+      sourceArchiveUrl,
     },
     null,
     2,

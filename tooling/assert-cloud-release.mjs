@@ -16,7 +16,18 @@ const releaseForbidden = [
   ["test runtime hook", /__dougoos/u],
   ["account or ingest API", /\/(?:api\/auth|v1\/ingest)\b/iu],
 ];
-const allowedExternalUrl = "https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg";
+const allowedExternalUrls = new Set([
+  "https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg",
+  "https://github.com/dctongsheng/dougoos",
+  "https://github.com/dctongsheng/dougoos/tree/v0.2.0",
+  "https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE",
+]);
+const requiredExternalReferences = [
+  "https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg",
+  "https://github.com/dctongsheng/dougoos",
+  "/tree/v0.2.0",
+  "/blob/v0.2.0/LICENSE",
+];
 const externalResourceAttribute = /(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/giu;
 const sourceForbidden = [
   ["HTML injection", /dangerouslySetInnerHTML|\.innerHTML\s*=/u],
@@ -47,6 +58,47 @@ const required = [
   "把所有终端窗口,收进一个 OS",
   "登录 AgentOS",
   "data-production-ready",
+  "/legal/THIRD_PARTY_NOTICES.md",
+  "第三方许可",
+];
+const legalRequired = [
+  [
+    "THIRD_PARTY_NOTICES.md",
+    [
+      "Third-Party Software Notices",
+      "Instrument Sans and JetBrains Mono",
+      "legal/FRONTEND_THIRD_PARTY_LICENSES.txt",
+      "beside this notice in packaged legal directories",
+      "does not distribute or launch",
+      "@agentclientprotocol/claude-agent-acp",
+      "@anthropic-ai/claude-agent-sdk",
+      "@openai/codex@0.145.0",
+      "@openai/codex-darwin-arm64@0.145.0-darwin-arm64",
+      "rust-v0.145.0",
+    ],
+  ],
+  [
+    "Instrument-Sans-OFL.txt",
+    ["Copyright 2022 The Instrument Sans Project Authors", "SIL OPEN FONT LICENSE Version 1.1"],
+  ],
+  [
+    "JetBrains-Mono-OFL.txt",
+    ["Copyright 2020 The JetBrains Mono Project Authors", "SIL OPEN FONT LICENSE Version 1.1"],
+  ],
+  [
+    "FRONTEND_THIRD_PARTY_LICENSES.txt",
+    [
+      "Frontend Third-Party Licenses",
+      "react@19.2.8",
+      "react-dom@19.2.8",
+      "scheduler@0.27.0",
+      "react-markdown@10.1.0",
+      "remark-gfm@4.0.1",
+      "zod@4.4.3",
+      "vite@8.1.5",
+      "Copyright (c) Meta Platforms, Inc. and affiliates.",
+    ],
+  ],
 ];
 
 const files = [];
@@ -70,13 +122,19 @@ const contents = await Promise.all(
   sourceFiles.map(async (path) => [path, await readFile(path, "utf8")]),
 );
 const failures = [];
+for (const [name, tokens] of legalRequired) {
+  const content = await readFile(join(releaseRoot, "legal", name), "utf8");
+  for (const token of tokens) {
+    if (!content.includes(token)) failures.push(`release legal/${name}: missing ${token}`);
+  }
+}
 for (const [path, content] of contents) {
   for (const [label, pattern] of releaseForbidden) {
     if (pattern.test(content))
       failures.push(`${relative(workspaceRoot, path)}: forbidden ${label}`);
   }
   for (const match of content.matchAll(externalResourceAttribute)) {
-    if (match[1] !== allowedExternalUrl) {
+    if (!allowedExternalUrls.has(match[1])) {
       failures.push(`${relative(workspaceRoot, path)}: forbidden external resource URL`);
     }
   }
@@ -103,8 +161,10 @@ for (const path of sourcePaths.filter((sourcePath) =>
 }
 
 const composite = contents.map(([, content]) => content).join("\n");
-if (!composite.includes(allowedExternalUrl)) {
-  failures.push("release output: missing canonical Early Access download URL");
+for (const reference of requiredExternalReferences) {
+  if (!composite.includes(reference)) {
+    failures.push(`release output: missing approved external reference ${reference}`);
+  }
 }
 for (const token of required) {
   if (!composite.includes(token)) failures.push(`release output: missing ${token}`);

@@ -242,6 +242,13 @@ test("Landing renders every reference section and preserves its two-column 1024 
   await expect(page.locator(".route-row")).toHaveCount(3);
   await expect(page.locator(".memory-star")).toHaveCount(8);
   await expect(page.locator(".stats > div")).toHaveCount(4);
+  await expect(page.locator(".agent-chip").filter({ hasText: "Claude Agent" })).toContainText(
+    "0.2.0 暂不可用",
+  );
+  await expect(page.locator(".product-card").filter({ hasText: "Claude Agent" })).toContainText(
+    "暂不可用",
+  );
+  await expect(page.locator(".route-card")).not.toContainText("Claude Agent");
   await expect(page.getByText("把所有终端窗口,收进一个 OS", { exact: true })).toBeVisible();
 
   const productAnimation = await page.locator(".product-window").evaluate((element) => {
@@ -291,11 +298,7 @@ test("Landing renders every reference section and preserves its two-column 1024 
     iteration: "infinite",
     name: "pulse",
   });
-  expect(dotAnimations[1]).toMatchObject({
-    duration: "1.1s",
-    iteration: "infinite",
-    name: "pulse",
-  });
+  expect(dotAnimations[1]).toMatchObject({ duration: "0s", iteration: "1", name: "none" });
   expect(dotAnimations[2]).toMatchObject({
     duration: "0.9s",
     iteration: "infinite",
@@ -323,9 +326,7 @@ test("Landing renders every reference section and preserves its two-column 1024 
   expect(await page.locator("body").evaluate((element) => element.scrollWidth)).toBe(1024);
 });
 
-test("only the three download CTAs expose the canonical Early Access artifact", async ({
-  page,
-}) => {
+test("download and source CTAs expose only approved release destinations", async ({ page }) => {
   const dynamicRequests: string[] = [];
   const downloads: string[] = [];
   page.on("request", (request) => {
@@ -355,9 +356,25 @@ test("only the three download CTAs expose the canonical Early Access artifact", 
     "href",
     downloadUrl,
   );
-  await page.getByRole("button", { exact: true, name: "在线体验 →" }).click();
-  await page.getByRole("button", { exact: true, name: "GitHub ↗" }).click();
+  const sourceUrl = "https://github.com/dctongsheng/dougoos";
+  const sourceReleaseUrl = `${sourceUrl}/tree/v0.2.0`;
+  await expect(page.getByRole("link", { exact: true, name: "GitHub ↗" })).toHaveAttribute(
+    "href",
+    sourceUrl,
+  );
   const footer = page.locator(".landing-footer");
+  await expect(footer.getByRole("link", { exact: true, name: "源代码 v0.2.0" })).toHaveAttribute(
+    "href",
+    sourceReleaseUrl,
+  );
+  await expect(
+    footer.getByRole("link", { exact: true, name: "许可证 AGPL-3.0-only" }),
+  ).toHaveAttribute("href", `${sourceUrl}/blob/v0.2.0/LICENSE`);
+  await expect(footer.getByRole("link", { exact: true, name: "第三方许可" })).toHaveAttribute(
+    "href",
+    "/legal/THIRD_PARTY_NOTICES.md",
+  );
+  await page.getByRole("button", { exact: true, name: "在线体验 →" }).click();
   await footer.getByRole("button", { exact: true, name: "dougoos.com" }).click();
   await footer.getByRole("button", { exact: true, name: "文档" }).click();
   await footer.getByRole("button", { exact: true, name: "更新日志" }).click();
@@ -400,7 +417,7 @@ test("login overlay traps focus, returns focus, clears credentials, and stays ef
   await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "关闭登录" })).toBeFocused();
 
-  await dialog.getByText(/原始会话数据始终留在本机/u).click();
+  await dialog.getByText(/会话记录保存在本机/u).click();
   await expect(dialog).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);

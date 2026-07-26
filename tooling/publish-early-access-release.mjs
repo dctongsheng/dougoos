@@ -9,6 +9,8 @@ import { createReadStream } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
+import { assertObjectMatches, ensureImmutableObject } from "./r2-object-publisher.mjs";
+
 const root = process.cwd();
 const releaseDirectory = join(root, ".artifacts", "release");
 const bucket = process.env.R2_BUCKET ?? "dougoos-releases";
@@ -51,25 +53,33 @@ const client = new S3Client({
   region: "auto",
 });
 
-async function uploadFile({ cacheControl, contentType, key, path }) {
+async function sha256File(path) {
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(path)) hash.update(chunk);
+  return hash.digest("hex");
+}
+
+async function uploadFile({ cacheControl, contentType, expectedSha256, key, path }) {
   const size = (await stat(path)).size;
-  await client.send(
-    new PutObjectCommand({
-      Body: createReadStream(path),
-      Bucket: bucket,
-      CacheControl: cacheControl,
-      ContentLength: size,
-      ContentType: contentType,
-      IfNoneMatch: "*",
-      Key: key,
-      Metadata: {
-        "dougoos-release": version,
-      },
-    }),
-  );
+  const sha256 = expectedSha256 ?? (await sha256File(path));
+  await ensureImmutableObject({
+    body: () => createReadStream(path),
+    bucket,
+    cacheControl,
+    client,
+    contentLength: size,
+    contentType,
+    key,
+    metadata: {
+      "dougoos-release": version,
+      sha256,
+    },
+  });
+  return { sha256, size };
 }
 
 async function uploadBytes({ body, cacheControl, contentType, key }) {
+  const sha256 = createHash("sha256").update(body).digest("hex");
   await client.send(
     new PutObjectCommand({
       Body: body,
@@ -80,9 +90,11 @@ async function uploadBytes({ body, cacheControl, contentType, key }) {
       Key: key,
       Metadata: {
         "dougoos-release": version,
+        sha256,
       },
     }),
   );
+  return { sha256, size: body.byteLength };
 }
 
 async function readBoundedPublicBody(response, maximumBytes) {
@@ -116,10 +128,11 @@ async function readBoundedPublicBody(response, maximumBytes) {
 await uploadFile({
   cacheControl: "public, max-age=31536000, immutable",
   contentType: "application/x-apple-diskimage",
+  expectedSha256: latest.artifact.sha256,
   key: versionedArtifactKey,
   path: artifactPath,
 });
-await uploadFile({
+const signatureDetails = await uploadFile({
   cacheControl: "public, max-age=31536000, immutable",
   contentType: "application/octet-stream",
   key: `${versionedArtifactKey}.sig`,
@@ -182,12 +195,39 @@ if (!verify(null, publicDigest, publicKey, publicSignature)) {
   throw new Error("Public artifact Ed25519 signature did not verify");
 }
 
-await uploadBytes({
-  body: latestBody,
+// Promote the small signature alias first. A failure before the DMG alias is
+// updated leaves the previous downloadable DMG intact; a new signature beside
+// it is harmless and the installed-client manifest still points at immutable
+// versioned objects.
+await client.send(
+  new CopyObjectCommand({
+    Bucket: bucket,
+    CacheControl: "no-cache, no-store, must-revalidate",
+    ContentType: "application/octet-stream",
+    CopySource: encodeURI(`${bucket}/${versionedArtifactKey}.sig`),
+    Key: `${prefix}/DougoOS.dmg.sig`,
+    Metadata: {
+      "dougoos-release": version,
+      sha256: signatureDetails.sha256,
+    },
+    MetadataDirective: "REPLACE",
+  }),
+);
+
+const signatureAlias = await client.send(
+  new HeadObjectCommand({ Bucket: bucket, Key: `${prefix}/DougoOS.dmg.sig` }),
+);
+assertObjectMatches(signatureAlias, {
   cacheControl: "no-cache, no-store, must-revalidate",
-  contentType: "application/json; charset=utf-8",
-  key: `${prefix}/latest.json`,
+  contentLength: signatureDetails.size,
+  contentType: "application/octet-stream",
+  key: `${prefix}/DougoOS.dmg.sig`,
+  metadata: {
+    "dougoos-release": version,
+    sha256: signatureDetails.sha256,
+  },
 });
+
 await client.send(
   new CopyObjectCommand({
     Bucket: bucket,
@@ -203,29 +243,44 @@ await client.send(
     MetadataDirective: "REPLACE",
   }),
 );
-await client.send(
-  new CopyObjectCommand({
-    Bucket: bucket,
-    CacheControl: "no-cache, no-store, must-revalidate",
-    ContentType: "application/octet-stream",
-    CopySource: encodeURI(`${bucket}/${versionedArtifactKey}.sig`),
-    Key: `${prefix}/DougoOS.dmg.sig`,
-    Metadata: {
-      "dougoos-release": version,
-    },
-    MetadataDirective: "REPLACE",
-  }),
-);
 
 const alias = await client.send(
   new HeadObjectCommand({ Bucket: bucket, Key: `${prefix}/DougoOS.dmg` }),
 );
-if (
-  alias.ContentLength !== latest.artifact.size ||
-  alias.Metadata?.sha256 !== latest.artifact.sha256
-) {
-  throw new Error("Published download alias did not match the immutable artifact");
-}
+assertObjectMatches(alias, {
+  cacheControl: "no-cache, no-store, must-revalidate",
+  contentDisposition: `attachment; filename="${artifactName}"`,
+  contentLength: latest.artifact.size,
+  contentType: "application/x-apple-diskimage",
+  key: `${prefix}/DougoOS.dmg`,
+  metadata: {
+    "dougoos-release": version,
+    sha256: latest.artifact.sha256,
+  },
+});
+
+// Promote the update manifest last. Until this write succeeds, installed
+// clients keep seeing the previous release even if the human-facing alias has
+// already been refreshed.
+const latestDetails = await uploadBytes({
+  body: latestBody,
+  cacheControl: "no-cache, no-store, must-revalidate",
+  contentType: "application/json; charset=utf-8",
+  key: `${prefix}/latest.json`,
+});
+const latestHead = await client.send(
+  new HeadObjectCommand({ Bucket: bucket, Key: `${prefix}/latest.json` }),
+);
+assertObjectMatches(latestHead, {
+  cacheControl: "no-cache, no-store, must-revalidate",
+  contentLength: latestDetails.size,
+  contentType: "application/json; charset=utf-8",
+  key: `${prefix}/latest.json`,
+  metadata: {
+    "dougoos-release": version,
+    sha256: latestDetails.sha256,
+  },
+});
 
 console.log(`Published DougoOS ${version} to R2 bucket ${bucket}`);
 console.log(`Versioned artifact: ${latest.artifact.url}`);

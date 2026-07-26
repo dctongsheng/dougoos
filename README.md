@@ -29,6 +29,20 @@ macOS 13+ Apple Silicon 用户可从以下固定入口下载：
 退出 DougoOS 并将新版拖入 Applications 替换旧版本。Early Access 不会自覆盖正在运行的
 应用、申请管理员权限或修改 quarantine 属性。
 
+## 开源许可与源码
+
+DougoOS 自有源码采用 **GNU Affero General Public License v3.0 only**
+（SPDX：`AGPL-3.0-only`）发布：
+
+- 源码：<https://github.com/dctongsheng/dougoos>
+- 0.2.0 对应源码：<https://github.com/dctongsheng/dougoos/tree/v0.2.0>
+- 完整许可：[LICENSE](./LICENSE)
+- 第三方软件与独立条款：[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)
+
+AGPL 要求分发修改版本时继续提供对应源码；通过网络向用户提供修改版本功能时，也必须
+向这些用户提供正在运行版本的对应源码。DougoOS 的 AGPL 许可不重许可 Electron、
+Chromium、字体、Agent adapters 或其他第三方依赖，它们继续受各自许可或服务条款约束。
+
 ## 工具链
 
 - Release/CI Node.js：`.nvmrc` 是 exact version 的唯一真源
@@ -51,9 +65,11 @@ pnpm --filter @dougoos/web build
 pnpm --filter @dougoos/desktop debug
 ```
 
-应用 ready 后可在 Agent 会话页选择 Claude Code、Codex、Cursor Agent、Grok、Hermes、
-OpenClaw、OpenCode 或 Pi，选择 cwd、新建会话并发送消息。各 CLI 仍须在本机完成自身
-登录或模型配置；OpenClaw 还要求其 Gateway 健康运行。可先运行 Provider doctor 查看
+应用 ready 后可在 Agent 会话页使用 Codex、Cursor Agent、Grok、Hermes、OpenClaw、
+OpenCode 或 Pi，选择 cwd、新建会话并发送消息。Claude Agent 槽位仍会显示，但在
+DougoOS 0.2.0 中暂不可用：当前版本不包含或启动它的 adapter，也不会接受 consumer、
+OAuth、API key、云凭据或本机 Claude CLI 来启用它。其余 CLI 仍须在本机完成各自支持的
+认证或模型配置；OpenClaw 还要求其 Gateway 健康运行。可先运行 Provider doctor 查看
 脱敏诊断。
 
 只调试 fixture Web UI：
@@ -80,8 +96,8 @@ pnpm --filter @dougoos/core run smoke:providers all
 
 `discover` 会在已知 Agent CLI 清单中检测本机已安装项、绝对路径和版本；桌面端也会
 在启动时自动检测，并可在设置页点击“重新检测”。它不会无边界扫描系统中的全部命令。
-当前内置 Provider 为 Claude Code、Codex、Cursor Agent、Grok、Hermes、OpenClaw、
-OpenCode 和 Pi。
+当前内置 Provider 为 Codex、Cursor Agent、Grok、Hermes、OpenClaw、OpenCode 和 Pi；
+另保留 0.2.0 中固定不可用的 Claude Agent 占位项。
 
 ACP REPL 接受明确的命令和参数数组，不经过 shell 拼接：
 
@@ -134,28 +150,29 @@ pnpm smoke:package
 ```
 
 - `check` 可直接在 frozen clean checkout 运行：lint、format 和 workspace contract 通过后，
-  先按 workspace 拓扑构建 `dist`，再执行全部 typecheck 和当前 354 个 package tests；不依赖
-  旧构建产物，也不跳过类型检查。
+  先按 workspace 拓扑构建 `dist`，再执行全部 typecheck、当前 356 个 package tests 和
+  6 个 R2 不可变对象恢复测试；不依赖旧构建产物，也不跳过类型检查。
 - `test:e2e` 构建正式 Web bundle，并在真实 Chromium 中验证键盘、审批、响应式、持久状态、
   本地副作用边界与 release URL 安全。
 - `test:desktop` 通过 Playwright 启动 Electron，验证 renderer 与安全配置。
-- `test:desktop:real` 调用本机已认证的 Claude Code，验证可见 UI → Core → ACP → Agent →
-  Journal → SSE → UI，并覆盖持久化、审批和取消；它不是离线 CI 门禁。
+- `test:desktop:real` 默认调用 Codex（可通过 `DOUGOOS_REAL_PROVIDER_ID` 选择其他可用
+  Provider），验证可见 UI → Core → ACP → Agent → Journal → SSE → UI，并覆盖持久化、
+  审批和取消；它不是离线 CI 门禁。
 - `test:visual` 先构建正式与 visual-only 两个隔离输出，再验证 156 个 prototype
   reference case、155 个 production reference case 和 16 个 production-only
   语义/副作用 case，共 171 个生产 case。
 - `smoke:build` 验证 workspace TypeScript 产物可作为 ESM 导入。
 - `smoke:package` 验证 Electron 打包产物合同。
 
-本机已经认证 Claude Code 时，还可验证打包应用中的真实 Provider、SQLite、Journal
-和完整子进程树回收：
+本机已配置 Codex 后，还可验证打包应用中的真实 Provider、SQLite、Journal 和完整子进程
+树回收：
 
 ```bash
 pnpm smoke:package:provider
 ```
 
-该命令会调用真实 Provider，不属于离线 CI 门禁；输出仅包含锁定版本、协议、终态、
-stopReason、消息种类和结构化错误码。
+该命令默认调用 Codex，也可显式传入其他可用 Provider；不属于离线 CI 门禁。输出仅包含
+锁定版本、协议、终态、stopReason、消息种类和结构化错误码。
 
 视觉真源位于 `prototypes/agentos/`。reference evidence 会把两个原型 HTML、`support.js` 和原型
 README 一起纳入 source hash；正式应用不加载或嵌入这些文件。生产页面源码在

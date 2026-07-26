@@ -70,17 +70,13 @@ test("runs the scripted Fake Provider end to end without rendering raw reasoning
     const clis = await coreRequest(page, "/api/clis");
     expect(clis).toMatchObject({
       body: {
-        clis: [
-          { command: "claude", integratedProviderId: "claude-code" },
-          { command: "codex", integratedProviderId: "codex" },
-        ],
+        clis: [{ command: "codex", integratedProviderId: "codex" }],
       },
       status: 200,
     });
     await page.getByLabel("设置").click();
     await expect(page.getByRole("heading", { name: "本地 CLI 自动检测" })).toBeVisible();
-    await expect(page.getByText("2 个已安装")).toBeVisible();
-    await expect(page.getByText("/fixture/bin/claude")).toBeVisible();
+    await expect(page.getByText("1 个已安装")).toBeVisible();
     await page.getByRole("button", { name: "重新检测" }).click();
     await expect(page.getByRole("button", { name: "重新检测" })).toBeEnabled();
 

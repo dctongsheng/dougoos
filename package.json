@@ -2,6 +2,15 @@
   "name": "dougoos",
   "version": "0.2.0",
   "description": "Local-first desktop AgentOS MVP with Electron, ACP providers, SQLite recovery, and deterministic visual regression gates.",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://dougoos.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dctongsheng/dougoos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dctongsheng/dougoos/issues"
+  },
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.16.0",
@@ -11,12 +20,14 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "check": "pnpm lint && pnpm format:check && pnpm check:workspace && pnpm -r build && pnpm -r typecheck && pnpm -r test",
+    "check": "pnpm lint && pnpm format:check && pnpm check:workspace && pnpm legal:frontend:check && pnpm -r build && pnpm -r typecheck && pnpm -r test && node --test tooling/r2-object-publisher.test.mjs",
     "check:workspace": "node tooling/check-workspace.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "legal:frontend:check": "node tooling/generate-frontend-licenses.mjs --check",
+    "legal:frontend:generate": "node tooling/generate-frontend-licenses.mjs --write",
     "lint": "eslint . --max-warnings 0",
-    "package:desktop": "pnpm --filter @dougoos/web build && pnpm --filter @dougoos/desktop... build && node tooling/package-desktop.mjs",
+    "package:desktop": "pnpm legal:frontend:check && pnpm --filter @dougoos/web build && pnpm --filter @dougoos/desktop... build && node tooling/package-desktop.mjs",
     "release:early-access:prepare": "pnpm package:desktop && node tooling/prepare-early-access-release.mjs",
     "release:early-access:publish": "node tooling/publish-early-access-release.mjs",
     "release:manifest": "node tooling/release-manifest.mjs --write",
@@ -25,7 +36,7 @@
     "release:manifest:next:check": "node tooling/release-manifest.mjs --check --name v0.2.0",
     "smoke:build": "pnpm -r build && node tests/build-smoke/smoke.mjs",
     "smoke:package": "pnpm package:desktop && node tests/package-smoke/smoke.mjs && node tests/package-smoke/persistence.mjs",
-    "smoke:package:provider": "pnpm package:desktop && node tests/package-smoke/provider-smoke.mjs claude-code",
+    "smoke:package:provider": "pnpm package:desktop && node tests/package-smoke/provider-smoke.mjs codex",
     "test": "turbo run test",
     "test:desktop": "pnpm --filter @dougoos/web build && pnpm --filter @dougoos/core build && pnpm --filter @dougoos/desktop build && playwright test --project=desktop",
     "test:desktop:real": "pnpm --filter @dougoos/web build && pnpm --filter @dougoos/core build && pnpm --filter @dougoos/desktop build && DOUGOOS_REAL_PROVIDER_E2E=1 playwright test tests/e2e/desktop/real-provider.spec.ts --project=desktop",

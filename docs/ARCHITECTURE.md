@@ -4,7 +4,7 @@
 
 DougoOS 是"多个 Agent CLI，一个控制台"的桌面 AgentOS（原型显示名 AgentOS，官网 dougoos.com）：桌面端承载 Agent 聊天、任务派发、Harness、Session 管理；当前云端仅有落地页与 health 桩，统计上报和备份均后置。本方案基于对 4 份原型/参考项目的完整分析：
 
-- **主原型**（AgentOS SaaS.dc.html）：6 个 Agent（Codex/Claude Code/Grok/Cursor/Pi/Hermes）、7 种消息类型（user/text/note/think/tool/diff/approval）、Harness 8 子模块、Sessions Manager 7 子模块
+- **主原型**（AgentOS SaaS.dc.html）：6 个 Agent（Codex/Claude Agent/Grok/Cursor/Pi/Hermes）、7 种消息类型（user/text/note/think/tool/diff/approval）、Harness 8 子模块、Sessions Manager 7 子模块
 - **grok-html-demo**：5 种 CLI 全部经 ACP (JSON-RPC 2.0 over stdio) 统一接入，`AgentProvider` 抽象 + 事件归一化 + 审批闭环已验证；短板是单 activeTurn 全局锁和轮询判静默
 - **pi**：agent loop 三层抽象（agentLoop → Agent → AgentHarness）、typebox 工具定义、append-only 会话树——"新建任务 Agent"的设计蓝本
 - **code-insights**：CLI 引擎 + Hono server + React dashboard + Electron 薄壳四层；SessionProvider 采集、StatsDataSource 分层、outbox+redaction 上报——Session Manager 的设计蓝本
@@ -14,7 +14,8 @@ DougoOS 是"多个 Agent CLI，一个控制台"的桌面 AgentOS（原型显示�
 ## 假设清单（原型歧义的处理决定）
 
 1. 产品代号 DougoOS、UI 显示名 AgentOS，架构层面视为同一产品
-2. 本期 Agent 集合先固定 6 家中的 2 家起步（Claude Code + Codex），但架构支持任意新增（含用户自定义 GenericAcpProvider）
+2. Provider 架构支持按注册表扩展；DougoOS 0.2.0 的 Claude Agent 槽位固定
+   fail-closed，不包含或启动 adapter，不能作为可执行 Provider
 3. 智能路由原型是前端正则 mock → 设计成 TaskRouter 策略接口，规则版先行、LLM 版后置
 4. Hermes 的技能/看板/MCPs 特殊 tab、Memory 图谱、Compare、定时/长程任务：本期不实现，信息架构上占位
 5. 审批体系三处（approval 消息 / PreToolUse hook / Agent 级 auto 开关）本期只实现 ACP 审批闭环；同时在 Registry 留下可阻断的 `SessionInterceptor`，避免未来 Hooks 只能旁路观察
@@ -51,7 +52,7 @@ graph TB
     end
 
     subgraph Agents["Agent 进程层"]
-        ACP1["claude-agent-acp 子进程"]
+        CLAUDE["Claude Agent 槽位<br/>0.2.0 unavailable<br/>无 adapter 子进程"]
         ACP2["codex-acp 子进程"]
         INPROC["Task Agent<br/>(in-process agent loop)"]
     end
@@ -69,7 +70,8 @@ graph TB
 
     UI -- "fetch + SSE (localhost)" --> API
     MAIN --> Core
-    REG -- "spawn + stdio (ACP)" --> ACP1 & ACP2
+    REG -. "只返回 unavailable，不 spawn" .-> CLAUDE
+    REG -- "spawn + stdio (ACP)" --> ACP2
     ROUTER --> INPROC
     ROUTER --> REG
     Core --> DB
@@ -522,7 +524,9 @@ code-insights 已验证此路线（server 入口被 CLI 和 Electron 共用）�
 - 方案 A（任务 Agent 也 ACP 化）：协议统一，但其工具（经注入端口查注册表、写 tasks 表、调 Registry）全是进程内能力，过 stdio 序列化纯属绕路，还要额外做打包/进程管理。
 - **方案 B（选定）**：按 pi 三层抽象在 task-agent 包内实现约 300 行最小 agent loop（tool schema 约定、terminate 显式收尾、hook 审批点照抄 pi 设计），LLM 调用用 Vercel AI SDK。不直接 npm 依赖 pi monorepo（它是产品仓不是库），pi 是设计蓝本不是代码依赖。
 
-边界：**执行 Agent（Claude Code/Codex/…）一律 ACP；编排 Agent（任务路由）一律 in-process**。且分两步：P2 纯规则不上 LLM，P4 才引入 LlmTaskRouter。
+边界：**可执行 Agent（Codex/…）一律 ACP；编排 Agent（任务路由）一律 in-process**。
+Claude Agent 在 0.2.0 中是 fail-closed 例外，只保留状态槽位，不创建 ACP 子进程。且分两步：
+P2 纯规则不上 LLM，P4 才引入 LlmTaskRouter。
 
 ### 3.3 Harness 扩展机制：编译期注册的 HarnessModule 插件接口
 
@@ -620,7 +624,7 @@ dougoos/
 | Phase | 内容 | 留桩 |
 |---|---|---|
 | **P0 骨架**（~1 周） | monorepo + event/turn/shared schema + storage 迁移器/journal + core 空 server + fetch-SSE replay + web 壳 + Electron ready/restart 握手 + device_id | 云端仅 /v1/health |
-| **P1 ACP 聊天**（~2-3 周，核心） | 官方 ACP SDK v1 包装（多会话 Registry + Turn 状态机 + 空 Interceptor 链）+ EventJournalStore 实时记录 + providers（Claude Code + Codex 先行）+ 聊天 UI 7 种消息 + 审批/取消闭环 + acp repl | 其余 provider 按 checklist 陆续加 |
+| **P1 ACP 聊天**（~2-3 周，核心） | 官方 ACP SDK v1 包装（多会话 Registry + Turn 状态机 + 空 Interceptor 链）+ EventJournalStore 实时记录 + providers（Codex 先行；Claude Agent 在 0.2.0 中 fail-closed）+ 聊天 UI 7 种消息 + 审批/取消闭环 + acp repl | 其余 provider 按 checklist 陆续加 |
 | **P2 新建任务 + SM 本地**（~2 周） | RulesTaskRouter + TaskEngine + tasks/turns 幂等；外部 claude-code SessionProvider + 轮转/截断处理 + Dashboard 基础统计 | LlmTaskRouter 留接口；Insights/Patterns 占位 |
 | **P3 Harness·SystemPrompt + 云端数据面**（未来） | system-prompt 模块（Mock DataSource 起步、表结构就绪）+ 7 个 planned 占位；经独立 ADR/隐私评审后再考虑 metrics schema、outbox、redaction 与 ingest | 当前 MVP 只有 Landing + `/v1/health`；backup 仅留 ADR 入口 |
 | **P4+** | LlmTaskRouter、更多 provider、Skills/MCP 等逐个 active、加密备份 | — |
@@ -638,8 +642,12 @@ dougoos/
 ## 验证方式
 
 - P0：`pnpm -r build` 通过；Electron 收到 Core ready 后再展示主界面；杀 Core 后新 instanceId/port/token 生效；queued/starting/running/awaiting_approval/cancelling 均恢复为 interrupted；UI 通过全局 snapshot+replay 恢复且无重复事件
-- P1：acp repl 对 Claude Code 完成一轮含审批和取消的对话；同 session 两个并发 POST 最多一个创建成功，另一个稳定返回 `409 SESSION_BUSY`；相同 clientRequestId 重试返回原 turnId；UI 中 7 种消息类型及 interrupted 状态正确渲染
-- P2：相同 clientRequestId 两次 POST /api/tasks 只创建一个任务/Turn；stats 返回外部 Claude Code 会话聚合；JSONL 截断或轮转不重复导入
+- P1：acp repl 对可用 Provider 完成一轮含审批和取消的对话；Claude Agent doctor 固定返回
+  `unavailable` 且不能创建子进程；同 session 两个并发 POST 最多一个创建成功，另一个稳定
+  返回 `409 SESSION_BUSY`；相同 clientRequestId 重试返回原 turnId；UI 中 7 种消息类型及
+  interrupted 状态正确渲染
+- P2：相同 clientRequestId 两次 POST /api/tasks 只创建一个任务/Turn；stats 返回外部
+  Agent 会话聚合；JSONL 截断或轮转不重复导入
 - P3：System Prompt 页在 mock/local 两种 dataMode 下渲染一致；未知 metrics 字段被 schema 拒绝；dry-run 上报体经自动化断言和人工核查均无敏感字段
 
 ## 实施时对照的参考文件

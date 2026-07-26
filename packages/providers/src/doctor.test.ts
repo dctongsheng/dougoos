@@ -9,6 +9,11 @@ import {
 import { ProviderDoctorResultSchema, type ProviderCapabilitySnapshot } from "@dougoos/shared";
 import { describe, expect, it } from "vitest";
 
+import {
+  CLAUDE_AGENT_DISABLED_REASON,
+  CLAUDE_AGENT_DISABLED_REMEDIATION,
+  ClaudeCodeProvider,
+} from "./claude-code.js";
 import { doctorProvider } from "./doctor.js";
 
 const capabilities: ProviderCapabilitySnapshot = {
@@ -150,5 +155,23 @@ describe("Provider doctor", () => {
     });
     expect(result.status).toBe(status);
     expect(JSON.stringify(result)).not.toContain("must-never-surface");
+  });
+
+  it("reports Claude Agent as temporarily unavailable without attempting a handshake", async () => {
+    const result = await doctorProvider(new ClaudeCodeProvider(), {
+      ...doctorOptions,
+      registryFactory: () => {
+        throw new Error("disabled Claude Agent must not create a registry");
+      },
+    });
+
+    expect(result).toEqual({
+      checkedAt: "2026-07-24T00:00:00.000Z",
+      providerId: "claude-code",
+      reason: CLAUDE_AGENT_DISABLED_REASON,
+      remediation: CLAUDE_AGENT_DISABLED_REMEDIATION,
+      status: "unavailable",
+    });
+    expect(JSON.stringify(result)).not.toMatch(/sign in|subscription login is supported/iu);
   });
 });

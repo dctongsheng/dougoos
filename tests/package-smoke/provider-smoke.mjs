@@ -8,7 +8,7 @@ import { _electron as electron } from "@playwright/test";
 
 const execute = promisify(execFile);
 const root = process.cwd();
-const selectedProvider = process.argv[2] ?? "claude-code";
+const selectedProvider = process.argv[2] ?? "codex";
 const manifest = JSON.parse(
   await readFile(join(root, ".artifacts", "desktop-package.json"), "utf8"),
 );

@@ -60,7 +60,7 @@
         v0.2.0 · Early Access · macOS Apple Silicon
       </div>
       <h1 style="margin:22px 0 0;font-size:56px;line-height:1.12;font-weight:700;letter-spacing:-.01em;color:var(--text,#f2f7f3);text-wrap:pretty;max-width:820px">多个 Agent CLI<br>一个控制台</h1>
-      <p style="margin:18px 0 0;font-size:17px;line-height:1.65;color:var(--mut,#8a968e);max-width:600px;text-wrap:pretty">Codex、Claude Code、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。</p>
+      <p style="margin:18px 0 0;font-size:17px;line-height:1.65;color:var(--mut,#8a968e);max-width:600px;text-wrap:pretty">Codex、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换多个终端窗口。Claude Agent 在 0.2.0 中暂不可用，当前下载不包含或启动其 adapter。</p>
       <div style="display:flex;gap:12px;margin-top:28px">
         <a href="https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg" style="display:inline-flex;align-items:center;padding:12px 26px;border-radius:11px;background:var(--accent,#3ddc84);color:#05130b;font-weight:700;font-size:14.5px;cursor:pointer;box-shadow:0 0 32px color-mix(in oklab, var(--accent,#3ddc84) 30%, transparent);text-decoration:none" style-hover="filter:brightness(1.1)">下载桌面版</a>
         <div style="padding:12px 26px;border-radius:11px;border:1px solid var(--bd2,rgba(255,255,255,.14));color:var(--text2,#dfe8e2);font-weight:600;font-size:14.5px;cursor:pointer" style-hover="border-color:var(--accent,#3ddc84);color:var(--text,#f2f7f3)">在线体验 →</div>
@@ -139,7 +139,7 @@
         </div>
       </sc-for>
     </div>
-    <div style="text-align:center;font-size:12px;color:var(--faint,#66736b);padding-bottom:56px">已接入的 Agent CLI——检测本机安装,一键接管</div>
+    <div style="text-align:center;font-size:12px;color:var(--faint,#66736b);padding-bottom:56px">5 个可用 Agent CLI；Claude Agent 在 0.2.0 中暂不可用</div>
 
     <div style="text-align:center;padding:24px 0 36px">
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent,#3ddc84);letter-spacing:.18em">FEATURES</div>
@@ -159,7 +159,7 @@
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent,#3ddc84);letter-spacing:.18em">SMART ROUTING</div>
         <h3 style="margin:12px 0 0;font-size:26px;font-weight:700;color:var(--text,#f2f7f3)">描述任务,系统选人</h3>
-        <p style="margin:12px 0 0;font-size:14px;line-height:1.7;color:var(--mut,#8a968e);text-wrap:pretty">按任务类型、Agent 负载与历史成功率自动路由:重构给 Claude Code,脚本给 Codex,压测给 Grok。也可以手动指定,或同题多发做结果对比。</p>
+        <p style="margin:12px 0 0;font-size:14px;line-height:1.7;color:var(--mut,#8a968e);text-wrap:pretty">按任务类型、Agent 负载与历史成功率自动路由:重构给 Cursor,脚本给 Codex,压测给 Grok。也可以手动指定,或同题多发做结果对比。0.2.0 不会把任务路由给 Claude Agent。</p>
       </div>
       <div style="border:1px solid var(--bd,rgba(255,255,255,.08));border-radius:14px;padding:18px;background:var(--panel,#0d1110);display:flex;flex-direction:column;gap:8px">
         <sc-for list="{{ routeRows }}" as="r" hint-placeholder-count="3">
@@ -199,17 +199,17 @@
 
     <div style="text-align:center;padding:0 0 88px">
       <h2 style="margin:0;font-size:38px;font-weight:700;color:var(--text,#f2f7f3);letter-spacing:-.01em">把所有终端窗口,收进一个 OS</h2>
-      <p style="margin:14px 0 0;font-size:15px;color:var(--mut,#8a968e)">免费、开源、本地优先。你的会话数据永远不离开你的机器。</p>
+      <p style="margin:14px 0 0;font-size:15px;color:var(--mut,#8a968e)">免费、开源、本地优先。会话记录保存在本机；Provider 请求按对应服务边界传输。</p>
       <div style="display:flex;justify-content:center;gap:12px;margin-top:26px">
         <a href="https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg" style="display:inline-flex;align-items:center;padding:13px 30px;border-radius:11px;background:var(--accent,#3ddc84);color:#05130b;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 0 40px color-mix(in oklab, var(--accent,#3ddc84) 30%, transparent);text-decoration:none" style-hover="filter:brightness(1.1)">下载 DougoOS</a>
-        <div style="padding:13px 30px;border-radius:11px;border:1px solid var(--bd2,rgba(255,255,255,.14));color:var(--text2,#dfe8e2);font-weight:600;font-size:15px;cursor:pointer" style-hover="border-color:var(--accent,#3ddc84)">GitHub ↗</div>
+        <a href="https://github.com/dctongsheng/dougoos" style="padding:13px 30px;border-radius:11px;border:1px solid var(--bd2,rgba(255,255,255,.14));color:var(--text2,#dfe8e2);font-weight:600;font-size:15px;cursor:pointer;text-decoration:none" style-hover="border-color:var(--accent,#3ddc84)">GitHub ↗</a>
       </div>
     </div>
 
     <div style="display:flex;align-items:center;gap:10px;padding:20px 0 28px;border-top:1px solid var(--bd,rgba(255,255,255,.07));font-size:12px;color:var(--faint,#66736b)">
       <span style="color:var(--accent,#3ddc84)">◈</span> AgentOS · <a href="https://dougoos.com" style="color:var(--faint,#66736b)" style-hover="color:var(--accent,#3ddc84)">dougoos.com</a>
       <span style="flex:1"></span>
-      <span>文档</span><span>更新日志</span><span>许可证 MIT</span>
+      <span>文档</span><span>更新日志</span><a href="https://github.com/dctongsheng/dougoos/tree/v0.2.0" style="color:var(--faint,#66736b)">源代码 v0.2.0</a><a href="https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE" style="color:var(--faint,#66736b)">许可证 AGPL-3.0-only</a><a href="/legal/THIRD_PARTY_NOTICES.md" style="color:var(--faint,#66736b)">第三方许可</a>
     </div>
   </div>
 
@@ -222,7 +222,7 @@
           <div style="flex:1"></div>
           <div onClick="{{ closeLogin }}" style="width:26px;height:26px;border-radius:7px;display:grid;place-items:center;cursor:pointer;color:var(--faint,#66736b)" style-hover="background:var(--chip2,rgba(255,255,255,.03));color:var(--text,#f2f7f3)">✕</div>
         </div>
-        <div style="font-size:12.5px;color:var(--mut,#8a968e);margin-top:-6px">登录后可跨设备同步已提炼的知识与配置——原始会话数据始终留在本机。</div>
+        <div style="font-size:12.5px;color:var(--mut,#8a968e);margin-top:-6px">Early Access 暂不提供跨设备同步。会话记录保存在本机；使用 Provider 时，所选上下文会发送到对应服务。</div>
         <input placeholder="邮箱" style="background:var(--inset,rgba(0,0,0,.25));border:1px solid var(--bd2,rgba(255,255,255,.14));border-radius:10px;padding:11px 13px;font-size:13.5px;color:var(--text,#f2f7f3);outline:none;font-family:inherit">
         <input placeholder="密码" type="password" style="background:var(--inset,rgba(0,0,0,.25));border:1px solid var(--bd2,rgba(255,255,255,.14));border-radius:10px;padding:11px 13px;font-size:13.5px;color:var(--text,#f2f7f3);outline:none;font-family:inherit">
         <div onClick="{{ doLogin }}" style="padding:12px;border-radius:10px;background:var(--accent,#3ddc84);color:#05130b;font-weight:700;font-size:14px;text-align:center;cursor:pointer" style-hover="filter:brightness(1.1)">登录</div>
@@ -259,26 +259,26 @@ class Component extends DCLogic {
       doLogin:()=>this.setState({loggedIn:true,loginOpen:false}),
       mockAgents:[
         {name:'Codex',k:'codex',dot:'#4fd8e0',anim:'pulse 1.4s infinite'},
-        {name:'Claude Code',k:'claude',dot:'#3ddc84',anim:'pulse 1.1s infinite'},
+        {name:'Claude Agent',k:'claude',dot:'rgba(140,160,150,.35)',anim:'none'},
         {name:'Grok',k:'grok',dot:'#ffb454',anim:'pulse .9s steps(1) infinite'},
         {name:'Cursor',k:'cursor',dot:'rgba(140,160,150,.35)',anim:'none'},
         {name:'Pi',k:'pi',dot:'#3ddc84',anim:'pulse 1.4s infinite'},
         {name:'Hermes',k:'hermes',dot:'rgba(140,160,150,.35)',anim:'none'}
       ].map(a=>({...a,glyph:A[a.k][0],hue:A[a.k][1]})),
       mockKpis:[
-        {label:'活跃 Agent',value:'4/6',color:'#3ddc84'},
+        {label:'活跃 Agent',value:'3/5',color:'#3ddc84'},
         {label:'等待确认',value:'1',color:'#ffb454'},
         {label:'今日费用',value:'$12.40',color:'var(--text,#f2f7f3)'},
         {label:'今日 Tokens',value:'2.9M',color:'var(--text,#f2f7f3)'}
       ],
       mockCards:[
-        {k:'claude',name:'Claude Code',st:'执行中',stc:'#4fd8e0',task:'users 表 schema 迁移,先跑 dry-run',last:'▸ prisma migrate diff --preview',bd:'var(--bd,rgba(255,255,255,.07))'},
+        {k:'claude',name:'Claude Agent',st:'暂不可用',stc:'#8a968e',task:'DougoOS 0.2.0 不包含或启动 Anthropic adapter',last:'请使用其他 Provider',bd:'var(--bd,rgba(255,255,255,.07))'},
         {k:'codex',name:'Codex',st:'思考中',stc:'#b48cff',task:'为 CI 写 flaky 测试重试脚本',last:'analyzing test history…',bd:'var(--bd,rgba(255,255,255,.07))'},
         {k:'grok',name:'Grok',st:'等待确认',stc:'#ffb454',task:'k6 压测:限流网关 2k RPS',last:'⚠ 需要确认:写入生产配置',bd:'color-mix(in srgb, #ffb454 40%, transparent)'}
       ].map(c=>({...c,glyph:A[c.k][0],hue:A[c.k][1]})),
       agentChips:[
         {k:'codex',name:'Codex',bin:'codex'},
-        {k:'claude',name:'Claude Code',bin:'claude'},
+        {k:'claude',name:'Claude Agent',bin:'0.2.0 暂不可用'},
         {k:'grok',name:'Grok',bin:'grok'},
         {k:'cursor',name:'Cursor',bin:'cursor-agent'},
         {k:'pi',name:'Pi',bin:'pi'},
@@ -293,7 +293,7 @@ class Component extends DCLogic {
         {glyph:'▥',title:'预算与审批',body:'Token 与费用按 Agent、按项目追踪,预算护栏 + 敏感操作人工审批。'}
       ],
       routeRows:[
-        {task:'把 users 表迁移到新 schema',agent:'Claude Code',k:'claude',conf:'96%'},
+        {task:'把 users 表迁移到新 schema',agent:'Cursor',k:'cursor',conf:'93%'},
         {task:'写一个日志清洗脚本',agent:'Codex',k:'codex',conf:'91%'},
         {task:'对网关做 2k RPS 压测',agent:'Grok',k:'grok',conf:'88%'}
       ].map(r=>({...r,glyph:A[r.k][0],hue:A[r.k][1]})),
@@ -302,7 +302,7 @@ class Component extends DCLogic {
         {x:40,y:34,size:5,op:.6,glow:8},{x:12,y:26,size:4,op:.5,glow:6},{x:88,y:30,size:4,op:.45,glow:6},
         {x:50,y:74,size:5,op:.55,glow:8},{x:70,y:82,size:3,op:.4,glow:5}
       ],
-      stats:[{v:'6',l:'已接入 Agent CLI'},{v:'128',l:'本周托管会话'},{v:'0',l:'上传到云端的数据'},{v:'1',l:'需要盯着的窗口'}]
+      stats:[{v:'5',l:'0.2.0 可用 Agent CLI'},{v:'128',l:'本周托管会话'},{v:'关闭',l:'DougoOS 云端同步'},{v:'1',l:'需要盯着的窗口'}]
     };
   }
 }

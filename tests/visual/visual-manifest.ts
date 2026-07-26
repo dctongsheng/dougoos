@@ -277,7 +277,7 @@ const pageCases: readonly ReferenceTemplate[] = [
   },
   ...[
     ["codex", "Codex CLI"],
-    ["claude", "Claude Code"],
+    ["claude", "Claude Agent"],
     ["grok", "Grok CLI"],
     ["cursor", "Cursor CLI"],
     ["pi", "Pi"],
@@ -296,7 +296,7 @@ const pageCases: readonly ReferenceTemplate[] = [
   })),
   ...[
     ["codex", "Codex CLI"],
-    ["claude", "Claude Code"],
+    ["claude", "Claude Agent"],
     ["grok", "Grok CLI"],
     ["cursor", "Cursor CLI"],
     ["pi", "Pi"],
@@ -398,7 +398,7 @@ const pageCases: readonly ReferenceTemplate[] = [
 
 const stateCases: readonly ReferenceTemplate[] = [
   {
-    actions: [click(screenText("Claude Code"))],
+    actions: [click(screenText("Claude Agent"))],
     description: "Home Agent picker overlay.",
     expectedScreenLabel: "新建任务",
     id: "saas-home-agent-menu",
@@ -463,7 +463,7 @@ const stateCases: readonly ReferenceTemplate[] = [
     tags: ["state", "overlay", "mixed-data-mode"],
   },
   {
-    actions: agent("Claude Code"),
+    actions: agent("Claude Agent"),
     description: "Pending ACP approval card (prototype source state).",
     expectedScreenLabel: "Agent 会话",
     extraLandmarks: [
@@ -476,7 +476,7 @@ const stateCases: readonly ReferenceTemplate[] = [
         name: "approval-command",
       },
       {
-        locator: placeholder("向 Claude Code 派发任务 · Enter 发送", { scope: "screen" }),
+        locator: placeholder("向 Claude Agent 派发任务 · Enter 发送", { scope: "screen" }),
         name: "agent-composer",
       },
     ],
@@ -485,7 +485,7 @@ const stateCases: readonly ReferenceTemplate[] = [
     tags: ["state", "approval", "real-p0-p1-target"],
   },
   {
-    actions: [...agent("Claude Code"), click(screenText("批准执行"))],
+    actions: [...agent("Claude Agent"), click(screenText("批准执行"))],
     description: "Approved ACP approval card.",
     expectedScreenLabel: "Agent 会话",
     id: "saas-approval-approved",
@@ -493,7 +493,7 @@ const stateCases: readonly ReferenceTemplate[] = [
     tags: ["state", "approval", "real-p0-p1-target"],
   },
   {
-    actions: [...agent("Claude Code"), click(screenText("拒绝"))],
+    actions: [...agent("Claude Agent"), click(screenText("拒绝"))],
     description: "Denied ACP approval card.",
     expectedScreenLabel: "Agent 会话",
     id: "saas-approval-denied",
@@ -501,7 +501,7 @@ const stateCases: readonly ReferenceTemplate[] = [
     tags: ["state", "approval", "real-p0-p1-target"],
   },
   {
-    actions: [...nav("长程任务"), click(title("Claude Code")), click(screenText("派发 →", 0))],
+    actions: [...nav("长程任务"), click(title("Claude Agent")), click(screenText("派发 →", 0))],
     description: "Dispatched long-running task in running state.",
     expectedScreenLabel: "长程任务",
     id: "saas-queue-running",
@@ -644,7 +644,7 @@ const stateCases: readonly ReferenceTemplate[] = [
       },
       {
         locator: screenText(
-          "You are Claude Code, an agentic coding assistant operating in the user’s terminal.",
+          "You are Claude Agent, an agentic coding assistant operating in the user’s terminal.",
         ),
         name: "harness-prompt-expanded-body",
       },
@@ -857,7 +857,7 @@ const stateCases: readonly ReferenceTemplate[] = [
     tags: ["interaction", "hover", "primitive"],
   },
   {
-    actions: [...nav("总览"), { locator: screenText("Claude Code"), type: "hover" }],
+    actions: [...nav("总览"), { locator: screenText("Claude Agent"), type: "hover" }],
     description: "Agent overview card hover primitive.",
     expectedScreenLabel: "总览",
     id: "saas-interaction-card-hover",
@@ -956,7 +956,7 @@ const variantCases: readonly ReferenceTemplate[] = [
           viewports: SAAS_VIEWPORTS,
         },
         {
-          actions: agent("Claude Code"),
+          actions: agent("Claude Agent"),
           description: `Agent conversation in ${theme}/${accent}.`,
           expectedScreenLabel: "Agent 会话",
           id: `saas-agent-claude-${theme}-${accent}`,
@@ -1118,7 +1118,7 @@ export const productionOnlyCases: readonly ProductionOnlyCase[] = [
       [
         {
           id: "provider-notice",
-          includes: "Claude Code 尚未通过本机认证检查",
+          includes: "Claude Agent 在 0.2.0 中暂不可用",
           kind: "text",
           locator: css(".production-state-notice"),
         },
@@ -1475,11 +1475,39 @@ export const productionOnlyCases: readonly ProductionOnlyCase[] = [
           ),
           name: "href",
         },
+        {
+          equals: ["https://github.com/dctongsheng/dougoos"],
+          id: "public-source-repository",
+          kind: "attribute-set",
+          locator: css('a[href="https://github.com/dctongsheng/dougoos"]'),
+          name: "href",
+        },
+        {
+          equals: ["https://github.com/dctongsheng/dougoos/tree/v0.2.0"],
+          id: "public-release-source",
+          kind: "attribute-set",
+          locator: css('a[href="https://github.com/dctongsheng/dougoos/tree/v0.2.0"]'),
+          name: "href",
+        },
+        {
+          equals: ["https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE"],
+          id: "public-source-license",
+          kind: "attribute-set",
+          locator: css('a[href="https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE"]'),
+          name: "href",
+        },
+        {
+          equals: ["/legal/THIRD_PARTY_NOTICES.md"],
+          id: "public-third-party-notices",
+          kind: "attribute-set",
+          locator: css('a[href="/legal/THIRD_PARTY_NOTICES.md"]'),
+          name: "href",
+        },
       ],
       [{ locator: css('[data-screen-label="落地页"]'), name: "landing-root" }],
     ),
     description:
-      "Landing keeps demo controls inert while exposing only the approved Early Access download.",
+      "Landing keeps demo controls inert while exposing the approved Early Access download and AGPL source offer.",
     id: "landing-production-safe-cta",
     kind: "production-only",
     owner: "landing-ui-001",
@@ -1490,6 +1518,22 @@ export const productionOnlyCases: readonly ProductionOnlyCase[] = [
             'a[href="https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg"]',
             { index: 0 },
           ),
+          type: "focus",
+        },
+        {
+          locator: css('a[href="https://github.com/dctongsheng/dougoos"]', { index: 0 }),
+          type: "focus",
+        },
+        {
+          locator: css('a[href="https://github.com/dctongsheng/dougoos/tree/v0.2.0"]'),
+          type: "focus",
+        },
+        {
+          locator: css('a[href="https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE"]'),
+          type: "focus",
+        },
+        {
+          locator: css('a[href="/legal/THIRD_PARTY_NOTICES.md"]'),
           type: "focus",
         },
         {
@@ -1511,7 +1555,6 @@ export const productionOnlyCases: readonly ProductionOnlyCase[] = [
         click(text("Memory")),
         click(text("文档", { index: 0 })),
         click(text("在线体验 →")),
-        click(text("GitHub ↗")),
         click(text("dougoos.com")),
         click(text("文档", { index: "last" })),
         click(text("更新日志")),

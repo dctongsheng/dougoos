@@ -20,7 +20,8 @@
 交付一个可在本机运行的 DougoOS 桌面聊天 MVP：
 
 1. Electron 启动本地 Core，Core ready 后展示 React 主界面。
-2. 用户可以选择 Claude Code 或 Codex、选择工作目录、创建会话并连续聊天。
+2. 用户可以选择 Codex、选择工作目录、创建会话并连续聊天；Claude Agent 在 0.2.0 中
+   以“暂不可用”占位项显示。
 3. 聊天过程通过官方 ACP 稳定 v1 接入，实时展示 7 类消息，支持审批、拒绝和取消。
 4. 会话、Turn、消息、审批和事件写入本地 SQLite；应用或 Core 重启后能恢复到一致状态。
 5. Web 与 Core 通过带 bearer token 的 REST + fetch-SSE 通信，可在断线、replay gap 和 Core 重启后恢复。
@@ -79,7 +80,7 @@ UI 原型与后端阶段范围冲突时，采用“视觉完整、能力分期�
 - 官方 `@agentclientprotocol/sdk` 稳定 v1 的精确锁定版本。
 - ACP initialize/authenticate/session-new/prompt/cancel/update/request_permission 基线。
 - 多 Session Registry、每 Session 单活跃 Turn、空 `SessionInterceptor` 链。
-- Claude Code Provider、Codex Provider、Provider Registry 和 doctor。
+- Claude Agent 暂不可用占位项、Codex Provider、Provider Registry 和 doctor。
 - Headless ACP REPL。
 - Agents 聊天 UI：
   - Agent 会话页必须保持 `AgentOS SaaS.dc.html` 的尺寸、层级、文案和视觉样式；
@@ -186,7 +187,9 @@ UI 原型与后端阶段范围冲突时，采用“视觉完整、能力分期�
 - Sidebar 的 Projects、Pinned、会话树、Agents、折叠状态；
 - 顶栏、通知浮层、主题、accent、配置项和原型演示状态。
 
-其中只有 Claude Code/Codex 的 Agent 会话和 P0 基础状态接真实数据。其他页面继续使用显式 fixture/DataSource 复刻原型，不得假装已具备 P2+ 后端。
+其中只有可用 Provider（0.2.0 默认 Codex）的 Agent 会话和 P0 基础状态接真实数据。
+Claude Agent 显示明确的暂不可用状态；其他页面继续使用显式 fixture/DataSource 复刻
+原型，不得假装已具备 P2+ 后端。
 
 ### 5.3 Landing
 
@@ -384,7 +387,7 @@ planned → in_development → awaiting_verification
 | `desktop-001` | Electron 薄壳与 Core 生命周期 | `core-001` | verified |
 | `fake-e2e-001` | P0 Fake Agent 端到端闭环 | `web-001`, `desktop-001` | verified |
 | `acp-001` | 官方 ACP SDK 包装与 REPL | `shared-001` | verified |
-| `providers-001` | Claude Code/Codex Provider 与 doctor | `acp-001` | verified |
+| `providers-001` | Claude Agent 暂不可用占位项、Codex Provider 与 doctor | `acp-001` | verified |
 | `chat-integration-001` | Core、Registry、Journal、审批/取消集成 | `storage-001`, `core-001`, `acp-001`, `providers-001` | verified |
 | `chat-ui-001` | 原型 Agent 会话页的真实聊天闭环 | `web-001`, `chat-integration-001`, `saas-ui-001` | verified |
 | `real-e2e-001` | 真实 Agent 与恢复场景验收 | `desktop-001`, `chat-ui-001` | verified |
@@ -603,11 +606,11 @@ planned → in_development → awaiting_verification
 - afterEvent 失败不阻塞 journal 主链。
 - 不使用轮询判静默，不把 stdout 日志混入 ACP。
 
-### `providers-001` — Claude Code/Codex Provider 与 doctor
+### `providers-001` — Claude Agent 暂不可用占位项、Codex Provider 与 doctor
 
 范围：
 
-- 实现 Claude Code 和 Codex 的 `AgentProvider`。
+- 实现 Claude Agent 的 fail-closed 占位项和 Codex 的 `AgentProvider`。
 - `available()` 报告可用性、版本和可执行诊断原因。
 - `resolveCommand()` 使用参数数组与环境变量 allowlist。
 - 认证方法仅从 initialize 返回的 authMethods 与本机安全环境中选择。
@@ -665,7 +668,8 @@ planned → in_development → awaiting_verification
 - 在仓库内一次性、可清理的 smoke fixture 目录运行真实 Provider，禁止改动用户其他项目。
 - 对每个本机可用且已认证 Provider 执行最小真实文本对话。
 - 至少一个真实 Provider 完成 UI 端到端聊天；能力支持时还要完成一次审批和一次取消。
-- Claude Code 与 Codex 两个 adapter 都必须实现并通过 fixture/doctor；本机不可用者记录精确外部阻塞证据。
+- Claude Agent 在 0.2.0 中必须固定返回 `unavailable`，不得打包或启动 adapter，也不得
+  接受本机/项目认证来源；Codex adapter 必须通过 fixture/doctor。
 
 完成下限：
 
@@ -774,7 +778,8 @@ pnpm smoke:package
 ### 12.3 P1 聊天
 
 - [x] ACP 主链只使用官方稳定 v1 SDK 的精确锁定版本。
-- [x] Claude Code 和 Codex Provider adapter、Registry、doctor 均已实现和验证。
+- [x] Claude Agent fail-closed 占位项、Codex Provider、Registry 和 doctor 均已实现和
+  验证。
 - [x] ACP REPL 能运行会话、审批和取消 fixture；对本机可用 Provider 可真实运行。
 - [x] Desktop UI 可选择 Provider/cwd、新建与切换会话、发送多轮消息。
 - [x] user/text/note/think/tool/diff/approval 七类消息正确渲染。

@@ -44,7 +44,6 @@ describe("test-only Fake Registry", () => {
 
   it("exposes deterministic local CLI discovery data for desktop acceptance", () => {
     expect(registry.listAgentCliInstallations().clis).toMatchObject([
-      { command: "claude", executablePath: "/fixture/bin/claude" },
       { command: "codex", executablePath: "/fixture/bin/codex" },
     ]);
   });

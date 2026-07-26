@@ -15,7 +15,7 @@ DougoOS 的 ACP v1 客户端运行时。它负责官方 SDK transport、握手�
 ## 运行 REPL
 
 REPL 接受一个明确的 ACP Agent 命令；每个额外参数单独使用 `--arg`，不会经过 shell
-拼接。`providers-001` 会在组合根提供 Claude Code/Codex 的 provider 选择。
+拼接。`providers-001` 会在组合根提供 Claude Agent/Codex 的 provider 选择。
 
 ```bash
 pnpm --filter @dougoos/acp repl -- \

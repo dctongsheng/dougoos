@@ -16,7 +16,7 @@ export function createBuiltinProviders(
   cliDiscovery: AgentCliDiscoveryPort = new AgentCliDiscovery(),
 ): readonly AgentProvider[] {
   return [
-    new ClaudeCodeProvider({ cliDiscovery }),
+    new ClaudeCodeProvider(),
     new CodexProvider({ cliDiscovery }),
     new CursorAgentProvider({ cliDiscovery }),
     new GrokProvider({ cliDiscovery }),

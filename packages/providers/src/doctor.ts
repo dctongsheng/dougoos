@@ -10,6 +10,7 @@ import {
 } from "@dougoos/acp";
 import { ProviderDoctorResultSchema, type ProviderDoctorResult } from "@dougoos/shared";
 
+import { CLAUDE_AGENT_DISABLED_REASON, CLAUDE_AGENT_DISABLED_REMEDIATION } from "./claude-code.js";
 import { providerProcessEnvironment } from "./environment.js";
 
 type RegistryFactory = (options: AgentSessionRegistryOptions) => AgentSessionRegistry;
@@ -32,6 +33,15 @@ function unauthenticatedResult(
   checkedAt: string,
   version: string | undefined,
 ): ProviderDoctorResult {
+  if (provider.id === "claude-code") {
+    return ProviderDoctorResultSchema.parse({
+      checkedAt,
+      providerId: provider.id,
+      reason: CLAUDE_AGENT_DISABLED_REASON,
+      remediation: CLAUDE_AGENT_DISABLED_REMEDIATION,
+      status: "unavailable",
+    });
+  }
   return ProviderDoctorResultSchema.parse({
     checkedAt,
     providerId: provider.id,

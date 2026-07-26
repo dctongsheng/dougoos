@@ -41,11 +41,11 @@ const agentSeeds: readonly AgentSeed[] = [
     pulse: "pulse 1.4s infinite",
   },
   {
-    bin: "claude",
-    dot: "#3ddc84",
+    bin: "0.2.0 暂不可用",
+    dot: "rgba(140,160,150,.35)",
     key: "claude",
-    name: "Claude Code",
-    pulse: "pulse 1.1s infinite",
+    name: "Claude Agent",
+    pulse: "none",
   },
   {
     bin: "grok",
@@ -86,7 +86,7 @@ export const landingAgents: readonly LandingAgent[] = agentSeeds.map((agent) => 
 }));
 
 export const landingKpis: readonly LandingKpi[] = [
-  { color: "#3ddc84", label: "活跃 Agent", value: "4/6" },
+  { color: "#3ddc84", label: "活跃 Agent", value: "3/5" },
   { color: "#ffb454", label: "等待确认", value: "1" },
   { color: "var(--text,#f2f7f3)", label: "今日费用", value: "$12.40" },
   { color: "var(--text,#f2f7f3)", label: "今日 Tokens", value: "2.9M" },
@@ -106,11 +106,11 @@ const productCardSeeds: readonly ProductCardSeed[] = [
   {
     border: "var(--bd,rgba(255,255,255,.07))",
     key: "claude",
-    last: "▸ prisma migrate diff --preview",
-    name: "Claude Code",
-    status: "执行中",
-    statusColor: "#4fd8e0",
-    task: "users 表 schema 迁移,先跑 dry-run",
+    last: "请使用其他 Provider",
+    name: "Claude Agent",
+    status: "暂不可用",
+    statusColor: "#8a968e",
+    task: "DougoOS 0.2.0 不包含或启动 Anthropic adapter",
   },
   {
     border: "var(--bd,rgba(255,255,255,.07))",
@@ -179,9 +179,9 @@ interface RouteSeed {
 
 const routeSeeds: readonly RouteSeed[] = [
   {
-    agent: "Claude Code",
-    confidence: "96%",
-    key: "claude",
+    agent: "Cursor",
+    confidence: "93%",
+    key: "cursor",
     task: "把 users 表迁移到新 schema",
   },
   { agent: "Codex", confidence: "91%", key: "codex", task: "写一个日志清洗脚本" },
@@ -205,8 +205,8 @@ export const memoryStars: readonly MemoryStar[] = [
 ];
 
 export const landingStats: readonly LandingStat[] = [
-  { label: "已接入 Agent CLI", value: "6" },
+  { label: "0.2.0 可用 Agent CLI", value: "5" },
   { label: "本周托管会话", value: "128" },
-  { label: "上传到云端的数据", value: "0" },
+  { label: "DougoOS 云端同步", value: "关闭" },
   { label: "需要盯着的窗口", value: "1" },
 ];

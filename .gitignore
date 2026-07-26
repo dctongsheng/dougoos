@@ -38,6 +38,8 @@ diagnostics/provider-*/
 .env
 .env.*
 !.env.example
+.dev.vars
+.dev.vars.*
 .secrets/
 release/private/
 *.p8
