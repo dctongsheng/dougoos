@@ -1,0 +1,58 @@
+{
+  "schema": "dougoos.release-manifest.v1",
+  "release": {
+    "name": "v0.2.0",
+    "version": "0.2.0"
+  },
+  "source": {
+    "algorithm": "sha256(path-length:path:type:size:content; Git ref or releasable worktree inputs; current manifest excluded)",
+    "fileCount": 624,
+    "ref": "v0.2.0",
+    "sha256": "fccedaf86869212daa3db43dc0b5c5ab1daa9ac6df9f11f7c7874f8bd6fece7a"
+  },
+  "runtime": {
+    "node": "22.23.1",
+    "nodeEngineCompatibility": ">=22.13.0",
+    "pnpm": "pnpm@11.16.0",
+    "chromium": "149.0.7827.55"
+  },
+  "dependencies": {
+    "acpSdk": "1.3.0",
+    "betterSqlite3": "13.0.1",
+    "codexAcp": "1.1.7",
+    "electron": "43.2.0",
+    "playwright": "1.61.1",
+    "react": "19.2.8",
+    "typescript": "6.0.3"
+  },
+  "verification": {
+    "recordedOn": "2026-07-26",
+    "gates": [
+      {
+        "command": "pnpm check",
+        "status": "passed"
+      },
+      {
+        "command": "pnpm test:e2e",
+        "status": "passed"
+      },
+      {
+        "command": "pnpm test:visual",
+        "status": "passed"
+      },
+      {
+        "command": "pnpm smoke:build",
+        "status": "passed"
+      },
+      {
+        "command": "pnpm smoke:package",
+        "status": "passed"
+      }
+    ],
+    "releaseReview": {
+      "blockingFindings": [],
+      "document": "docs/plan/reviews/early-access-0.2.0-02.md",
+      "status": "passed"
+    }
+  }
+}
