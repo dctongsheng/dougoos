@@ -45,10 +45,11 @@ depends-on: [release-baseline-001]
 7. 活动任务或待审批操作只阻止打开安装包，不阻止后台下载。
 8. 发布流水线必须先上传并公网回读不可变制品，最后提升清单和固定别名。
 9. clean checkout 必须重现 check、E2E、视觉回归、构建 smoke 与 release manifest 门禁。
-10. 独立 review 必须明确 blocking/non-blocking findings；没有 blocking finding 才能标记
-    `done` 和创建 `v0.2.0` tag。
+10. Tag 前独立 review 必须明确 blocking/non-blocking findings；没有 blocking finding 才能
+    创建 `v0.2.0` tag。Tag 后另做公网 release review，公网制品、生产入口和人工安装验收
+    不能反向阻塞只有 Tag 才能触发的发布流水线。
 
-## verification
+## pre-tag verification
 
 ```bash
 pnpm release:manifest:check
@@ -62,8 +63,18 @@ node tooling/prepare-early-access-release.mjs
 ```
 
 此外测试正确签名、错误签名、损坏文件、降级版本、错误域名、网络中断，以及活动任务的
-打开阻断。最终发布必须从 `downloads.dougoos.com` 回读并校验版本化 DMG。
+打开阻断。Tag 前 Review 只在这些离线门禁通过、R2/自定义域名/GitHub Secrets 就绪且没有
+代码 blocker 时授权创建 `v0.2.0`。
+
+## post-tag verification
+
+Tag 流水线必须从 `downloads.dougoos.com` 回读并校验版本化 DMG，再提升 `latest.json`
+和固定别名。公网 release review 复核版本化制品、签名、缓存头、固定下载入口、生产
+`/install` 的 `410 Gone` 以及官网文案。
+
+公网与生产入口验证通过后状态改为 `awaiting_verification`。只有在干净 Mac 用户环境完成
+“下载 → 拖入 Applications → 隐私与安全性仍要打开 → 启动”后才能标记 `done`。
 
 ## completion evidence
 
-等待完整门禁、独立 review、R2 公网回读和 `v0.2.0` tag 后填写。
+等待 Tag 前授权 review、`v0.2.0` 发布、Tag 后公网 review 和干净 Mac 验收后填写。

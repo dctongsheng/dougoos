@@ -16,7 +16,7 @@ docs/plan/
 ## 状态
 
 ```text
-pending -> ready -> in-progress -> done
+pending -> ready -> in-progress -> awaiting_verification -> done
                          |
                          +-> blocked
 ```
@@ -25,6 +25,7 @@ pending -> ready -> in-progress -> done
 - 独立验证者根据 `context`、源码与验证命令出具 review。
 - blocking finding 必须修复并重新验证。
 - non-blocking finding 进入 [backlog.md](./backlog.md)。
+- `awaiting_verification` 表示实现与自动化门禁已通过，正在等待不能由仓库自动完成的外部验收。
 - `done` 表示任务已通过独立验证，并已进入目标分支。
 
 ## 当前任务
@@ -51,4 +52,6 @@ Early Access 发布另需满足：
 2. DMG 为 macOS 13+ Apple Silicon、ad-hoc signed、未公证，官网没有误导性表述。
 3. 更新包必须通过大小、SHA-256 与 Ed25519 签名校验，且不会自覆盖应用。
 4. R2 必须先发布并公网回读不可变制品，最后才能更新 `latest.json` 和固定别名。
-5. 独立 release review 没有 blocking finding。
+5. Tag 前独立 release review 没有 blocking finding，并明确授权创建 Tag。
+6. Tag 后必须另做一次公网 release review；公网制品、生产入口和人工安装验收不能作为
+   只有 Tag 才能触发的发布流水线的 Tag 前置条件。

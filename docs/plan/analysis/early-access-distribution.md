@@ -32,9 +32,13 @@ Electron 主进程可以安全地检查、下载和验证新版 DMG，但未签�
 
 ## 发布顺序
 
+Tag 前独立 release review 负责确认离线门禁、发布代码和外部基础设施已就绪，并授权创建
+`v0.2.0`。该 review 不要求提前验证只有 Tag 流水线才能产生的公网对象。
+
 `v0.2.0` tag 触发 macOS Apple Silicon runner。流水线完成无凭据门禁、DMG 打包和 packaged
 smoke 后，上传版本化不可变对象，再从公网域名下载并重新校验。只有回读成功，才提升
-`latest.json`、固定 `DougoOS.dmg` 和对应签名别名。
+`latest.json`、固定 `DougoOS.dmg` 和对应签名别名。提升完成后由另一名独立验证者做 Tag 后
+公网 release review；官网入口和人工安装验收属于这一步。
 
 版本化路径使用长期 immutable cache；固定别名和清单使用 `no-cache`。这保证失败发布不会
 把客户端指向尚未验证或不完整的制品。
