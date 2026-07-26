@@ -41,8 +41,8 @@ jobs:
       - name: Install pinned Chromium
         run: pnpm exec playwright install chromium
 
-      - name: Build the production web bundle
-        run: pnpm --filter @dougoos/web build
+      - name: Build workspace dependencies
+        run: pnpm -r build
 
       - name: Capture requested production case
         run: pnpm exec tsx tests/visual/diagnose-production.ts --case="${{ inputs.case }}"
