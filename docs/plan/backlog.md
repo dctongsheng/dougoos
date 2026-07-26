@@ -13,3 +13,16 @@
 - 影响：不影响 `ui-regression-001` 或当前 release candidate 的必需离线门禁；Desktop E2E
   目前不属于 release-baseline CI。
 - 后续：若未来将完整 Desktop E2E 提升为 release-baseline CI 门禁，单独复查并稳定该恢复用例。
+
+## Early Access 0.2.0 production release
+
+- 来源：[`early-access-0.2.0` Release Review 03](./reviews/early-access-0.2.0-03.md)
+- 优先级：P3
+- 状态：accepted / non-blocking
+- GitHub Actions：`actions/*@v4` 出现 Node runtime 弃用警告；后续升级到受维护版本或
+  固定完整 commit SHA。
+- R2 恢复：immutable 对象在 promotion 前发生部分上传后，同 Tag 重跑可能需要人工清理
+  残留对象；当前发布保持 fail-closed。
+- 官网产品边界：登录、文档和在线体验等 demo/no-op 入口应继续明确标注或在后续实现，
+  避免被理解为已上线业务功能。
+- 影响：不影响 0.2.0 DMG 下载、SHA-256/Ed25519 校验、安装包打开或更新器信任边界。

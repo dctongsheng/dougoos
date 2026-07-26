@@ -1,7 +1,7 @@
 ---
 id: early-access-0.2.0
 scope: release
-status: in-progress
+status: awaiting_verification
 depends-on: [release-baseline-001]
 ---
 
@@ -77,4 +77,20 @@ Tag 流水线必须从 `downloads.dougoos.com` 回读并校验版本化 DMG，�
 
 ## completion evidence
 
-等待 Tag 前授权 review、`v0.2.0` 发布、Tag 后公网 review 和干净 Mac 验收后填写。
+- annotated `v0.2.0` Tag 指向
+  `c1ab4f625155b2ceb5d5146892ea98556727aa2b`；`release/v0.2.0.json` 与该 Tag 一致。
+- Tag 前 [`Review 02`](../reviews/early-access-0.2.0-02.md) 与 Tag 后
+  [`Review 03`](../reviews/early-access-0.2.0-03.md) 均为 `pass`，blocking findings 为
+  none。
+- GitHub Release workflow
+  [`30188102736`](https://github.com/dctongsheng/dougoos/actions/runs/30188102736) 与 tagged
+  clean checkout
+  [`30188102737`](https://github.com/dctongsheng/dougoos/actions/runs/30188102737) 均成功。
+- 公网 DMG 为 `304173685` bytes，SHA-256
+  `4644903c703c26ed9746ad7a1b7bcebdd27c0e7081aac66ab5cef0e5b15748d7`；独立完整下载、
+  Ed25519 签名和 `hdiutil verify` 均通过。
+- `latest.json`、版本化制品、固定下载别名、attachment 文件名与缓存头均通过公网验证。
+- Cloudflare production version `703ad307-ab81-4b3f-8308-35d94a5c1085` 已部署；官网三个
+  下载入口均指向固定 DMG，`/install` GET/HEAD 均返回 `410 Gone`。
+- 剩余验收：在干净 macOS 13+ Apple Silicon Mac 完成“下载 → 拖入 Applications →
+  隐私与安全性仍要打开 → 启动”。通过后才能标记 `done`。

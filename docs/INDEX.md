@@ -21,8 +21,12 @@
 - [Early Access 发布分析](./plan/analysis/early-access-distribution.md)：零付费 macOS
   分发、受限更新和未来正式更新边界。
 - [Early Access 0.2.0 任务](./plan/tasks/early-access-0.2.0.md)
-- [Early Access Review 01](./plan/reviews/early-access-0.2.0-01.md)：代码复审通过；
-  R2、生产部署与干净 Mac 验收仍阻塞 Tag。
+- [Early Access Review 01](./plan/reviews/early-access-0.2.0-01.md)：历史 blocked review；
+  代码 finding 已关闭。
+- [Early Access Review 02](./plan/reviews/early-access-0.2.0-02.md)：`pass`，授权创建
+  `v0.2.0` Tag。
+- [Early Access Review 03](./plan/reviews/early-access-0.2.0-03.md)：`pass`，公网制品与
+  官网部署通过；等待干净 Mac 首次启动验收。
 - [Release Baseline 分析](./plan/analysis/p1-release-baseline.md)
 - [视觉阻塞归因](./plan/analysis/ui-regression-release-blocker.md)
 - [视觉阻塞修复任务](./plan/tasks/ui-regression-001.md)

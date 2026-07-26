@@ -34,7 +34,7 @@ pending -> ready -> in-progress -> awaiting_verification -> done
 |---|---|---|
 | [`ui-regression-001`](./tasks/ui-regression-001.md) | 恢复 fixture/real 数据边界和像素级视觉合同 | done |
 | [`release-baseline-001`](./tasks/release-baseline-001.md) | 建立 P0/P1 可复现、可回退的发布基线 | done |
-| [`early-access-0.2.0`](./tasks/early-access-0.2.0.md) | 零付费发布 macOS Apple Silicon Early Access | in-progress |
+| [`early-access-0.2.0`](./tasks/early-access-0.2.0.md) | 零付费发布 macOS Apple Silicon Early Access | awaiting_verification |
 
 ## Release Baseline 门禁
 

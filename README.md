@@ -5,6 +5,8 @@ renderer、Core/ACP/provider/storage packages，以及严格的 TypeScript、wor
 和视觉证据门禁。
 
 - 当前项目版本：`0.2.0 Early Access`
+- `v0.2.0` 已发布：R2 固定下载、Ed25519 签名、公开源码 Tag 与
+  [dougoos.com](https://dougoos.com/) 生产入口均已验证；等待干净 Mac 首次启动验收
 - P0/P1 产品实现：历史 checkpoint 已验证
 - `p0-p1-mvp` release baseline：`done`；三轮独立 review 已关闭全部 finding，exact-Node
   clean checkout 已重现全部离线门禁，annotated tag 可用于回退
