@@ -4792,6 +4792,10 @@ input:focus-visible,
   margin-bottom: 3px;
 }
 
+.customize-section {
+  height: 480px;
+}
+
 .customize-section > div:first-child p,
 .agent-config-section > div:first-child p {
   color: var(--faint);
