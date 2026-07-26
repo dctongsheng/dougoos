@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "d61b8e460b03582c",
+    "digest": "474c4160c9567380",
     "visibleElementCount": 391
   },
   "externalRequests": [],
@@ -96,7 +96,7 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -158,7 +158,7 @@
         "width": "240px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -282,7 +282,7 @@
         "width": "1200px",
         "z-index": "auto"
       },
-      "text": "下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Code ▼ ⌂对话▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
+      "text": "下午好 · RYO 有什么可以帮你的? 指定 Agent 智能路由 ◆ Claude Agent ▼ ⌂对话▼ 模型由 Agent 管理 ➤ 修复 flaky 的 e2e 登录用例 分析昨晚的 crash 日志 为 parser 补全单元测试 重新生成 OpenAPI 文档 4 个 Agent 运行中 · 今日 $12.47 · ⌘+Enter 发送"
     },
     {
       "boundingBox": {
@@ -344,15 +344,15 @@
         "width": "360px",
         "z-index": "900"
       },
-      "text": "通知 全部已读 ◆ Claude Code 等待确认 请求执行 prisma migrate deploy 刚刚 ⌖ Cursor CLI 任务完成 parser 单元测试 14/14 通过 6 分钟前 ◔ 预算提醒 今日费用已达预算 78% 1 小时前"
+      "text": "通知 全部已读 ◆ Claude Agent 等待确认 请求执行 prisma migrate deploy 刚刚 ⌖ Cursor CLI 任务完成 parser 单元测试 14/14 通过 6 分钟前 ◔ 预算提醒 今日费用已达预算 78% 1 小时前"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 221091,
+    "bytes": 221482,
     "path": "screenshots/saas-notifications-unread--saas-1440x900.png",
-    "sha256": "b9e0f012a1be685c55008b882ca9276ba6a2a7ca0b3508239738553ab664d03e"
+    "sha256": "c47acd0f666fc7c3c4bc9ad71a967cedd99295408e77251e20b07bf3ec71c969"
   },
   "scroll": {
     "main": "top",
@@ -360,7 +360,7 @@
     "sidebar": "top"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
+  "sourceSha256": "fb500f7de66c2705e6455bdbe08e6421ccd125c65c9227ed94a87e6a2dce6976",
   "surface": "saas",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",

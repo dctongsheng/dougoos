@@ -18,14 +18,14 @@
     "timezoneId": "Asia/Shanghai"
   },
   "document": {
-    "height": 2904,
+    "height": 2934,
     "scrollX": 0,
     "scrollY": 0,
     "width": 1440
   },
   "dom": {
-    "digest": "353bd021b51f5a47",
-    "visibleElementCount": 325
+    "digest": "dae118c89d36b02c",
+    "visibleElementCount": 327
   },
   "externalRequests": [],
   "fonts": {
@@ -38,7 +38,7 @@
   "landmarks": [
     {
       "boundingBox": {
-        "height": 2904.156,
+        "height": 2934.203,
         "width": 1440,
         "x": 0,
         "y": 0
@@ -73,7 +73,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2904.16px",
+        "height": "2934.2px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -96,7 +96,7 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS 功能 Agents Memory 文档 ☀ 登录 免费下载 v0.2.0 · Early Access · macOS Apple Silicon 多个 Agent CLI一个控制台 Codex、Claude Code、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。 下载桌面版 在线体验 → macOS Apple Silicon · Early Access · 未经 Apple 公证 四步开始体验 下载并打开 DMG 拖入 Applications 首次尝试启动 被拦截时在“隐私与安全性”选择“仍要打开” AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Code 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 4/6 等待确认 1 今日费用 $12.40 今日 Tokens 2.9M ✳ Claude Code 执行中 users 表 sche"
+      "text": "◈ AgentOS 功能 Agents Memory 文档 ☀ 登录 免费下载 v0.2.0 · Early Access · macOS Apple Silicon 多个 Agent CLI一个控制台 Codex、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换多个终端窗口。Claude Agent 在 0.2.0 中暂不可用，当前下载不包含或启动其 adapter。 下载桌面版 在线体验 → macOS Apple Silicon · Early Access · 未经 Apple 公证 四步开始体验 下载并打开 DMG 拖入 Applications 首次尝试启动 被拦截时在“隐私与安全性”选择“仍要打开” AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Agent 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 3/5 等待确认 1 今日费用 $12.40 今日 Tokens"
     },
     {
       "boundingBox": {
@@ -227,7 +227,7 @@
         "height": 13,
         "width": 978,
         "x": 255,
-        "y": 653.406
+        "y": 681.453
       },
       "count": 1,
       "name": "product-window-title",
@@ -289,7 +289,7 @@
         "height": 14,
         "width": 1056,
         "x": 192,
-        "y": 1285.406
+        "y": 1313.453
       },
       "count": 1,
       "name": "features-heading",
@@ -351,7 +351,7 @@
         "height": 14,
         "width": 504,
         "x": 192,
-        "y": 1837.359
+        "y": 1853.5
       },
       "count": 1,
       "name": "routing-heading",
@@ -413,7 +413,7 @@
         "height": 14,
         "width": 504,
         "x": 744,
-        "y": 2116.859
+        "y": 2144.906
       },
       "count": 1,
       "name": "memory-heading",
@@ -475,7 +475,7 @@
         "height": 53,
         "width": 1056,
         "x": 192,
-        "y": 2587.156
+        "y": 2617.203
       },
       "count": 1,
       "name": "cta-heading",
@@ -534,7 +534,7 @@
     },
     {
       "boundingBox": {
-        "height": 2904.156,
+        "height": 2934.203,
         "width": 1440,
         "x": 0,
         "y": 0
@@ -569,7 +569,7 @@
         "font-weight": "400",
         "gap": "normal",
         "grid-template-columns": "none",
-        "height": "2904.16px",
+        "height": "2934.2px",
         "justify-content": "normal",
         "letter-spacing": "normal",
         "line-height": "normal",
@@ -592,15 +592,15 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS 功能 Agents Memory 文档 ☀ 登录 免费下载 v0.2.0 · Early Access · macOS Apple Silicon 多个 Agent CLI一个控制台 Codex、Claude Code、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换六个终端窗口。 下载桌面版 在线体验 → macOS Apple Silicon · Early Access · 未经 Apple 公证 四步开始体验 下载并打开 DMG 拖入 Applications 首次尝试启动 被拦截时在“隐私与安全性”选择“仍要打开” AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Code 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 4/6 等待确认 1 今日费用 $12.40 今日 Tokens 2.9M ✳ Claude Code 执行中 users 表 sche"
+      "text": "◈ AgentOS 功能 Agents Memory 文档 ☀ 登录 免费下载 v0.2.0 · Early Access · macOS Apple Silicon 多个 Agent CLI一个控制台 Codex、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换多个终端窗口。Claude Agent 在 0.2.0 中暂不可用，当前下载不包含或启动其 adapter。 下载桌面版 在线体验 → macOS Apple Silicon · Early Access · 未经 Apple 公证 四步开始体验 下载并打开 DMG 拖入 Applications 首次尝试启动 被拦截时在“隐私与安全性”选择“仍要打开” AgentOS — workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 3 ✦ Memory AGENTS ⌬ Codex ✳ Claude Agent 𝕏 Grok ▮ Cursor π Pi ☿ Hermes 活跃 Agent 3/5 等待确认 1 今日费用 $12.40 今日 Tokens"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 597003,
+    "bytes": 618489,
     "path": "screenshots/landing-full--landing-1440x1000.png",
-    "sha256": "6f674d566e02dbb63f0a6711e847507918566acebea5528c5d4bce1c0b705e06"
+    "sha256": "75ed3ffb6f5c42ffe6850a82fff758892165f77f8ca0c2e85ab347ceb4078b40"
   },
   "scroll": {
     "main": "top",
@@ -608,7 +608,7 @@
     "sidebar": "top"
   },
   "source": "prototypes/agentos/project/AgentOS Landing.dc.html",
-  "sourceSha256": "b6b6b8edbd13397430d70df3cb2f0d0c19a47afa4ac04e56bfc87d446a03c442",
+  "sourceSha256": "4bddf5799f074705503cadce11231f45f477e5b51bb32bf3ab5a64f991682de9",
   "surface": "landing",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",

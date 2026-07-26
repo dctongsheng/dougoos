@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "0ca14635e8b79e93",
+    "digest": "1092c5515eb204ad",
     "visibleElementCount": 394
   },
   "externalRequests": [],
@@ -96,7 +96,7 @@
         "width": "1280px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -158,7 +158,7 @@
         "width": "240px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -220,7 +220,7 @@
         "width": "1040px",
         "z-index": "auto"
       },
-      "text": "Claude Code ~/dev/webapp 活跃 4/6 今日 $12.47 2.58M tok ◍ 2 12:05:06"
+      "text": "Claude Agent ~/dev/webapp 活跃 4/6 今日 $12.47 2.58M tok ◍ 2 12:05:06"
     },
     {
       "boundingBox": {
@@ -282,15 +282,15 @@
         "width": "980px",
         "z-index": "auto"
       },
-      "text": "◆ Claude Code 等待确认 ⌂ webapp · claude-4.5-sonnet · ~/dev/webapp · ⏱ 11m00s · 96k tok · $1.84 会话 历史 ⚙ 配置 把 users 表迁移到新 schema,写好迁移脚本并先跑 dry-run ▸ Read prisma/schema.prisma 2.1k tok ▸ Bash npx prisma migrate diff --preview exit 0 差异已确认:users 表新增 tenant_id 与软删除字段,需要回填数据。迁移分两阶段:先扩列回填,再收紧约束。dry-run 通过。 migrations/20260721_users_v2.sql +48−12 + ALTER TABLE users ADD COLUMN tenant_id uuid; + ALTER TABLE users ADD COLUMN deleted_at timestamptz; + UPDATE users SET tenant_id = o.tenant_id FROM orgs o ...; "
+      "text": "◆ Claude Agent 等待确认 ⌂ webapp · claude-4.5-sonnet · ~/dev/webapp · ⏱ 11m00s · 96k tok · $1.84 会话 历史 ⚙ 配置 把 users 表迁移到新 schema,写好迁移脚本并先跑 dry-run ▸ Read prisma/schema.prisma 2.1k tok ▸ Bash npx prisma migrate diff --preview exit 0 差异已确认:users 表新增 tenant_id 与软删除字段,需要回填数据。迁移分两阶段:先扩列回填,再收紧约束。dry-run 通过。 migrations/20260721_users_v2.sql +48−12 + ALTER TABLE users ADD COLUMN tenant_id uuid; + ALTER TABLE users ADD COLUMN deleted_at timestamptz; + UPDATE users SET tenant_id = o.tenant_id FROM orgs o ...;"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 209628,
+    "bytes": 209833,
     "path": "screenshots/saas-agent-claude-light-green--saas-1280x800.png",
-    "sha256": "d9932d8ac64b7aadf7cf450f6640e79e26dcb1f60e4ce47d8be384e74fdd32da"
+    "sha256": "17a3070e530a4c7d056b0d5455515c3b0b07153d2bf0bc66f89a0b304a5449f3"
   },
   "scroll": {
     "main": "top",
@@ -298,7 +298,7 @@
     "sidebar": "top"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
+  "sourceSha256": "fb500f7de66c2705e6455bdbe08e6421ccd125c65c9227ed94a87e6a2dce6976",
   "surface": "saas",
   "theme": "light",
   "timezoneId": "Asia/Shanghai",

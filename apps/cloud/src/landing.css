@@ -993,6 +993,10 @@ a:focus-visible {
   box-shadow: 0 0 40px color-mix(in oklab, var(--accent) 30%, transparent);
 }
 
+.final-secondary {
+  line-height: 21px;
+}
+
 .final-secondary:hover {
   color: var(--text2);
 }

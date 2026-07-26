@@ -24,7 +24,7 @@
     "width": 1280
   },
   "dom": {
-    "digest": "d75ef4a46666ead8",
+    "digest": "017b3768e2ae8d8e",
     "visibleElementCount": 439
   },
   "externalRequests": [],
@@ -96,7 +96,7 @@
         "width": "1280px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -158,7 +158,7 @@
         "width": "240px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -282,15 +282,15 @@
         "width": "1040px",
         "z-index": "auto"
       },
-      "text": "全部 摘要 决策 经验 技巧 Prompt 质量 决策 07-21 users 表迁移采用两阶段方案:先扩列回填,再收紧约束 — 避免锁表与不可回滚风险。 ◆Claude Code #a3f2⌂ webapp 决策 07-18 rate limiter 最终采纳滑动窗口 + Redis sorted set,兼顾精度与降级路径。 ◆Claude Code #98c1⌂ api-server 经验 07-21 e2e 偶发超时的根因是 CI 上共享 redis 端口冲突 — 隔离资源后 flaky 消失。 ⌖Cursor CLI #61aa⌂ webapp 经验 07-19 worker 池重连时复用已关闭句柄会在并发下触发空指针,acquire 前必须做存活检查。 ◭Grok CLI #77de⌂ ml-pipeline 技巧 07-10 训练数据去重用 minhash,相似度阈值 0.86 时误杀率与召回率平衡最佳。 ◭Grok CLI #77de⌂ ml-pipeline 摘要 今天 auth 中间件重构为可插拔策略模式,JWT/ApiKey/Session 三实现,14/14 测"
+      "text": "全部 摘要 决策 经验 技巧 Prompt 质量 决策 07-21 users 表迁移采用两阶段方案:先扩列回填,再收紧约束 — 避免锁表与不可回滚风险。 ◆Claude Agent #a3f2⌂ webapp 决策 07-18 rate limiter 最终采纳滑动窗口 + Redis sorted set,兼顾精度与降级路径。 ◆Claude Agent #98c1⌂ api-server 经验 07-21 e2e 偶发超时的根因是 CI 上共享 redis 端口冲突 — 隔离资源后 flaky 消失。 ⌖Cursor CLI #61aa⌂ webapp 经验 07-19 worker 池重连时复用已关闭句柄会在并发下触发空指针,acquire 前必须做存活检查。 ◭Grok CLI #77de⌂ ml-pipeline 技巧 07-10 训练数据去重用 minhash,相似度阈值 0.86 时误杀率与召回率平衡最佳。 ◭Grok CLI #77de⌂ ml-pipeline 摘要 今天 auth 中间件重构为可插拔策略模式,JWT/ApiKey/Session 三实现,14/14"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 165004,
+    "bytes": 165332,
     "path": "screenshots/saas-sm-insights--saas-1280x800.png",
-    "sha256": "29ae097d801778335b9c7364b6bd4965a96a46580b35a8ba83414d4cdfb73d2d"
+    "sha256": "9ecfb9073c5aa93f72a34f1724b0bc23ba666f5d0e5d89dbb68a537d6a1eb4bf"
   },
   "scroll": {
     "main": "top",
@@ -298,7 +298,7 @@
     "sidebar": "bottom"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
+  "sourceSha256": "fb500f7de66c2705e6455bdbe08e6421ccd125c65c9227ed94a87e6a2dce6976",
   "surface": "saas",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",

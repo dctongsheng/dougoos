@@ -117,7 +117,7 @@
         "requirements": [
           {
             "id": "provider-notice",
-            "includes": "Claude Code 尚未通过本机认证检查",
+            "includes": "Claude Agent 在 0.2.0 中暂不可用",
             "kind": "text",
             "locator": { "by": "css", "value": ".production-state-notice" }
           },
@@ -617,11 +617,48 @@
               "value": "a[href=\"https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg\"]"
             },
             "name": "href"
+          },
+          {
+            "equals": ["https://github.com/dctongsheng/dougoos"],
+            "id": "public-source-repository",
+            "kind": "attribute-set",
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://github.com/dctongsheng/dougoos\"]"
+            },
+            "name": "href"
+          },
+          {
+            "equals": ["https://github.com/dctongsheng/dougoos/tree/v0.2.0"],
+            "id": "public-release-source",
+            "kind": "attribute-set",
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://github.com/dctongsheng/dougoos/tree/v0.2.0\"]"
+            },
+            "name": "href"
+          },
+          {
+            "equals": ["https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE"],
+            "id": "public-source-license",
+            "kind": "attribute-set",
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE\"]"
+            },
+            "name": "href"
+          },
+          {
+            "equals": ["/legal/THIRD_PARTY_NOTICES.md"],
+            "id": "public-third-party-notices",
+            "kind": "attribute-set",
+            "locator": { "by": "css", "value": "a[href=\"/legal/THIRD_PARTY_NOTICES.md\"]" },
+            "name": "href"
           }
         ]
       },
       "expected": { "externalRequests": [], "runtimeEffects": [], "storageWrites": [] },
-      "description": "Landing keeps demo controls inert while exposing only the approved Early Access download.",
+      "description": "Landing keeps demo controls inert while exposing the approved Early Access download and AGPL source offer.",
       "id": "landing-production-safe-cta",
       "kind": "production-only",
       "owner": "landing-ui-001",
@@ -633,6 +670,32 @@
               "value": "a[href=\"https://downloads.dougoos.com/early-access/macos/arm64/DougoOS.dmg\"]",
               "index": 0
             },
+            "type": "focus"
+          },
+          {
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://github.com/dctongsheng/dougoos\"]",
+              "index": 0
+            },
+            "type": "focus"
+          },
+          {
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://github.com/dctongsheng/dougoos/tree/v0.2.0\"]"
+            },
+            "type": "focus"
+          },
+          {
+            "locator": {
+              "by": "css",
+              "value": "a[href=\"https://github.com/dctongsheng/dougoos/blob/v0.2.0/LICENSE\"]"
+            },
+            "type": "focus"
+          },
+          {
+            "locator": { "by": "css", "value": "a[href=\"/legal/THIRD_PARTY_NOTICES.md\"]" },
             "type": "focus"
           },
           {
@@ -659,7 +722,6 @@
             "type": "click"
           },
           { "locator": { "by": "text", "exact": true, "value": "在线体验 →" }, "type": "click" },
-          { "locator": { "by": "text", "exact": true, "value": "GitHub ↗" }, "type": "click" },
           { "locator": { "by": "text", "exact": true, "value": "dougoos.com" }, "type": "click" },
           {
             "locator": { "by": "text", "exact": true, "value": "文档", "index": "last" },
@@ -1131,12 +1193,12 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
       "captureMode": "viewport",
-      "description": "Claude Code conversation fixture.",
+      "description": "Claude Agent conversation fixture.",
       "expectedScreenLabel": "Agent 会话",
       "id": "saas-agent-claude-session--saas-1440x900",
       "kind": "prototype-reference",
@@ -1169,12 +1231,12 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
       "captureMode": "viewport",
-      "description": "Claude Code conversation fixture.",
+      "description": "Claude Agent conversation fixture.",
       "expectedScreenLabel": "Agent 会话",
       "id": "saas-agent-claude-session--saas-1280x800",
       "kind": "prototype-reference",
@@ -1589,7 +1651,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         },
         {
@@ -1598,7 +1660,7 @@
         }
       ],
       "captureMode": "viewport",
-      "description": "Claude Code history subview, including populated and empty fixtures.",
+      "description": "Claude Agent history subview, including populated and empty fixtures.",
       "expectedScreenLabel": "Agent 会话",
       "id": "saas-agent-claude-history--saas-1440x900",
       "kind": "prototype-reference",
@@ -1631,7 +1693,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         },
         {
@@ -1640,7 +1702,7 @@
         }
       ],
       "captureMode": "viewport",
-      "description": "Claude Code history subview, including populated and empty fixtures.",
+      "description": "Claude Agent history subview, including populated and empty fixtures.",
       "expectedScreenLabel": "Agent 会话",
       "id": "saas-agent-claude-history--saas-1280x800",
       "kind": "prototype-reference",
@@ -3969,7 +4031,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "scope": "screen" },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "scope": "screen" },
           "type": "click"
         }
       ],
@@ -4174,7 +4236,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -4221,7 +4283,7 @@
         {
           "locator": {
             "by": "placeholder",
-            "value": "向 Claude Code 派发任务 · Enter 发送",
+            "value": "向 Claude Agent 派发任务 · Enter 发送",
             "scope": "screen"
           },
           "name": "agent-composer"
@@ -4238,7 +4300,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         },
         {
@@ -4280,7 +4342,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         },
         {
@@ -4322,7 +4384,7 @@
       "accent": "green",
       "actions": [
         { "locator": { "by": "text", "exact": false, "value": "长程任务" }, "type": "click" },
-        { "locator": { "by": "title", "value": "Claude Code" }, "type": "click" },
+        { "locator": { "by": "title", "value": "Claude Agent" }, "type": "click" },
         {
           "locator": {
             "by": "text",
@@ -4774,7 +4836,7 @@
           "locator": {
             "by": "text",
             "exact": true,
-            "value": "You are Claude Code, an agentic coding assistant operating in the user’s terminal.",
+            "value": "You are Claude Agent, an agentic coding assistant operating in the user’s terminal.",
             "scope": "screen"
           },
           "name": "harness-prompt-expanded-body"
@@ -5445,7 +5507,7 @@
       "actions": [
         { "locator": { "by": "text", "exact": false, "value": "总览" }, "type": "click" },
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "scope": "screen" },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "scope": "screen" },
           "type": "hover"
         }
       ],
@@ -5937,7 +5999,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -5975,7 +6037,7 @@
       "accent": "green",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -6161,7 +6223,7 @@
       "accent": "cyan",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -6199,7 +6261,7 @@
       "accent": "cyan",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -6385,7 +6447,7 @@
       "accent": "orange",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -6423,7 +6485,7 @@
       "accent": "orange",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -6609,7 +6671,7 @@
       "accent": "purple",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],
@@ -6647,7 +6709,7 @@
       "accent": "purple",
       "actions": [
         {
-          "locator": { "by": "text", "exact": true, "value": "Claude Code", "index": 0 },
+          "locator": { "by": "text", "exact": true, "value": "Claude Agent", "index": 0 },
           "type": "click"
         }
       ],

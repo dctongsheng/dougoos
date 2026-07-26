@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "6ddef78e717e91f2",
+    "digest": "162cd8cf0d10cfd7",
     "visibleElementCount": 907
   },
   "externalRequests": [],
@@ -96,7 +96,7 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -158,7 +158,7 @@
         "width": "240px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -282,7 +282,7 @@
         "width": "860px",
         "z-index": "auto"
       },
-      "text": "外观 主题 深色 浅色 主题色 对话项目 新建对话默认在这个目录中运行，Agent 可以在这里读取和创建文件。 内置项目 ◇ 对话目录 /Users/ryo/Documents/Dogoos 修改只影响之后新建的对话，不会移动已有对话或文件。 选择目录 界面自定义 勾选侧边栏中显示的模块 —— 主导航、PROJECTS、Agent、HARNESS 与 Sessions Manager 主导航 ＋ 新建任务 ✓ ▦ 总览 ✓ ▤ 任务编排 ✓ ✦ Memory ✓ PROJECTS 模块 ⚑ 置顶 ✓ ❒ 项目 ✓ ❯ 对话 ✓ AGENTS ❯ Codex CLI ✓ ◆ Claude Code ✓ ◭ Grok CLI ✓ ⌖ Cursor CLI ✓ π Pi ✓ ☿ Hermes ✓ HARNESS 模块 ¶ System Prompt ✓ ✦ Skills ✓ ⚙ MCP ✓ ⛬ SubAgents ✓ ◎ Goals ✓ ⧉ Workflows ✓ ⚓ Hooks ✓ § Rules ✓ SESSIONS MANAGER 模块 ⊞ Dashboard ✓ ❐ Sessions"
+      "text": "外观 主题 深色 浅色 主题色 对话项目 新建对话默认在这个目录中运行，Agent 可以在这里读取和创建文件。 内置项目 ◇ 对话目录 /Users/ryo/Documents/Dogoos 修改只影响之后新建的对话，不会移动已有对话或文件。 选择目录 界面自定义 勾选侧边栏中显示的模块 —— 主导航、PROJECTS、Agent、HARNESS 与 Sessions Manager 主导航 ＋ 新建任务 ✓ ▦ 总览 ✓ ▤ 任务编排 ✓ ✦ Memory ✓ PROJECTS 模块 ⚑ 置顶 ✓ ❒ 项目 ✓ ❯ 对话 ✓ AGENTS ❯ Codex CLI ✓ ◆ Claude Agent ✓ ◭ Grok CLI ✓ ⌖ Cursor CLI ✓ π Pi ✓ ☿ Hermes ✓ HARNESS 模块 ¶ System Prompt ✓ ✦ Skills ✓ ⚙ MCP ✓ ⛬ SubAgents ✓ ◎ Goals ✓ ⧉ Workflows ✓ ⚓ Hooks ✓ § Rules ✓ SESSIONS MANAGER 模块 ⊞ Dashboard ✓ ❐ Session"
     },
     {
       "boundingBox": {
@@ -344,15 +344,15 @@
         "width": "820px",
         "z-index": "auto"
       },
-      "text": "Agent 配置 接入的 CLI Agent 的模型、密钥、工作目录与审批策略 ❯ Codex CLI ◆ Claude Code ◭ Grok CLI ⌖ Cursor CLI π Pi ☿ Hermes ❯ Codex CLI /usr/local/bin/codex · v3.4.1 已启用 模型 gpt-5-codex o4 o4-mini API Key codex-••••••••7f21 更换 工作目录 ~/dev/api-server 审批策略 自动批准低风险操作 读取、检索、测试类命令免确认;写库与部署仍需人工批准"
+      "text": "Agent 配置 接入的 CLI Agent 的模型、密钥、工作目录与审批策略 ❯ Codex CLI ◆ Claude Agent ◭ Grok CLI ⌖ Cursor CLI π Pi ☿ Hermes ❯ Codex CLI /usr/local/bin/codex · v3.4.1 已启用 模型 gpt-5-codex o4 o4-mini API Key codex-••••••••7f21 更换 工作目录 ~/dev/api-server 审批策略 自动批准低风险操作 读取、检索、测试类命令免确认;写库与部署仍需人工批准"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 175878,
+    "bytes": 176151,
     "path": "screenshots/saas-settings-agent--saas-1440x900.png",
-    "sha256": "8706f8f6351427b1b3d2d9737314b2d2d938811f87d2e90fcfd191ea35d7b81f"
+    "sha256": "8e8ad78dc203ae4717c6732ed9f10104bdad983e996ce1b8f0d3e5ddce05946b"
   },
   "scroll": {
     "main": 690,
@@ -360,7 +360,7 @@
     "sidebar": "top"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
+  "sourceSha256": "fb500f7de66c2705e6455bdbe08e6421ccd125c65c9227ed94a87e6a2dce6976",
   "surface": "saas",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",

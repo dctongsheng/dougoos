@@ -351,8 +351,9 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
             一个控制台
           </h1>
           <p>
-            Codex、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——
-            不再切换多个终端窗口。Claude Agent 在 0.2.0 中暂不可用，当前下载不包含或启动其 adapter。
+            {
+              "Codex、Grok、Cursor、Pi、Hermes 的桌面统一入口。派发任务、审批变更、管理会话与记忆——不再切换多个终端窗口。Claude Agent 在 0.2.0 中暂不可用，当前下载不包含或启动其 adapter。"
+            }
           </p>
           <div className="hero-actions">
             <a className="primary-action" href={EARLY_ACCESS_DOWNLOAD_URL}>
@@ -416,8 +417,9 @@ export const LandingApp = ({ initialDisplay }: LandingAppProps) => {
             <div className="eyebrow">SMART ROUTING</div>
             <h3 id="routing-title">描述任务,系统选人</h3>
             <p>
-              按任务类型、Agent 负载与历史成功率自动路由:重构给 Cursor,脚本给 Codex,压测给 Grok。
-              也可以手动指定,或同题多发做结果对比。0.2.0 不会把任务路由给 Claude Agent。
+              {
+                "按任务类型、Agent 负载与历史成功率自动路由:重构给 Cursor,脚本给 Codex,压测给 Grok。也可以手动指定,或同题多发做结果对比。0.2.0 不会把任务路由给 Claude Agent。"
+              }
             </p>
           </div>
           <div className="route-card">

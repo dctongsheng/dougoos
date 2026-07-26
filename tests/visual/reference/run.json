@@ -27,14 +27,14 @@
   "schemaVersion": 1,
   "sources": [
     {
-      "bytes": 197889,
+      "bytes": 197899,
       "path": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-      "sha256": "04777d854f0e1f0bea6e26dec0d1bc9c0fbc884d71de37796ed444ae5c70a0ad"
+      "sha256": "126d372670f25d9ce78567dea61c506822b9ad32321e381238255cabb05a69bf"
     },
     {
-      "bytes": 31061,
+      "bytes": 31638,
       "path": "prototypes/agentos/project/AgentOS Landing.dc.html",
-      "sha256": "3b3acdf63f7c4b795ffd1a7ddb9f6b5164ba7ee18926ad16651ccd65e0fcce9e"
+      "sha256": "8dcd4f4fa650187e9fcb6dd2c8095d6441d4d805eafbd6d5cd3934b26b3fe163"
     },
     {
       "bytes": 66404,
@@ -42,9 +42,9 @@
       "sha256": "c60c49083997f51a592df118c0068475337afd20b8cfd8e1cd9d5eb0c7e254f6"
     },
     {
-      "bytes": 1619,
+      "bytes": 1613,
       "path": "prototypes/agentos/README.md",
-      "sha256": "39f21ee138284d1501708c4259fd4e535bf70278df7f798bde9582942eb0cca1"
+      "sha256": "3a1d5b7ac4294e8841a8238a6ecdbb42658447133ddc6d2c3a2f21117d813319"
     }
   ],
   "thresholds": {

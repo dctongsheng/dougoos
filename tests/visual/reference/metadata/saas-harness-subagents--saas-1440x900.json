@@ -24,7 +24,7 @@
     "width": 1440
   },
   "dom": {
-    "digest": "14cde39b700c60f3",
+    "digest": "bac8a102370e08a4",
     "visibleElementCount": 419
   },
   "externalRequests": [],
@@ -96,7 +96,7 @@
         "width": "1440px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -158,7 +158,7 @@
         "width": "240px",
         "z-index": "auto"
       },
-      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Code ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ ◭"
+      "text": "◈ AgentOS workspace / local ＋ 新建任务 ▦ 总览 ▤ 任务编排 2 ▶ ◷定时任务 ⇶长程任务 ✦ Memory PROJECTS ▶ 置顶 ▶ ◫ 对话 ▶ 迁移 users 表到新 schema ◆ 重构 auth 中间件为策略模式 ❯ 修复 webapp 构建缓存失效 ⌖ API 集成测试补全 ◭ 重构日志管道与告警 ☿ 依赖升级与安全审计 π ❒ webapp ▶ 调整 AgentShare 客户端 ◆ 落地页动效与模板重构 ⌖ ❒ api-server ▶ ❒ ml-pipeline ▶ ❒ dotfiles ▶ AGENTS ▶ ▶ ❯ Codex CLI 重构 auth 中间件为策略模式 api-server 修复 CI 缓存键漂移 api-server 07-20 gRPC 网关脚手架 api-server 07-18 ▶ ◆ Claude Agent ! 迁移 users 表到新 schema webapp 重构支付 webhook 重试逻辑 webapp 07-20 修复 SSR hydration 报错 webapp 07-19 ▶ "
     },
     {
       "boundingBox": {
@@ -282,15 +282,15 @@
         "width": "1080px",
         "z-index": "auto"
       },
-      "text": "子代理编队 · 主 Agent 可派生的专职分身,各带独立提示词与工具白名单 ◆ Explore 宿主 Claude Code · claude-4-haiku 214 次派生 只读侦察兵:快速扫仓库结构与关键实现,产出摘要供主 Agent 规划。 read grep ls ◆ Plan 宿主 Claude Code · claude-4.5-sonnet 87 次派生 先出实施计划与风险点,主 Agent 确认后才动手改代码。 read grep ❯ Reviewer 宿主 Codex CLI · o4-mini 63 次派生 diff 审查分身:安全 → 性能 → 可读性,输出分级意见。 read diff ◭ Repro 宿主 Grok CLI · grok-4-fast 41 次派生 专职复现:循环运行失败用例并采集最小复现命令。 bash tail ☿ Drafter 宿主 Hermes · hermes-4-70b 52 次派生 低成本初稿分身:邮件/文案先出 3 版草稿,主体只做终审。 notion browser"
+      "text": "子代理编队 · 主 Agent 可派生的专职分身,各带独立提示词与工具白名单 ◆ Explore 宿主 Claude Agent · claude-4-haiku 214 次派生 只读侦察兵:快速扫仓库结构与关键实现,产出摘要供主 Agent 规划。 read grep ls ◆ Plan 宿主 Claude Agent · claude-4.5-sonnet 87 次派生 先出实施计划与风险点,主 Agent 确认后才动手改代码。 read grep ❯ Reviewer 宿主 Codex CLI · o4-mini 63 次派生 diff 审查分身:安全 → 性能 → 可读性,输出分级意见。 read diff ◭ Repro 宿主 Grok CLI · grok-4-fast 41 次派生 专职复现:循环运行失败用例并采集最小复现命令。 bash tail ☿ Drafter 宿主 Hermes · hermes-4-70b 52 次派生 低成本初稿分身:邮件/文案先出 3 版草稿,主体只做终审。 notion browser"
     }
   ],
   "locale": "zh-CN",
   "platform": "darwin",
   "screenshot": {
-    "bytes": 155544,
+    "bytes": 156074,
     "path": "screenshots/saas-harness-subagents--saas-1440x900.png",
-    "sha256": "b2b997e107180dd8ed5a1b82f1a23f5aa897bde0ebb6af06197713eb26c43027"
+    "sha256": "0c18416612e48a42b6a13280951953e0b15d073f8558691ce7d1ad31e325abfd"
   },
   "scroll": {
     "main": "top",
@@ -298,7 +298,7 @@
     "sidebar": "bottom"
   },
   "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
-  "sourceSha256": "f6279f86a87c64a799faf41e1ae028ef93403999f74c9297ea2909980c517438",
+  "sourceSha256": "fb500f7de66c2705e6455bdbe08e6421ccd125c65c9227ed94a87e6a2dce6976",
   "surface": "saas",
   "theme": "dark",
   "timezoneId": "Asia/Shanghai",
