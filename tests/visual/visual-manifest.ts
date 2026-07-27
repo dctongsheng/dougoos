@@ -45,6 +45,7 @@ export type VisualAction =
   | { type: "hover"; locator: LocatorSpec }
   | { type: "pointer-down"; locator: LocatorSpec }
   | { type: "scroll-into-view"; locator: LocatorSpec }
+  | { type: "select-option"; locator: LocatorSpec; value: string }
   | { type: "wait-for-visible"; locator: LocatorSpec }
   | {
       type: "scroll";
@@ -114,7 +115,7 @@ export interface ProductionOnlyCase {
   readonly description: string;
   readonly expected: {
     readonly externalRequests: readonly string[];
-    readonly runtimeEffects: readonly Readonly<Record<string, string>>[];
+    readonly runtimeEffects: readonly Readonly<Record<string, unknown>>[];
     readonly storageWrites: readonly string[];
   };
   readonly id: string;
@@ -752,7 +753,8 @@ const stateCases: readonly ReferenceTemplate[] = [
   },
   {
     actions: [...settings(), { scope: "screen", text: "已启用", type: "click-switch-near-text" }],
-    description: "Selected provider disabled in Settings.",
+    description:
+      "Legacy prototype-only provider enabled switch; real production uses catalog availability.",
     expectedScreenLabel: "设置",
     extraLandmarks: [
       {
@@ -761,9 +763,10 @@ const stateCases: readonly ReferenceTemplate[] = [
       },
     ],
     id: "saas-settings-agent-disabled",
+    kind: "source-defect",
     scroll: { main: 690 },
     surface: "saas",
-    tags: ["state", "settings", "demo-only"],
+    tags: ["state", "settings", "demo-only", "legacy-prototype-only"],
   },
   {
     actions: [...settings(), click(screenText("o4-mini"))],
@@ -783,12 +786,14 @@ const stateCases: readonly ReferenceTemplate[] = [
         type: "click-switch-near-text",
       },
     ],
-    description: "Prototype auto-approve toggle; visual demo only and never a permission grant.",
+    description:
+      "Legacy prototype-only auto-approve switch; real production uses Provider permission profiles.",
     expectedScreenLabel: "设置",
     id: "saas-settings-auto-approve-demo",
+    kind: "source-defect",
     scroll: { main: 690 },
     surface: "saas",
-    tags: ["state", "settings", "demo-only", "security-boundary"],
+    tags: ["state", "settings", "demo-only", "security-boundary", "legacy-prototype-only"],
   },
   {
     actions: [...settings(), click(screenText("总览"))],
@@ -1048,6 +1053,61 @@ const productionContract = (
 });
 
 export const productionOnlyCases: readonly ProductionOnlyCase[] = [
+  {
+    capture: {
+      landmarks: [
+        { locator: css(".agent-config-section"), name: "settings-agent-section" },
+        { locator: css("#permission-profile-codex"), name: "permission-profile-selector" },
+      ],
+      requirements: [
+        {
+          id: "permission-selector-visible",
+          kind: "visible",
+          locator: css("#permission-profile-codex"),
+        },
+        {
+          id: "permission-selector-enabled",
+          kind: "enabled",
+          locator: css("#permission-profile-codex"),
+        },
+        {
+          id: "dangerous-default-disclosed",
+          includes: "高风险权限",
+          kind: "text",
+          locator: css(".permission-profile-note"),
+        },
+      ],
+    },
+    description:
+      "Real Provider permission selector exposes the catalog profiles and persists a new-session preference.",
+    expected: {
+      externalRequests: [],
+      runtimeEffects: [
+        {
+          name: "provider.preference.update",
+          permissionProfileId: "agent",
+          providerId: "codex",
+          visibleInSidebar: true,
+        },
+      ],
+      storageWrites: [],
+    },
+    id: "saas-production-permission-selector",
+    kind: "production-only",
+    owner: "web-001",
+    probe: {
+      actions: [
+        {
+          locator: css("#permission-profile-codex"),
+          type: "select-option",
+          value: "agent",
+        },
+      ],
+    },
+    surface: "saas",
+    tags: ["permissions", "security", "dynamic-catalog", "prototype-missing"],
+    viewport: "saas-1440x900",
+  },
   {
     ...productionContract(
       [
@@ -1724,9 +1784,9 @@ export function validateVisualManifest(): readonly string[] {
   const saasProductionCases = productionOnlyCases.filter(
     (visualCase) => visualCase.surface === "saas",
   );
-  if (saasProductionCases.length !== 15) {
+  if (saasProductionCases.length !== 16) {
     errors.push(
-      `SaaS production-only contract requires exactly 15 cases, received ${String(
+      `SaaS production-only contract requires exactly 16 cases, received ${String(
         saasProductionCases.length,
       )}`,
     );

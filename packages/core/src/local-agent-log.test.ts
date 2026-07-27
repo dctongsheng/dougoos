@@ -1,10 +1,10 @@
-import { mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { RotatingAgentLog } from "./local-agent-log.js";
+import { RotatingAgentLog, RotatingPermissionAuditLog } from "./local-agent-log.js";
 
 describe("RotatingAgentLog", () => {
   it("writes bounded private files, rotates, and reapplies redaction", async () => {
@@ -39,6 +39,75 @@ describe("RotatingAgentLog", () => {
       expect(rendered).not.toContain("operator@example.com");
       expect(rendered).not.toContain("/Users/operator");
       expect((await stat(join(directory, "agent-stderr.log"))).mode & 0o777).toBe(0o600);
+    } finally {
+      await rm(directory, { force: true, recursive: true });
+    }
+  });
+
+  it("writes a separate private automatic-permission audit without tool payloads", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "dougoos-permission-audit-"));
+    try {
+      const log = new RotatingPermissionAuditLog({ directory });
+      await log.write({
+        cwd: "/Users/operator/project",
+        effectiveProfileId: "agent-full-access",
+        occurredAt: "2026-07-27T00:00:00.000Z",
+        optionId: "allow-once",
+        providerId: "codex",
+        requestId: "request:permission",
+        result: "allowed",
+        sessionId: "session:permission",
+        source: "permission_profile",
+        toolKind: "shell",
+        turnId: "turn:permission",
+      });
+      await log.close();
+
+      const filePath = join(directory, "permission-audit.log");
+      const record = JSON.parse(await readFile(filePath, "utf8")) as Record<string, unknown>;
+      expect(record).toEqual({
+        cwd: "/Users/operator/project",
+        effectiveProfileId: "agent-full-access",
+        occurredAt: "2026-07-27T00:00:00.000Z",
+        optionId: "allow-once",
+        providerId: "codex",
+        requestId: "request:permission",
+        result: "allowed",
+        sessionId: "session:permission",
+        source: "permission_profile",
+        toolKind: "shell",
+        turnId: "turn:permission",
+      });
+      expect(record).not.toHaveProperty("command");
+      expect(record).not.toHaveProperty("arguments");
+      expect((await stat(filePath)).mode & 0o777).toBe(0o600);
+    } finally {
+      await rm(directory, { force: true, recursive: true });
+    }
+  });
+
+  it("rejects a durable permission audit write instead of silently losing it", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "dougoos-permission-audit-failure-"));
+    try {
+      const blocker = join(directory, "not-a-directory");
+      await writeFile(blocker, "blocked");
+      const log = new RotatingPermissionAuditLog({ directory: join(blocker, "logs") });
+
+      await expect(
+        log.write({
+          cwd: "/workspace",
+          effectiveProfileId: "auto",
+          occurredAt: "2026-07-27T00:00:00.000Z",
+          optionId: "allow-once",
+          providerId: "fixture",
+          requestId: "request:permission",
+          result: "allowed",
+          sessionId: "session:permission",
+          source: "permission_profile",
+          turnId: "turn:permission",
+        }),
+      ).rejects.toBeDefined();
+      await expect(log.close()).resolves.toBeUndefined();
     } finally {
       await rm(directory, { force: true, recursive: true });
     }

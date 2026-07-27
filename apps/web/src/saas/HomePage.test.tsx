@@ -4,9 +4,17 @@ import { describe, expect, it } from "vitest";
 import { saasFixture } from "./fixtures.js";
 import { HomePage } from "./HomePage.js";
 import { initialSaasState, saasReducer } from "./state.js";
-import type { SaasState } from "./types.js";
+import type { ChatViewSnapshot, SaasState } from "./types.js";
 
 const conversationDirectory = "/Users/tester/Documents/Dogoos";
+const emptyChat: ChatViewSnapshot = {
+  agentCatalog: [],
+  cliInstallations: [],
+  providerPreferences: [],
+  providers: [],
+  selectedSessionIds: {},
+  sessions: [],
+};
 
 function loadedState(overrides: Partial<SaasState> = {}): SaasState {
   const loaded = saasReducer(initialSaasState, {
@@ -58,5 +66,19 @@ describe("Home project picker", () => {
 
     expect(markup).toContain(`<span class="path-value">${selectedPath}</span>`);
     expect(markup).not.toContain(conversationDirectory);
+  });
+
+  it("renders a deterministic disabled state when no integrated CLI is detected", () => {
+    const markup = renderHome(
+      loadedState({
+        chat: emptyChat,
+        homeDraft: "hello",
+        homeMenu: "agent",
+      }),
+    );
+
+    expect(markup).toContain("未检测到可用 Agent");
+    expect(markup).toContain('aria-label="发送任务"');
+    expect(markup).toContain('disabled=""');
   });
 });

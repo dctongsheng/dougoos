@@ -132,6 +132,7 @@ function sessionSummary(
     id: session.id,
     ...(lastMessagePreview === undefined ? {} : { lastMessagePreview }),
     messageCount,
+    permission: session.permission,
     providerId: session.providerId,
     state: session.state,
     title: session.title,

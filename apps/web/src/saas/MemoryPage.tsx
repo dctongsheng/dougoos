@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
 import type { MemoryItemFixture } from "./feature-fixtures.js";
-import { agentById } from "./fixtures.js";
 import type { MemoryTab, SaasFixture } from "./types.js";
 
 interface MemoryPageProps {
@@ -12,6 +11,7 @@ interface MemoryPageProps {
 
 export function MemoryPage({ fixture, initialTab }: MemoryPageProps) {
   const memoryFixture = fixture.features.memory;
+  const agentsById = new Map(fixture.agents.map((agent) => [agent.id, agent]));
   const [tab, setTab] = useState(initialTab);
   const [query, setQuery] = useState("");
 
@@ -19,7 +19,9 @@ export function MemoryPage({ fixture, initialTab }: MemoryPageProps) {
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
+    const agentIds = new Set(fixture.agents.map((agent) => agent.id));
     return memoryFixture.items.filter((memory) => {
+      if (!agentIds.has(memory.agent)) return false;
       if (tab === "notes" && memory.kind !== "note") return false;
       if (tab === "omi" && memory.kind !== "omi") return false;
       return (
@@ -29,14 +31,15 @@ export function MemoryPage({ fixture, initialTab }: MemoryPageProps) {
         memory.project.toLowerCase().includes(normalized)
       );
     });
-  }, [memoryFixture.items, query, tab]);
+  }, [fixture.agents, memoryFixture.items, query, tab]);
 
   const openStar = (memory: MemoryItemFixture) => {
     setTab(memory.kind === "note" ? "notes" : "omi");
     setQuery(memory.title.slice(0, 12));
   };
-  const memoryCount = memoryFixture.items.filter((memory) => memory.kind === "omi").length;
-  const noteCount = memoryFixture.items.length - memoryCount;
+  const availableMemories = memoryFixture.items.filter((memory) => agentsById.has(memory.agent));
+  const memoryCount = availableMemories.filter((memory) => memory.kind === "omi").length;
+  const noteCount = availableMemories.length - memoryCount;
 
   return (
     <main className="memory-page page-stack" data-screen-label="Memory">
@@ -80,7 +83,13 @@ export function MemoryPage({ fixture, initialTab }: MemoryPageProps) {
             {(query.trim().length === 0 ? memoryFixture.links : []).map(([from, to]) => {
               const start = memoryFixture.items[from];
               const end = memoryFixture.items[to];
-              if (start === undefined || end === undefined) return null;
+              if (
+                start === undefined ||
+                end === undefined ||
+                !agentsById.has(start.agent) ||
+                !agentsById.has(end.agent)
+              )
+                return null;
               return (
                 <line
                   key={`${String(from)}-${String(to)}`}
@@ -147,32 +156,34 @@ export function MemoryPage({ fixture, initialTab }: MemoryPageProps) {
         </section>
       ) : (
         <section className="memory-list">
-          {filtered.map((memory) => {
-            const agent = agentById(fixture, memory.agent);
-            return (
-              <article className="panel memory-card" key={memory.id}>
-                <span
-                  className="memory-list-glyph"
-                  style={
-                    {
-                      "--agent-tone": memory.kind === "note" ? "#b48cff" : agent.tone,
-                    } as CSSProperties
-                  }
-                >
-                  {memory.kind === "note" ? "✎" : agent.glyph}
-                </span>
-                <div>
-                  <strong>
-                    <span>{memory.title}</span>
-                  </strong>
-                  <small>
-                    {agent.name} · {memory.kind === "note" ? "笔记" : "记忆"}
-                  </small>
-                </div>
-                <code>⌂ {memory.project}</code>
-                <time>{memory.date}</time>
-              </article>
-            );
+          {filtered.flatMap((memory) => {
+            const agent = agentsById.get(memory.agent);
+            return agent === undefined
+              ? []
+              : [
+                  <article className="panel memory-card" key={memory.id}>
+                    <span
+                      className="memory-list-glyph"
+                      style={
+                        {
+                          "--agent-tone": memory.kind === "note" ? "#b48cff" : agent.tone,
+                        } as CSSProperties
+                      }
+                    >
+                      {memory.kind === "note" ? "✎" : agent.glyph}
+                    </span>
+                    <div>
+                      <strong>
+                        <span>{memory.title}</span>
+                      </strong>
+                      <small>
+                        {agent.name} · {memory.kind === "note" ? "笔记" : "记忆"}
+                      </small>
+                    </div>
+                    <code>⌂ {memory.project}</code>
+                    <time>{memory.date}</time>
+                  </article>,
+                ];
           })}
         </section>
       )}

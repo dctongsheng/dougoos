@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  pi-acp@0.0.31: f6596e404fe1759eec070f7ecbc451b303a6c8660a21f6f07f92960df84033ea
+
 importers:
 
   .:
@@ -196,7 +199,7 @@ importers:
         version: link:../shared
       pi-acp:
         specifier: 0.0.31
-        version: 0.0.31
+        version: 0.0.31(patch_hash=f6596e404fe1759eec070f7ecbc451b303a6c8660a21f6f07f92960df84033ea)
 
   packages/shared:
     dependencies:
@@ -3906,7 +3909,7 @@ snapshots:
 
   pathe@2.0.3: {}
 
-  pi-acp@0.0.31:
+  pi-acp@0.0.31(patch_hash=f6596e404fe1759eec070f7ecbc451b303a6c8660a21f6f07f92960df84033ea):
     dependencies:
       '@agentclientprotocol/sdk': 0.26.0(zod@3.25.76)
       zod: 3.25.76

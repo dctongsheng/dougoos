@@ -177,8 +177,9 @@ device_id 是可重置的伪匿名标识，不得在产品或代码注释中宣�
 
 当前版本不得启动 outbox 调度器或构造 metrics payload。未来若实现，
 `localOnly=true` 时 outbox 调度器不得启动，metrics payload 必须由严格白名单 schema
-从头构造，禁止把业务对象 spread 后再依赖 redaction 清洗。审批（approval）默认策略永远
-是"询问"，禁止实现"默认全部允许"。
+从头构造，禁止把业务对象 spread 后再依赖 redaction 清洗。Agent 权限必须使用
+Provider 声明的原生权限档；可控 Provider 的新 Session 默认最高权限，自动允许的作用域、
+审计、失效处理与外部管理例外遵循 ADR-0004。
 
 ## 6. 明确禁止清单
 
@@ -218,6 +219,7 @@ device_id 是可重置的伪匿名标识，不得在产品或代码注释中宣�
 
 | 日期 | 变更 |
 |---|---|
+| 2026-07-27 | 权限策略改为 Provider 原生档位；可控 Provider 的新 Session 默认最高权限，按 ADR-0004 限定作用域与审计 |
 | 2026-07-23 | 四处收口：partial unique index 保证单 Session 单活跃 Turn；五种非终态统一 interrupted；REPLAY_GAP 改用全局一致快照；移除 P2 的旧 AcpSessionRecorder |
 | 2026-07-23 | 一致性修订：P6 Hooks 描述与 ADR-0003 对齐（阻断走 SessionInterceptor，事件总线仅观察；安全边界 ADR 已存在，不再重复要求先出 ADR） |
 | 2026-07-23 | 架构加固：Turn/Event envelope、fetch-SSE replay、ACP 官方 SDK v1、SessionInterceptor、Core 重启握手、严格 metrics allowlist |

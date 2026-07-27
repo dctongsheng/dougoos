@@ -2,9 +2,14 @@ import type {
   AgentProvider,
   ProviderAvailability,
   ResolvedAgentCommand,
+  ResolvedSessionPermissionConfiguration,
   SanitizedProcessEnv,
 } from "@dougoos/acp";
-import type { PermissionEnforcement, ProviderProcessPolicy } from "@dougoos/shared";
+import type {
+  PermissionEnforcement,
+  PermissionProfileDescriptor,
+  ProviderProcessPolicy,
+} from "@dougoos/shared";
 
 import { AgentCliDiscovery, type AgentCliDiscoveryPort } from "./cli-discovery.js";
 import {
@@ -13,6 +18,10 @@ import {
   prependExecutableDirectory,
   withLoopbackProxyBypass,
 } from "./environment.js";
+import {
+  defaultPermissionEnforcement,
+  requireDeclaredPermissionProfile,
+} from "./permission-profiles.js";
 
 export interface NativeCliProviderOptions {
   readonly cliDiscovery?: AgentCliDiscoveryPort;
@@ -24,10 +33,11 @@ export interface NativeCliProviderOptions {
  */
 export abstract class NativeCliAcpProvider implements AgentProvider {
   abstract readonly commandArgs: readonly string[];
+  abstract readonly defaultPermissionProfileId: string;
   abstract readonly displayName: string;
   abstract readonly id: string;
+  abstract readonly permissionProfiles: readonly PermissionProfileDescriptor[];
   abstract readonly providerEnvironmentNames: readonly string[];
-  readonly permissionEnforcement: PermissionEnforcement = "requests_permission";
   readonly processPolicy: ProviderProcessPolicy = {
     maxSessionsPerProcess: 1,
     multiSessionPerProcess: false,
@@ -42,6 +52,10 @@ export abstract class NativeCliAcpProvider implements AgentProvider {
 
   constructor(options: NativeCliProviderOptions = {}) {
     this.#cliDiscovery = options.cliDiscovery ?? new AgentCliDiscovery();
+  }
+
+  get permissionEnforcement(): PermissionEnforcement {
+    return defaultPermissionEnforcement(this.permissionProfiles, this.defaultPermissionProfileId);
   }
 
   async available(): Promise<ProviderAvailability> {
@@ -65,20 +79,48 @@ export abstract class NativeCliAcpProvider implements AgentProvider {
     };
   }
 
-  resolveCommand(context: { readonly env: SanitizedProcessEnv }): ResolvedAgentCommand {
+  protected commandArgsForPermissionProfile(_profileId: string): readonly string[] {
+    void _profileId;
+    return this.commandArgs;
+  }
+
+  protected environmentForPermissionProfile(_profileId: string): Readonly<Record<string, string>> {
+    void _profileId;
+    return {};
+  }
+
+  protected sessionConfigurationForPermissionProfile(
+    _profileId: string,
+  ): ResolvedSessionPermissionConfiguration | undefined {
+    void _profileId;
+    return undefined;
+  }
+
+  resolveCommand(context: {
+    readonly env: SanitizedProcessEnv;
+    readonly permissionProfileId: string;
+  }): ResolvedAgentCommand {
     if (this.#executablePath === null) {
       throw new Error(`${this.displayName} CLI availability must be checked before invocation`);
     }
+    requireDeclaredPermissionProfile(this.permissionProfiles, context.permissionProfileId);
     const env = withLoopbackProxyBypass(
       prependExecutableDirectory(
         pickEnvironment(context.env, [...COMMON_PROCESS_ENV, ...this.providerEnvironmentNames]),
         this.#executablePath,
       ),
     );
+    const sessionConfiguration = this.sessionConfigurationForPermissionProfile(
+      context.permissionProfileId,
+    );
     return {
-      args: this.commandArgs,
+      args: this.commandArgsForPermissionProfile(context.permissionProfileId),
       command: this.#executablePath,
-      env,
+      env: {
+        ...env,
+        ...this.environmentForPermissionProfile(context.permissionProfileId),
+      },
+      ...(sessionConfiguration === undefined ? {} : { sessionConfiguration }),
     };
   }
 }

@@ -51,11 +51,36 @@ const CAPABILITIES = {
   },
 } as const;
 
+const PERMISSION_PROFILES = [
+  {
+    description: "Ask before privileged operations",
+    id: "ask",
+    label: "Ask",
+    mechanism: "launch",
+    permissionEnforcement: "requests_permission",
+    requiresNewSession: true,
+    risk: "guarded",
+    semantic: "ask",
+  },
+  {
+    description: "Run with the highest available permissions",
+    id: "full-access",
+    label: "Full access",
+    mechanism: "launch",
+    permissionEnforcement: "requests_permission",
+    requiresNewSession: true,
+    risk: "dangerous",
+    semantic: "unrestricted",
+  },
+] as const;
+
 const PROVIDER = ProviderSchema.parse({
   capabilities: CAPABILITIES,
   checkedAt: NOW,
+  defaultPermissionProfileId: "full-access",
   displayName: "Fake ACP",
   id: "fake",
+  permissionProfiles: PERMISSION_PROFILES,
   processPolicy: {
     maxSessionsPerProcess: 1,
     multiSessionPerProcess: false,
@@ -89,8 +114,17 @@ class FakeRegistry implements CoreRegistry {
 
   createSession(input: CreateRegistrySessionInput) {
     this.createInputs.push(input);
+    const profile =
+      PERMISSION_PROFILES.find((candidate) => candidate.id === input.permissionProfileId) ??
+      PERMISSION_PROFILES[1];
     return {
       capabilities: CAPABILITIES,
+      permission: {
+        effectiveProfileId: profile.id,
+        mechanism: profile.mechanism,
+        permissionEnforcement: profile.permissionEnforcement,
+        requestedProfileId: input.permissionProfileId,
+      },
       providerSessionId: `provider-${input.sessionId}`,
       title: "Fake session",
     };
@@ -168,6 +202,14 @@ function jsonPost(runtime: CoreRuntime, path: string, body: unknown): Promise<Re
     body: JSON.stringify(body),
     headers: { "content-type": "application/json" },
     method: "POST",
+  });
+}
+
+function jsonPut(runtime: CoreRuntime, path: string, body: unknown): Promise<Response> {
+  return api(runtime, path, {
+    body: JSON.stringify(body),
+    headers: { "content-type": "application/json" },
+    method: "PUT",
   });
 }
 
@@ -350,8 +392,12 @@ describe("Core Hono REST baseline", () => {
       providerId: "fake",
     });
     expect(created.status).toBe(201);
-    const createdBody = (await created.json()) as { session: { id: string } };
+    const createdBody = (await created.json()) as {
+      session: { id: string; permission: { effectiveProfileId: string } };
+    };
     expect(context.registry.createInputs).toHaveLength(1);
+    expect(context.registry.createInputs[0]?.permissionProfileId).toBe("full-access");
+    expect(createdBody.session.permission.effectiveProfileId).toBe("full-access");
     expect(eventListener).toHaveBeenCalledTimes(1);
 
     const snapshot = await api(
@@ -373,6 +419,106 @@ describe("Core Hono REST baseline", () => {
       includedSessions: [{ session: { id: createdBody.session.id } }],
       sessions: [{ id: createdBody.session.id }],
     });
+  });
+
+  it("persists per-Provider preferences and freezes them into only new Sessions", async () => {
+    await context.runtime.initialize();
+
+    const initial = await api(context.runtime, "/api/provider-preferences");
+    expect(initial.status).toBe(200);
+    expect(await initial.json()).toEqual({
+      preferences: [
+        {
+          permissionProfileId: "full-access",
+          providerId: "fake",
+          visibleInSidebar: true,
+        },
+      ],
+    });
+
+    const first = await jsonPost(context.runtime, "/api/sessions", {
+      cwd: context.directory,
+      providerId: "fake",
+    });
+    const firstSession = (await first.json()) as {
+      session: { id: string; permission: { effectiveProfileId: string } };
+    };
+    expect(firstSession.session.permission.effectiveProfileId).toBe("full-access");
+
+    const invalid = await jsonPut(context.runtime, "/api/provider-preferences/fake", {
+      permissionProfileId: "removed-profile",
+      visibleInSidebar: false,
+    });
+    expect(invalid.status).toBe(409);
+    expect(await invalid.json()).toMatchObject({
+      code: "PROVIDER_CAPABILITY_UNSUPPORTED",
+      details: {
+        capability: "permission.profile",
+        operation: "create_session",
+        providerId: "fake",
+      },
+    });
+
+    const updated = await jsonPut(context.runtime, "/api/provider-preferences/fake", {
+      permissionProfileId: "ask",
+      visibleInSidebar: false,
+    });
+    expect(updated.status).toBe(200);
+    expect(await updated.json()).toEqual({
+      preference: {
+        permissionProfileId: "ask",
+        providerId: "fake",
+        visibleInSidebar: false,
+      },
+    });
+    expect(context.storage.getProviderPreference("fake")).toEqual({
+      permissionProfileId: "ask",
+      providerId: "fake",
+      visibleInSidebar: false,
+    });
+
+    const second = await jsonPost(context.runtime, "/api/sessions", {
+      cwd: context.directory,
+      providerId: "fake",
+    });
+    const secondSession = (await second.json()) as {
+      session: { id: string; permission: { effectiveProfileId: string } };
+    };
+    expect(secondSession.session.permission.effectiveProfileId).toBe("ask");
+    expect(context.registry.createInputs.at(-1)?.permissionProfileId).toBe("ask");
+
+    const firstSnapshot = await api(
+      context.runtime,
+      `/api/sessions/${encodeURIComponent(firstSession.session.id)}`,
+    );
+    expect(await firstSnapshot.json()).toMatchObject({
+      session: {
+        permission: {
+          effectiveProfileId: "full-access",
+          requestedProfileId: "full-access",
+        },
+      },
+    });
+  });
+
+  it("blocks a stale stored permission profile instead of widening it", async () => {
+    await context.runtime.initialize();
+    context.storage.upsertProviderPreference({
+      permissionProfileId: "removed-profile",
+      providerId: "fake",
+      visibleInSidebar: true,
+    });
+
+    const response = await jsonPost(context.runtime, "/api/sessions", {
+      cwd: context.directory,
+      providerId: "fake",
+    });
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({
+      code: "PROVIDER_CAPABILITY_UNSUPPORTED",
+      details: { capability: "permission.profile", providerId: "fake" },
+    });
+    expect(context.registry.createInputs).toHaveLength(0);
   });
 
   it("reads and persists an existing custom conversation directory without leaking rejected paths", async () => {

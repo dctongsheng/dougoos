@@ -38,7 +38,7 @@ import type {
   ResolveRegistryApprovalInput,
   StartRegistryTurnInput,
 } from "./types.js";
-import { RotatingAgentLog } from "./local-agent-log.js";
+import { RotatingAgentLog, RotatingPermissionAuditLog } from "./local-agent-log.js";
 
 const DEFAULT_MAX_AGENT_PROCESSES = 4;
 const DEFAULT_IDLE_PROCESS_TIMEOUT_MS = 30 * 60_000;
@@ -100,6 +100,13 @@ export interface AcpCoreRegistryOptions {
   readonly sessionRegistry?: AgentSessionRegistry;
 }
 
+function providerPermissionPolicy(provider: AgentProvider) {
+  return {
+    defaultPermissionProfileId: provider.defaultPermissionProfileId,
+    permissionProfiles: provider.permissionProfiles,
+  };
+}
+
 function providerSummary(provider: AgentProvider, result: ProviderDoctorResult): Provider {
   if (result.status === "available") {
     return ProviderSchema.parse({
@@ -107,6 +114,7 @@ function providerSummary(provider: AgentProvider, result: ProviderDoctorResult):
       checkedAt: result.checkedAt,
       displayName: provider.displayName,
       id: provider.id,
+      ...providerPermissionPolicy(provider),
       processPolicy: provider.processPolicy,
       status: "available",
       version: result.version,
@@ -118,6 +126,7 @@ function providerSummary(provider: AgentProvider, result: ProviderDoctorResult):
       checkedAt: result.checkedAt,
       displayName: provider.displayName,
       id: provider.id,
+      ...providerPermissionPolicy(provider),
       processPolicy: provider.processPolicy,
       reason: "The ACP handshake failed.",
       remediation: "Retry Provider doctor, then repair or reinstall the locked adapter.",
@@ -130,6 +139,7 @@ function providerSummary(provider: AgentProvider, result: ProviderDoctorResult):
     checkedAt: result.checkedAt,
     displayName: provider.displayName,
     id: provider.id,
+    ...providerPermissionPolicy(provider),
     processPolicy: provider.processPolicy,
     reason: result.reason,
     remediation: result.remediation,
@@ -159,6 +169,7 @@ export class AcpCoreRegistry implements CoreRegistry {
   readonly #listeners = new Set<RegistryEventListener>();
   readonly #maxAgentProcesses: number;
   readonly #pendingTurns: ManagedTurn[] = [];
+  readonly #permissionAuditLog: RotatingPermissionAuditLog | null;
   readonly #providerBreakers = new Map<string, ProviderBreaker>();
   readonly #providerRegistry: AgentProviderRegistry;
   readonly #providers: readonly AgentProvider[];
@@ -175,6 +186,10 @@ export class AcpCoreRegistry implements CoreRegistry {
       options.localLogDirectory === undefined
         ? null
         : new RotatingAgentLog({ directory: options.localLogDirectory });
+    this.#permissionAuditLog =
+      options.localLogDirectory === undefined
+        ? null
+        : new RotatingPermissionAuditLog({ directory: options.localLogDirectory });
     this.#circuitBreakerThreshold =
       options.circuitBreakerThreshold ?? DEFAULT_CIRCUIT_BREAKER_THRESHOLD;
     this.#clock = options.clock ?? (() => new Date().toISOString());
@@ -199,6 +214,7 @@ export class AcpCoreRegistry implements CoreRegistry {
     }
     this.#providers = options.providers ?? createBuiltinProviders(this.#cliDiscovery);
     this.#providerRegistry = new AgentProviderRegistry(this.#providers);
+    const permissionAuditLog = this.#permissionAuditLog;
     this.#sessionRegistry =
       options.sessionRegistry ??
       new DefaultAgentSessionRegistry({
@@ -208,6 +224,9 @@ export class AcpCoreRegistry implements CoreRegistry {
         ...(this.#agentLog === null
           ? {}
           : { onAgentStderr: (entry) => this.#agentLog?.write(entry) }),
+        ...(permissionAuditLog === null
+          ? {}
+          : { onPermissionAudit: (entry) => permissionAuditLog.write(entry) }),
         providers: this.#providers,
       });
     for (const provider of this.#providers) {
@@ -223,6 +242,7 @@ export class AcpCoreRegistry implements CoreRegistry {
           checkedAt: this.#now(),
           displayName: provider.displayName,
           id: provider.id,
+          ...providerPermissionPolicy(provider),
           processPolicy: provider.processPolicy,
           status: "probing",
         }),
@@ -299,7 +319,7 @@ export class AcpCoreRegistry implements CoreRegistry {
     try {
       await this.#sessionRegistry.disposeAll();
     } finally {
-      await this.#agentLog?.close();
+      await Promise.all([this.#agentLog?.close(), this.#permissionAuditLog?.close()]);
     }
   }
 
@@ -343,6 +363,7 @@ export class AcpCoreRegistry implements CoreRegistry {
     }
     const handle = await this.#sessionRegistry.create({
       cwd: input.cwd,
+      permissionProfileId: input.permissionProfileId,
       providerId: input.providerId,
       sessionId: input.sessionId,
     });
@@ -359,6 +380,7 @@ export class AcpCoreRegistry implements CoreRegistry {
     const workspaceName = basename(input.cwd).slice(0, 96);
     return {
       capabilities: handle.capabilities,
+      permission: handle.permission,
       providerSessionId: handle.providerSessionId,
       title: TitleSchema.parse(
         `${provider.displayName}${workspaceName.length === 0 ? "" : ` · ${workspaceName}`}`,
@@ -739,6 +761,7 @@ export class AcpCoreRegistry implements CoreRegistry {
           checkedAt: this.#now(),
           displayName: provider.displayName,
           id: provider.id,
+          ...providerPermissionPolicy(provider),
           processPolicy: provider.processPolicy,
           reason: "The Provider circuit breaker is open after repeated process crashes.",
           remediation: "Run Provider doctor to verify the adapter and reset the circuit breaker.",

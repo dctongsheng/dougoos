@@ -219,10 +219,6 @@ describe("saasReducer", () => {
         },
         settings: {
           ...saasFixture.features.settings,
-          initialAutoApprove: {
-            ...saasFixture.features.settings.initialAutoApprove,
-            pi: true,
-          },
           initialNotifyDone: false,
         },
       },
@@ -244,11 +240,10 @@ describe("saasReducer", () => {
     });
     expect(updated.sidebarVisibility.pi).toBe(false);
     expect(updated.fixture?.suggestions).toEqual(["LIVE_R2"]);
-    expect(updated.features?.agentMessages.pi.map((message) => message.id)).toEqual(["live-new"]);
+    expect(updated.features?.agentMessages.pi?.map((message) => message.id)).toEqual(["live-new"]);
     expect(updated.features?.agentDrafts.pi).toBe("unfinished draft");
     expect(updated.features?.queueStatuses.t1).toBe("done");
     expect(updated.features?.settingsAgentEnabled.pi).toBe(false);
-    expect(updated.features?.settingsAutoApprove.pi).toBe(true);
     expect(updated.features?.settingsModels.pi).toBe("pi-live-r2");
     expect(updated.features?.settingsNotifyDone).toBe(false);
 

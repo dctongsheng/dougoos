@@ -59,7 +59,7 @@ test("runs the scripted Fake Provider end to end without rendering raw reasoning
 
   try {
     const page = await application.firstWindow();
-    await expect(page).toHaveTitle("AgentOS", { timeout: 30_000 });
+    await expect(page).toHaveTitle("DougoOS", { timeout: 30_000 });
     await expect(page.locator("[data-production-ready=true]")).toBeVisible();
 
     const providers = await coreRequest(page, "/api/providers");
@@ -70,7 +70,7 @@ test("runs the scripted Fake Provider end to end without rendering raw reasoning
     const clis = await coreRequest(page, "/api/clis");
     expect(clis).toMatchObject({
       body: {
-        clis: [{ command: "codex", integratedProviderId: "codex" }],
+        clis: [{ command: "codex", integratedProviderId: "test-fake" }],
       },
       status: 200,
     });
@@ -344,7 +344,7 @@ test("hands the Home project to Fake Agent and renders Markdown without raw reas
 
   try {
     const page = await application.firstWindow();
-    await expect(page).toHaveTitle("AgentOS", { timeout: 30_000 });
+    await expect(page).toHaveTitle("DougoOS", { timeout: 30_000 });
     await expect(page.locator("[data-production-ready=true]")).toBeVisible();
 
     for (const cwd of [firstProject, secondProject]) {
@@ -415,7 +415,7 @@ test("hands the Home project to Fake Agent and renders Markdown without raw reas
       })
       .toBe(3);
 
-    const agentTree = page.locator('.agent-tree[data-agent-id="claude"]');
+    const agentTree = page.locator('.agent-tree[data-agent-id="test-fake"]');
     const expandAgent = page.getByRole("button", { name: "展开 Test Fake Provider 会话" });
     if (await expandAgent.isVisible()) await expandAgent.click();
     const sessionRows = agentTree.locator(".agent-session-row");
@@ -458,7 +458,7 @@ test("uses the persisted conversation project directory without exposing it on H
 
   try {
     const page = await application.firstWindow();
-    await expect(page).toHaveTitle("AgentOS", { timeout: 30_000 });
+    await expect(page).toHaveTitle("DougoOS", { timeout: 30_000 });
     await expect(page.locator("[data-production-ready=true]")).toBeVisible();
 
     const projectPicker = page.locator(".path-button");

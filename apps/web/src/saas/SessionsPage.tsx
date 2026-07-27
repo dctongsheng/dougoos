@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { CSSProperties } from "react";
 
-import { agentById } from "./fixtures.js";
 import type { Route, SaasAction, SaasFeatureState, SaasFixture, SessionsSection } from "./types.js";
 
 interface SessionsPageProps {
@@ -39,6 +38,7 @@ export function SessionsPage({
   writesDisabled,
 }: SessionsPageProps) {
   const sessionsFixture = fixture.features.sessions;
+  const agentsById = new Map(fixture.agents.map((agent) => [agent.id, agent]));
   const {
     sessionCategory: category,
     sessionDepth: depth,
@@ -78,13 +78,31 @@ export function SessionsPage({
 
   const filteredSessions = useMemo(() => {
     const normalized = query.trim().toLowerCase();
+    const agentIds = new Set(fixture.agents.map((agent) => agent.id));
     return sessionsFixture.rows.filter(
       (session) =>
-        normalized.length === 0 ||
-        session.title.toLowerCase().includes(normalized) ||
-        session.project.toLowerCase().includes(normalized),
+        agentIds.has(session.agentId) &&
+        (normalized.length === 0 ||
+          session.title.toLowerCase().includes(normalized) ||
+          session.project.toLowerCase().includes(normalized)),
     );
-  }, [query, sessionsFixture.rows]);
+  }, [fixture.agents, query, sessionsFixture.rows]);
+  const visibleSources = sessionsFixture.dashboard.sources.flatMap(([agentId, count, width]) => {
+    const agent = agentsById.get(agentId);
+    return agent === undefined ? [] : [{ agent, count, width }];
+  });
+  const visibleInsights = sessionsFixture.insights.flatMap((item) => {
+    const agent = agentsById.get(item.agentId);
+    return agent === undefined || (category !== "全部" && category !== item.category)
+      ? []
+      : [{ agent, item }];
+  });
+  const visibleModelUsage = sessionsFixture.analytics.modelUsage.flatMap(
+    ([agentId, model, tokens, width]) => {
+      const agent = agentsById.get(agentId);
+      return agent === undefined ? [] : [{ agent, model, tokens, width }];
+    },
+  );
 
   const generateExport = () => {
     if (writesDisabled || exportState === "pending") return;
@@ -145,10 +163,9 @@ export function SessionsPage({
             </article>
             <article className="sm-chart-card sm-sources">
               <h2>来源工具</h2>
-              {sessionsFixture.dashboard.sources.map(([agentId, count, width]) => {
-                const agent = agentById(fixture, agentId);
+              {visibleSources.map(({ agent, count, width }) => {
                 return (
-                  <div className="sm-source-row" key={agentId}>
+                  <div className="sm-source-row" key={agent.id}>
                     <span
                       className="sm-agent-glyph"
                       style={{ "--sm-tone": agent.tone } as CSSProperties}
@@ -170,6 +187,9 @@ export function SessionsPage({
                   </div>
                 );
               })}
+              {visibleSources.length === 0 ? (
+                <div className="sm-session-empty">暂无可用 Agent 的来源数据</div>
+              ) : null}
             </article>
           </section>
         </>
@@ -185,10 +205,11 @@ export function SessionsPage({
             value={query}
           />
           <section className="sm-session-list">
-            {filteredSessions.map((session) => {
-              const agent = agentById(fixture, session.agentId);
+            {filteredSessions.flatMap((session) => {
+              const agent = agentsById.get(session.agentId);
+              if (agent === undefined) return [];
               const categoryColor = categoryColors[session.category] ?? "var(--mut)";
-              return (
+              return [
                 <button
                   className="sm-session-row"
                   key={`${session.agentId}-${session.title}`}
@@ -221,8 +242,8 @@ export function SessionsPage({
                   </span>
                   <span className="sm-project-pill">⌂ {session.project}</span>
                   {session.live ? <i className="sm-live-dot" /> : null}
-                </button>
-              );
+                </button>,
+              ];
             })}
             {filteredSessions.length === 0 ? (
               <div className="sm-session-empty">没有匹配的会话</div>
@@ -244,35 +265,35 @@ export function SessionsPage({
             ))}
           </nav>
           <section className="sm-insight-grid">
-            {sessionsFixture.insights
-              .filter((item) => category === "全部" || category === item.category)
-              .map((item) => {
-                const agent = agentById(fixture, item.agentId);
-                const categoryColor = insightColors[item.category] ?? "var(--mut)";
-                return (
-                  <article className="sm-insight-card" key={item.text}>
-                    <header>
-                      <span
-                        className="sm-insight-category"
-                        style={{ "--sm-tone": categoryColor } as CSSProperties}
-                      >
-                        {item.category}
-                      </span>
-                      <i />
-                      <time>{item.date}</time>
-                    </header>
-                    <p>{item.text}</p>
-                    <footer>
-                      <span style={{ color: agent.tone }}>{agent.glyph}</span>
-                      <span>
-                        {agent.name} {item.source}
-                      </span>
-                      <i />
-                      <span>⌂ {item.project}</span>
-                    </footer>
-                  </article>
-                );
-              })}
+            {visibleInsights.map(({ agent, item }) => {
+              const categoryColor = insightColors[item.category] ?? "var(--mut)";
+              return (
+                <article className="sm-insight-card" key={item.text}>
+                  <header>
+                    <span
+                      className="sm-insight-category"
+                      style={{ "--sm-tone": categoryColor } as CSSProperties}
+                    >
+                      {item.category}
+                    </span>
+                    <i />
+                    <time>{item.date}</time>
+                  </header>
+                  <p>{item.text}</p>
+                  <footer>
+                    <span style={{ color: agent.tone }}>{agent.glyph}</span>
+                    <span>
+                      {agent.name} {item.source}
+                    </span>
+                    <i />
+                    <span>⌂ {item.project}</span>
+                  </footer>
+                </article>
+              );
+            })}
+            {visibleInsights.length === 0 ? (
+              <div className="sm-session-empty">暂无可用 Agent 的洞察</div>
+            ) : null}
           </section>
         </>
       ) : section === "analytics" ? (
@@ -304,8 +325,7 @@ export function SessionsPage({
             </article>
             <article className="sm-chart-card sm-models">
               <h2>Token · 按模型</h2>
-              {sessionsFixture.analytics.modelUsage.map(([agentId, model, tokens, width]) => {
-                const agent = agentById(fixture, agentId);
+              {visibleModelUsage.map(({ agent, model, tokens, width }) => {
                 return (
                   <div className="sm-model-row" key={model}>
                     <span>{model}</span>
@@ -323,6 +343,9 @@ export function SessionsPage({
                   </div>
                 );
               })}
+              {visibleModelUsage.length === 0 ? (
+                <div className="sm-session-empty">暂无可用 Agent 的模型数据</div>
+              ) : null}
             </article>
           </section>
         </>

@@ -67,4 +67,10 @@ describe("agentById", () => {
       "Unknown fixture agent: missing",
     );
   });
+
+  it("does not fall back to prototype Agents missing from a live fixture", () => {
+    expect(() => agentById({ ...saasFixture, agents: [] }, "claude")).toThrow(
+      "Unknown fixture agent: claude",
+    );
+  });
 });

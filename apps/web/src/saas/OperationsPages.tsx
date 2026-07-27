@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 
 import type { QueueTaskFixture } from "./feature-fixtures.js";
-import { agentById } from "./fixtures.js";
 import type { AgentId, Route, SaasAction, SaasFeatureState, SaasFixture } from "./types.js";
 
 interface OperationsPageProps {
@@ -97,7 +96,7 @@ export function DashboardPage({ featureState, fixture, navigate }: OperationsPag
             <p>{agent.task}</p>
             <code className="agent-last">{agent.last}</code>
             <footer>
-              <span>⏱ {runtimeByAgent[agent.id]}</span>
+              <span>⏱ {runtimeByAgent[agent.id] ?? "0m00s"}</span>
               <span>{compactTokens(agent.tokenCount)} tok</span>
               <strong>${agent.cost.toFixed(2)}</strong>
               <i />
@@ -148,7 +147,9 @@ export function DashboardPage({ featureState, fixture, navigate }: OperationsPag
           <div className="dashboard-notifications">
             {fixture.notifications.map((notification) => {
               const agent =
-                notification.agentId === null ? null : agentById(fixture, notification.agentId);
+                notification.agentId === null
+                  ? undefined
+                  : fixture.agents.find((candidate) => candidate.id === notification.agentId);
               return (
                 <p key={notification.id} style={{ opacity: notification.read ? 0.55 : 1 }}>
                   <span
@@ -176,13 +177,16 @@ export function CronPage({
   writesDisabled,
 }: MutableOperationsPageProps) {
   const cron = fixture.features.operations.cron;
+  const visibleTasks = cron.tasks.flatMap((task) => {
+    const agent = fixture.agents.find((candidate) => candidate.id === task.agentId);
+    return agent === undefined ? [] : [{ agent, task }];
+  });
 
   return (
     <main className="compact-page page-stack" data-screen-label="定时任务">
       <p className="page-description">按计划自动派发 · 与 Workflows 联动</p>
       <section className="list-stack">
-        {cron.tasks.map((task) => {
-          const agent = agentById(fixture, task.agentId);
+        {visibleTasks.map(({ agent, task }) => {
           const on = featureState.cronEnabled[task.id] === true;
           return (
             <article className="panel schedule-row" key={task.id}>
@@ -216,6 +220,9 @@ export function CronPage({
             </article>
           );
         })}
+        {visibleTasks.length === 0 ? (
+          <div className="module-empty">暂无可用 Agent 的定时任务</div>
+        ) : null}
       </section>
     </main>
   );
@@ -243,7 +250,12 @@ export function QueuePage({
 
   const dispatchTask = (task: QueueTaskFixture) => {
     const agentId = featureState.queueAssignees[task.id];
-    if (writesDisabled || agentId === undefined || featureState.queueStatuses[task.id] !== "queued")
+    if (
+      writesDisabled ||
+      agentId === undefined ||
+      !fixture.agents.some((agent) => agent.id === agentId) ||
+      featureState.queueStatuses[task.id] !== "queued"
+    )
       return;
     dispatch({ status: "running", taskId: task.id, type: "queue.status" });
     const timer = window.setTimeout(() => {
@@ -262,6 +274,7 @@ export function QueuePage({
         {queue.tasks.map((task) => {
           const status = featureState.queueStatuses[task.id] ?? "queued";
           const assigned = featureState.queueAssignees[task.id];
+          const assignedAgent = fixture.agents.find((agent) => agent.id === assigned);
           return (
             <article className={`panel queue-card is-${status}`} key={task.id}>
               <header>
@@ -298,19 +311,23 @@ export function QueuePage({
                   <span />
                   <button
                     className="primary-action"
-                    disabled={writesDisabled || assigned === undefined}
+                    disabled={writesDisabled || assignedAgent === undefined}
                     onClick={() => dispatchTask(task)}
                     type="button"
                   >
                     派发 →
                   </button>
                 </div>
-              ) : status === "running" && assigned !== undefined ? (
-                <div className="running-line">▸ {agentById(fixture, assigned).name} 执行中 …</div>
+              ) : status === "running" ? (
+                <div className="running-line">
+                  {assignedAgent === undefined
+                    ? "Agent 不可用"
+                    : `▸ ${assignedAgent.name} 执行中 …`}
+                </div>
               ) : (
                 <div className="done-line">
-                  {task.result ?? "✓ 已完成"} ·{" "}
-                  {assigned === undefined ? "" : agentById(fixture, assigned).name}
+                  {task.result ?? "✓ 已完成"}
+                  {assignedAgent === undefined ? "" : ` · ${assignedAgent.name}`}
                 </div>
               )}
             </article>

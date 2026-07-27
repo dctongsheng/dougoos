@@ -88,19 +88,51 @@ export function SettingsPage({
   >("idle");
   const [refreshingClis, setRefreshingClis] = useState(false);
   const settingsFixture = fixture.features.settings;
+  const agentBinaries = settingsFixture.agentBinaries as Readonly<Partial<Record<AgentId, string>>>;
+  const apiKeyMasks = settingsFixture.apiKeyMasks as Readonly<Partial<Record<AgentId, string>>>;
+  const modelOptions = settingsFixture.modelOptions as Readonly<
+    Partial<Record<AgentId, readonly string[]>>
+  >;
   const settingsState = state.features;
   if (settingsState === null) throw new Error("Settings requires loaded feature state");
-  const selectedAgentId = initialAgentId;
-  const enabled = settingsState.settingsAgentEnabled;
+  const configurableAgents =
+    dataMode === "real"
+      ? (chat?.agentCatalog.flatMap((item) => {
+          const agent = fixture.agents.find((candidate) => candidate.id === item.agentId);
+          return agent === undefined ? [] : [agent];
+        }) ?? [])
+      : fixture.agents;
+  const selectedAgent =
+    configurableAgents.find((agent) => agent.id === initialAgentId) ?? configurableAgents[0];
+  const selectedAgentId = selectedAgent?.id;
   const models = settingsState.settingsModels;
-  const autoApprove = settingsState.settingsAutoApprove;
   const notifyDone = settingsState.settingsNotifyDone;
   const notifyWait = settingsState.settingsNotifyWait;
-  const selectedAgent = agentById(fixture, selectedAgentId);
+  const selectedProvider =
+    selectedAgentId === undefined
+      ? undefined
+      : chat?.providers.find((provider) => provider.id === selectedAgentId);
+  const selectedCatalogItem =
+    selectedAgentId === undefined
+      ? undefined
+      : chat?.agentCatalog.find((item) => item.agentId === selectedAgentId);
+  const selectedPreference =
+    selectedAgentId === undefined
+      ? undefined
+      : chat?.providerPreferences.find((preference) => preference.providerId === selectedAgentId);
+  const selectedPermissionProfileId =
+    selectedPreference?.permissionProfileId ?? selectedProvider?.defaultPermissionProfileId;
+  const selectedPermissionProfile = selectedProvider?.permissionProfiles.find(
+    (profile) => profile.id === selectedPermissionProfileId,
+  );
+  const permissionProfileIsStale =
+    selectedPreference !== undefined &&
+    selectedProvider !== undefined &&
+    selectedPermissionProfile === undefined;
   const visibilityOn = (name: string): boolean => {
     const key = visibilityKeyByName[name];
     if (key === undefined) return true;
-    return key === "dashboard" ? state.dashboardVisible : state.sidebarVisibility[key];
+    return key === "dashboard" ? state.dashboardVisible : (state.sidebarVisibility[key] ?? true);
   };
   const toggleVisibility = (name: string) => {
     if (writesDisabled) return;
@@ -110,6 +142,27 @@ export function SettingsPage({
     } else if (key !== undefined) {
       dispatch({ key, type: "settings.sidebar-visible" });
     }
+  };
+  const toggleAgentVisibility = (agentId: AgentId) => {
+    if (writesDisabled) return;
+    const currentlyVisible = state.sidebarVisibility[agentId] ?? true;
+    if (dataMode === "real") {
+      const provider = chat?.providers.find((candidate) => candidate.id === agentId);
+      const preference = chat?.providerPreferences.find(
+        (candidate) => candidate.providerId === agentId,
+      );
+      const permissionProfileId =
+        preference?.permissionProfileId ?? provider?.defaultPermissionProfileId;
+      if (permissionProfileId === undefined) return;
+      void execute({
+        name: "provider.preference.update",
+        permissionProfileId,
+        providerId: agentId,
+        visibleInSidebar: !currentlyVisible,
+      });
+      return;
+    }
+    dispatch({ key: agentId, type: "settings.sidebar-visible" });
   };
   const costTotal = fixture.agents.reduce((sum, agent) => sum + agent.cost, 4.73);
   const tokenTotal = fixture.agents.reduce((sum, agent) => sum + agent.tokenCount, 2_160_000);
@@ -251,19 +304,16 @@ export function SettingsPage({
           </div>
         ))}
         <div className="visibility-group">
-          <h3>AGENTS</h3>
+          <h3>AGENTS · {configurableAgents.length}</h3>
           <div className="visibility-grid">
-            {fixture.agents.map((agent) => {
-              const on = state.sidebarVisibility[agent.id];
+            {configurableAgents.map((agent) => {
+              const on = state.sidebarVisibility[agent.id] ?? true;
               return (
                 <button
                   aria-pressed={on}
                   disabled={writesDisabled}
                   key={agent.id}
-                  onClick={() => {
-                    if (!writesDisabled)
-                      dispatch({ key: agent.id, type: "settings.sidebar-visible" });
-                  }}
+                  onClick={() => toggleAgentVisibility(agent.id)}
                   style={{ "--agent-tone": agent.tone } as CSSProperties}
                   type="button"
                 >
@@ -273,6 +323,11 @@ export function SettingsPage({
                 </button>
               );
             })}
+            {configurableAgents.length === 0 ? (
+              <p className="cli-empty-state">
+                暂无已检测且已接入的 Agent CLI。请先在下方重新检测。
+              </p>
+            ) : null}
           </div>
         </div>
         {settingsFixture.visibilityGroups.slice(2).map((group) => (
@@ -357,9 +412,9 @@ export function SettingsPage({
           <p>接入的 CLI Agent 的模型、密钥、工作目录与审批策略</p>
         </div>
         <nav className="agent-config-tabs" aria-label="Agent 配置选择">
-          {fixture.agents.map((agent) => (
+          {configurableAgents.map((agent) => (
             <button
-              aria-pressed={selectedAgentId === agent.id}
+              aria-pressed={selectedAgent?.id === agent.id}
               key={agent.id}
               onClick={() =>
                 dispatch({
@@ -376,93 +431,142 @@ export function SettingsPage({
             </button>
           ))}
         </nav>
-        <div className="agent-config-panel">
-          <header>
-            <span
-              className="agent-config-glyph"
-              style={{ "--agent-tone": selectedAgent.tone } as CSSProperties}
-            >
-              {selectedAgent.glyph}
-            </span>
-            <div>
-              <strong>{selectedAgent.name}</strong>
-              <small>{settingsFixture.agentBinaries[selectedAgentId]}</small>
-            </div>
-            <strong className="enabled-label">
-              {enabled[selectedAgentId] ? "已启用" : "已停用"}
-            </strong>
-            <button
-              aria-label={enabled[selectedAgentId] ? "已启用" : "已停用"}
-              aria-pressed={enabled[selectedAgentId]}
-              className="switch"
-              disabled={writesDisabled}
-              onClick={() => {
-                if (!writesDisabled)
-                  dispatch({ agentId: selectedAgentId, type: "settings.agent-enabled" });
-              }}
-              type="button"
-            >
-              <span />
-            </button>
-          </header>
-          <div className="agent-config-fields">
-            <div className="config-field">
-              <label>模型</label>
-              <div className="model-options">
-                {settingsFixture.modelOptions[selectedAgentId].map((model) => (
-                  <button
-                    aria-pressed={models[selectedAgentId] === model}
-                    disabled={writesDisabled}
-                    key={model}
-                    onClick={() => {
-                      if (!writesDisabled)
-                        dispatch({
-                          agentId: selectedAgentId,
-                          model,
-                          type: "settings.model",
-                        });
-                    }}
-                    style={{ "--agent-tone": selectedAgent.tone } as CSSProperties}
-                    type="button"
-                  >
-                    {model}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="config-field horizontal-field">
-              <label>API Key</label>
-              <code>{settingsFixture.apiKeyMasks[selectedAgentId]}</code>
-              <button disabled={writesDisabled} type="button">
-                更换
-              </button>
-            </div>
-            <div className="config-field horizontal-field">
-              <label>工作目录</label>
-              <code>{selectedAgent.cwd}</code>
-            </div>
-            <div className="config-field approval-policy-field">
-              <label>审批策略</label>
-              <button
-                aria-label="自动批准低风险操作"
-                aria-pressed={autoApprove[selectedAgentId]}
-                className="switch"
-                disabled={writesDisabled}
-                onClick={() => {
-                  if (!writesDisabled)
-                    dispatch({ agentId: selectedAgentId, type: "settings.auto-approve" });
-                }}
-                type="button"
+        {selectedAgent === undefined || selectedAgentId === undefined ? (
+          <div className="agent-config-panel agent-config-empty">
+            <p>没有可配置的 Agent。安装并重新检测已接入的 CLI 后即可设置权限。</p>
+          </div>
+        ) : (
+          <div className="agent-config-panel">
+            <header>
+              <span
+                className="agent-config-glyph"
+                style={{ "--agent-tone": selectedAgent.tone } as CSSProperties}
               >
-                <span />
-              </button>
+                {selectedAgent.glyph}
+              </span>
               <div>
-                <strong>自动批准低风险操作</strong>
-                <small>读取、检索、测试类命令免确认;写库与部署仍需人工批准</small>
+                <strong>{selectedAgent.name}</strong>
+                <small>
+                  {dataMode === "real"
+                    ? [selectedCatalogItem?.cli.executablePath, selectedCatalogItem?.cli.version]
+                        .filter(Boolean)
+                        .join(" · ")
+                    : agentBinaries[selectedAgentId]}
+                </small>
               </div>
+              <strong className="enabled-label">
+                {selectedAgent.enabled ? "可用" : "当前不可用"}
+              </strong>
+            </header>
+            <div className="agent-config-fields">
+              <div className="config-field">
+                <label>模型</label>
+                <div className="model-options">
+                  {(dataMode === "real"
+                    ? [selectedAgent.model]
+                    : (modelOptions[selectedAgentId] ?? [selectedAgent.model])
+                  ).map((model) => (
+                    <button
+                      aria-pressed={(models[selectedAgentId] ?? selectedAgent.model) === model}
+                      disabled={writesDisabled || dataMode === "real"}
+                      key={model}
+                      onClick={() => {
+                        if (!writesDisabled)
+                          dispatch({
+                            agentId: selectedAgentId,
+                            model,
+                            type: "settings.model",
+                          });
+                      }}
+                      style={{ "--agent-tone": selectedAgent.tone } as CSSProperties}
+                      type="button"
+                    >
+                      {model}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="config-field horizontal-field">
+                <label>认证</label>
+                <code>
+                  {dataMode === "real" ? "使用 CLI 当前登录状态" : apiKeyMasks[selectedAgentId]}
+                </code>
+              </div>
+              <div className="config-field horizontal-field">
+                <label>工作目录</label>
+                <code>{selectedAgent.cwd}</code>
+              </div>
+              {dataMode === "real" && selectedProvider !== undefined ? (
+                <div className="config-field permission-profile-field">
+                  <label htmlFor={`permission-profile-${selectedAgentId}`}>权限级别</label>
+                  <select
+                    disabled={writesDisabled}
+                    id={`permission-profile-${selectedAgentId}`}
+                    onChange={(event) => {
+                      void execute({
+                        name: "provider.preference.update",
+                        permissionProfileId: event.currentTarget.value,
+                        providerId: selectedProvider.id,
+                        visibleInSidebar:
+                          selectedPreference?.visibleInSidebar ??
+                          state.sidebarVisibility[selectedAgentId] ??
+                          true,
+                      });
+                    }}
+                    value={selectedPermissionProfileId}
+                  >
+                    {permissionProfileIsStale ? (
+                      <option disabled value={selectedPermissionProfileId}>
+                        已移除：{selectedPermissionProfileId}（请重新选择）
+                      </option>
+                    ) : null}
+                    {selectedProvider.permissionProfiles.map((profile) => (
+                      <option key={profile.id} value={profile.id}>
+                        {profile.label}
+                      </option>
+                    ))}
+                  </select>
+                  {permissionProfileIsStale ? (
+                    <div className="permission-profile-note risk-stale">
+                      <strong>⚠ 权限档位已失效</strong>
+                      <small>
+                        CLI 升级后不再提供 {selectedPermissionProfileId}。新建 Session
+                        已被阻止，请重新选择一个权限档位。
+                      </small>
+                    </div>
+                  ) : selectedPermissionProfile === undefined ? null : (
+                    <div
+                      className={`permission-profile-note risk-${selectedPermissionProfile.risk}`}
+                    >
+                      <strong>
+                        {selectedPermissionProfile.risk === "dangerous"
+                          ? "⚠ 高风险权限"
+                          : selectedPermissionProfile.label}
+                      </strong>
+                      <small>{selectedPermissionProfile.description}</small>
+                      <small>修改只影响之后新建的 Session。</small>
+                      {selectedPermissionProfile.permissionEnforcement ===
+                      "client_enforced" ? null : (
+                        <small>
+                          执行保证：{selectedPermissionProfile.permissionEnforcement}
+                          ，部分限制由 CLI 或外部 Gateway 决定。
+                        </small>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="config-field approval-policy-field">
+                  <label>权限级别</label>
+                  <div>
+                    <strong>演示模式</strong>
+                    <small>真实 CLI 模式下可选择原生权限档位，默认使用最高权限。</small>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </section>
 
       <section className="panel settings-section usage-settings-section">
@@ -555,40 +659,44 @@ export function SettingsPage({
         </label>
       </section>
 
-      <section className="panel settings-section projects-settings-section">
-        <h2>项目</h2>
-        {settingsFixture.projects.map((project) => (
-          <div className="settings-project-row" key={project.name}>
-            <div>
-              <header>
-                <strong>{project.name}</strong>
-                <code>⎇ {project.branch}</code>
-                <span className={project.dirty ? "is-dirty" : ""}>{project.changes}</span>
-              </header>
-              <small>
-                {project.path} · {project.last}
-              </small>
-            </div>
-            <aside>
-              {project.agentIds.map((agentId) => {
-                const agent = agentById(fixture, agentId);
-                return (
-                  <span
-                    className="agent-glyph"
-                    key={agent.id}
-                    style={{ "--agent-tone": agent.tone } as CSSProperties}
-                    title={agent.name}
-                  >
-                    {agent.glyph}
-                  </span>
-                );
-              })}
-            </aside>
-          </div>
-        ))}
-      </section>
+      {dataMode === "fixture" ? (
+        <>
+          <section className="panel settings-section projects-settings-section">
+            <h2>项目</h2>
+            {settingsFixture.projects.map((project) => (
+              <div className="settings-project-row" key={project.name}>
+                <div>
+                  <header>
+                    <strong>{project.name}</strong>
+                    <code>⎇ {project.branch}</code>
+                    <span className={project.dirty ? "is-dirty" : ""}>{project.changes}</span>
+                  </header>
+                  <small>
+                    {project.path} · {project.last}
+                  </small>
+                </div>
+                <aside>
+                  {project.agentIds.map((agentId) => {
+                    const agent = agentById(fixture, agentId);
+                    return (
+                      <span
+                        className="agent-glyph"
+                        key={agent.id}
+                        style={{ "--agent-tone": agent.tone } as CSSProperties}
+                        title={agent.name}
+                      >
+                        {agent.glyph}
+                      </span>
+                    );
+                  })}
+                </aside>
+              </div>
+            ))}
+          </section>
 
-      <ComparePanel fixture={fixture} writesDisabled={writesDisabled} />
+          <ComparePanel fixture={fixture} writesDisabled={writesDisabled} />
+        </>
+      ) : null}
     </main>
   );
 }
@@ -616,21 +724,26 @@ function ComparePanel({
 }) {
   const [adopted, setAdopted] = useState<AgentId | null>(null);
   const results = fixture.features.settings.compareResults;
+  const visibleResults = results.flatMap((result) => {
+    const agent = fixture.agents.find((candidate) => candidate.id === result.agentId);
+    return agent === undefined ? [] : [{ agent, result }];
+  });
+  const adoptedAgent =
+    adopted === null ? undefined : fixture.agents.find((agent) => agent.id === adopted);
 
   return (
     <section className="panel settings-section compare-section">
       <header className="compare-heading">
         <h2>结果对比</h2>
-        <p>同一 prompt 派给 3 个 Agent · 滑动窗口 rate limiter</p>
+        <p>同一 prompt 派给 {visibleResults.length} 个 Agent · 滑动窗口 rate limiter</p>
       </header>
-      {adopted === null ? null : (
+      {adoptedAgent === undefined ? null : (
         <div className="success-note">
-          已采纳 {agentById(fixture, adopted).name} 的实现 — diff 已进入审阅队列,其余分支已归档
+          已采纳 {adoptedAgent.name} 的实现 — diff 已进入审阅队列,其余分支已归档
         </div>
       )}
       <div className="compare-grid">
-        {results.map((result) => {
-          const agent = agentById(fixture, result.agentId);
+        {visibleResults.map(({ agent, result }) => {
           const selected = adopted === result.agentId;
           return (
             <article className={selected ? "is-adopted" : ""} key={result.agentId}>
@@ -677,6 +790,9 @@ function ComparePanel({
             </article>
           );
         })}
+        {visibleResults.length === 0 ? (
+          <div className="agent-config-empty">当前没有可对比的 Agent 结果。</div>
+        ) : null}
       </div>
     </section>
   );

@@ -2,11 +2,12 @@ import { rmSync } from "node:fs";
 import { join } from "node:path";
 
 import BetterSqlite3 from "better-sqlite3";
+import { SessionSchema } from "@dougoos/shared";
 import { describe, expect, it } from "vitest";
 
 import { StorageError } from "./errors.js";
 import { openStorage } from "./store.js";
-import { createTestContext } from "./test-utils/helpers.js";
+import { TEST_CAPABILITIES, createTestContext, time } from "./test-utils/helpers.js";
 
 describe("conversation-directory preference storage", () => {
   it("uses a fixed key, upserts a validated absolute path, and persists it", () => {
@@ -81,6 +82,92 @@ describe("conversation-directory preference storage", () => {
       } finally {
         reopened.close();
       }
+    } finally {
+      rmSync(context.directory, { force: true, recursive: true });
+    }
+  });
+});
+
+describe("provider preference and session permission storage", () => {
+  it("upserts provider preferences by stable provider id and persists visibility", () => {
+    const context = createTestContext();
+    try {
+      expect(context.store.listProviderPreferences()).toEqual([]);
+      expect(context.store.getProviderPreference("codex")).toBeNull();
+      expect(
+        context.store.upsertProviderPreference({
+          permissionProfileId: "agent-full-access",
+          providerId: "codex",
+          visibleInSidebar: true,
+        }),
+      ).toEqual({
+        permissionProfileId: "agent-full-access",
+        providerId: "codex",
+        visibleInSidebar: true,
+      });
+      context.store.upsertProviderPreference({
+        permissionProfileId: "ask",
+        providerId: "codex",
+        visibleInSidebar: false,
+      });
+      expect(context.store.getProviderPreference("codex")).toEqual({
+        permissionProfileId: "ask",
+        providerId: "codex",
+        visibleInSidebar: false,
+      });
+      expect(context.store.listProviderPreferences()).toEqual([
+        {
+          permissionProfileId: "ask",
+          providerId: "codex",
+          visibleInSidebar: false,
+        },
+      ]);
+
+      context.store.close();
+      const reopened = openStorage(context.databasePath);
+      expect(reopened.getProviderPreference("codex")).toEqual({
+        permissionProfileId: "ask",
+        providerId: "codex",
+        visibleInSidebar: false,
+      });
+      reopened.close();
+    } finally {
+      rmSync(context.directory, { force: true, recursive: true });
+    }
+  });
+
+  it("freezes and restores the permission snapshot on a new Session", () => {
+    const context = createTestContext();
+    try {
+      const permission = {
+        effectiveProfileId: "ask",
+        mechanism: "launch",
+        permissionEnforcement: "requests_permission",
+        requestedProfileId: "ask",
+      } as const;
+      const session = SessionSchema.parse({
+        capabilities: TEST_CAPABILITIES,
+        createdAt: time(0),
+        cwd: "/temporary/project",
+        id: "session:permission",
+        permission,
+        providerId: "codex",
+        providerSessionId: "provider-session:permission",
+        source: "dougoos-acp",
+        state: "idle",
+        title: "Permission snapshot",
+        updatedAt: time(1),
+      });
+      context.store.createInitializedSession({
+        eventId: "event:permission",
+        session,
+      });
+      expect(context.store.getSessionSnapshot(session.id).session.permission).toEqual(permission);
+
+      context.store.close();
+      const reopened = openStorage(context.databasePath);
+      expect(reopened.getSessionSnapshot(session.id).session.permission).toEqual(permission);
+      reopened.close();
     } finally {
       rmSync(context.directory, { force: true, recursive: true });
     }

@@ -401,7 +401,7 @@ Hermes 五个 tab 全部可达：
 7. Compare。
 
 状态包括 dark/light、4 accents、对话目录、隐藏 sidebar item、6 Agent chip、model
-选中、enabled、auto-approve demo、notification toggles、compare adopted。对话目录更新的
+选中、enabled、原生权限 profile、notification toggles、compare adopted。对话目录更新的
 选择中、保存中、失败提示和取消选择均须可达；取消不得改变当前目录。
 
 ## 6. Landing 信息架构与状态
@@ -489,7 +489,7 @@ Fixture 必须通过显式 DataSource；不得从组件内部用“如果没有 
 | Ryo/Profile/Pro | 纯展示，无账号体系 |
 | Cloud Sync toggle/同步 | 不建账号、设备同步或快照上报 |
 | Settings API Key/更换 | 不读写真实 secret |
-| Settings 自动批准低风险操作 | 纯视觉；不得扩大 ADR-0003 默认询问策略 |
+| Settings Agent 权限选择器 | 真实配置；展示 Provider 原生档位，修改仅影响新 Session |
 | Settings provider model/enabled UI | 原型状态展示；P1 只有 API provider availability/selection 是真实 |
 | Export 生成结果 | 只生成演示 note，不写用户文件 |
 | Workflow/Skill “运行” | 只跑原型 timer，不执行业务 |
@@ -559,7 +559,9 @@ Sidebar 置顶“限流方案对比 · 3 agents”调用 `go({kind:'compare'})`�
 
 ### 9.5 安全冲突
 
-Settings 的“自动批准低风险操作”与 ADR 的“默认永远询问，不能静默扩大权限”冲突。生产只能保留 demo-only 画面，不能让 toggle 改变 permission policy。
+Settings 的 Agent 权限选择器必须来自 Provider 发布的真实档位。可控 Provider 默认最高权限，
+危险档持续显示 sandbox/enforcement 警告；设置变化只影响新 Session，外部管理策略不得被
+静默改写，完整边界见 ADR-0004。
 
 Landing 登录、Cloud Sync、API Key 同理：可见结构必须复刻，但不能接真实账号、同步或 secret 存储。
 

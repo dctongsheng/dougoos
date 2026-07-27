@@ -10,6 +10,63 @@ export const PermissionEnforcementSchema = z.enum([
 ]);
 export type PermissionEnforcement = z.infer<typeof PermissionEnforcementSchema>;
 
+export const PermissionSemanticSchema = z.enum([
+  "read_only",
+  "ask",
+  "auto_limited",
+  "unrestricted",
+  "external",
+]);
+export type PermissionSemantic = z.infer<typeof PermissionSemanticSchema>;
+
+export const PermissionRiskSchema = z.enum(["safe", "guarded", "dangerous"]);
+export type PermissionRisk = z.infer<typeof PermissionRiskSchema>;
+
+export const PermissionMechanismSchema = z.enum(["launch", "acp_mode", "acp_config", "external"]);
+export type PermissionMechanism = z.infer<typeof PermissionMechanismSchema>;
+
+const PERMISSION_PROFILE_ID_PATTERN = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/u;
+
+export const PermissionProfileIdSchema = boundedString(128, {
+  label: "permission profile id",
+}).regex(PERMISSION_PROFILE_ID_PATTERN, {
+  error: "permission profile id must be a lowercase slug",
+});
+export type PermissionProfileId = z.infer<typeof PermissionProfileIdSchema>;
+
+export const PermissionProfileDescriptorSchema = z
+  .object({
+    description: boundedString(512, { label: "permission profile description" }),
+    id: PermissionProfileIdSchema,
+    label: boundedString(128, { label: "permission profile label" }),
+    mechanism: PermissionMechanismSchema,
+    permissionEnforcement: PermissionEnforcementSchema,
+    requiresNewSession: z.literal(true),
+    risk: PermissionRiskSchema,
+    semantic: PermissionSemanticSchema,
+  })
+  .strict();
+export type PermissionProfileDescriptor = z.infer<typeof PermissionProfileDescriptorSchema>;
+
+export const ProviderPreferenceSchema = z
+  .object({
+    permissionProfileId: PermissionProfileIdSchema,
+    providerId: ProviderIdSchema,
+    visibleInSidebar: z.boolean(),
+  })
+  .strict();
+export type ProviderPreference = z.infer<typeof ProviderPreferenceSchema>;
+
+export const SessionPermissionSnapshotSchema = z
+  .object({
+    effectiveProfileId: PermissionProfileIdSchema,
+    mechanism: PermissionMechanismSchema,
+    permissionEnforcement: PermissionEnforcementSchema,
+    requestedProfileId: PermissionProfileIdSchema,
+  })
+  .strict();
+export type SessionPermissionSnapshot = z.infer<typeof SessionPermissionSnapshotSchema>;
+
 /**
  * A normalized, per-session snapshot of capabilities actually negotiated with
  * ACP. Missing or false fields never imply support; raw ACP capability objects
@@ -82,8 +139,10 @@ export const ProviderSchema = z
      */
     capabilities: ProviderCapabilitySnapshotSchema.nullable(),
     checkedAt: IsoTimestampSchema,
+    defaultPermissionProfileId: PermissionProfileIdSchema,
     displayName: boundedString(128, { label: "provider display name" }),
     id: ProviderIdSchema,
+    permissionProfiles: z.array(PermissionProfileDescriptorSchema).min(1).max(32),
     processPolicy: ProviderProcessPolicySchema,
     reason: SafeDiagnosticTextSchema.optional(),
     remediation: SafeDiagnosticTextSchema.optional(),
@@ -92,6 +151,25 @@ export const ProviderSchema = z
   })
   .strict()
   .superRefine((value, context) => {
+    const profileIds = new Set<string>();
+    for (const [index, profile] of value.permissionProfiles.entries()) {
+      if (profileIds.has(profile.id)) {
+        context.addIssue({
+          code: "custom",
+          message: "Provider permission profile ids must be unique",
+          path: ["permissionProfiles", index, "id"],
+        });
+      }
+      profileIds.add(profile.id);
+    }
+    if (!profileIds.has(value.defaultPermissionProfileId)) {
+      context.addIssue({
+        code: "custom",
+        message: "default permission profile must reference a declared profile",
+        path: ["defaultPermissionProfileId"],
+      });
+    }
+
     if (value.status === "available") {
       if (value.version === undefined || value.capabilities === null) {
         context.addIssue({

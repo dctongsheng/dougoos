@@ -20,6 +20,66 @@
     {
       "capture": {
         "landmarks": [
+          {
+            "locator": { "by": "css", "value": ".agent-config-section" },
+            "name": "settings-agent-section"
+          },
+          {
+            "locator": { "by": "css", "value": "#permission-profile-codex" },
+            "name": "permission-profile-selector"
+          }
+        ],
+        "requirements": [
+          {
+            "id": "permission-selector-visible",
+            "kind": "visible",
+            "locator": { "by": "css", "value": "#permission-profile-codex" }
+          },
+          {
+            "id": "permission-selector-enabled",
+            "kind": "enabled",
+            "locator": { "by": "css", "value": "#permission-profile-codex" }
+          },
+          {
+            "id": "dangerous-default-disclosed",
+            "includes": "高风险权限",
+            "kind": "text",
+            "locator": { "by": "css", "value": ".permission-profile-note" }
+          }
+        ]
+      },
+      "description": "Real Provider permission selector exposes the catalog profiles and persists a new-session preference.",
+      "expected": {
+        "externalRequests": [],
+        "runtimeEffects": [
+          {
+            "name": "provider.preference.update",
+            "permissionProfileId": "agent",
+            "providerId": "codex",
+            "visibleInSidebar": true
+          }
+        ],
+        "storageWrites": []
+      },
+      "id": "saas-production-permission-selector",
+      "kind": "production-only",
+      "owner": "web-001",
+      "probe": {
+        "actions": [
+          {
+            "locator": { "by": "css", "value": "#permission-profile-codex" },
+            "type": "select-option",
+            "value": "agent"
+          }
+        ]
+      },
+      "surface": "saas",
+      "tags": ["permissions", "security", "dynamic-catalog", "prototype-missing"],
+      "viewport": "saas-1440x900"
+    },
+    {
+      "capture": {
+        "landmarks": [
           { "locator": { "by": "css", "value": ".system-surface" }, "name": "system-surface" },
           { "locator": { "by": "css", "value": ".system-surface p" }, "name": "startup-stage" }
         ],
@@ -5139,10 +5199,10 @@
         { "scope": "screen", "text": "已启用", "type": "click-switch-near-text" }
       ],
       "captureMode": "viewport",
-      "description": "Selected provider disabled in Settings.",
+      "description": "Legacy prototype-only provider enabled switch; real production uses catalog availability.",
       "expectedScreenLabel": "设置",
       "id": "saas-settings-agent-disabled--saas-1440x900",
-      "kind": "prototype-reference",
+      "kind": "source-defect",
       "landmarks": [
         { "locator": { "by": "css", "value": "#dc-root > .sc-host > div" }, "name": "root" },
         {
@@ -5165,7 +5225,7 @@
       "scroll": { "main": 690, "page": "top", "sidebar": "top" },
       "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
       "surface": "saas",
-      "tags": ["state", "settings", "demo-only"],
+      "tags": ["state", "settings", "demo-only", "legacy-prototype-only"],
       "theme": "dark",
       "viewport": "saas-1440x900"
     },
@@ -5218,10 +5278,10 @@
         { "scope": "screen", "text": "自动批准低风险操作", "type": "click-switch-near-text" }
       ],
       "captureMode": "viewport",
-      "description": "Prototype auto-approve toggle; visual demo only and never a permission grant.",
+      "description": "Legacy prototype-only auto-approve switch; real production uses Provider permission profiles.",
       "expectedScreenLabel": "设置",
       "id": "saas-settings-auto-approve-demo--saas-1440x900",
-      "kind": "prototype-reference",
+      "kind": "source-defect",
       "landmarks": [
         { "locator": { "by": "css", "value": "#dc-root > .sc-host > div" }, "name": "root" },
         {
@@ -5240,7 +5300,7 @@
       "scroll": { "main": 690, "page": "top", "sidebar": "top" },
       "source": "prototypes/agentos/project/AgentOS SaaS.dc.html",
       "surface": "saas",
-      "tags": ["state", "settings", "demo-only", "security-boundary"],
+      "tags": ["state", "settings", "demo-only", "security-boundary", "legacy-prototype-only"],
       "theme": "dark",
       "viewport": "saas-1440x900"
     },

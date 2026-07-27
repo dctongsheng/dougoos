@@ -11,6 +11,7 @@ export * from "./native-cli-provider.js";
 export * from "./openclaw.js";
 export * from "./opencode.js";
 export * from "./pi.js";
+export * from "./permission-profiles.js";
 export * from "./registry.js";
 
 export const packageManifest = {

@@ -5,12 +5,21 @@ import type {
   AgentProvider,
   ProviderAvailability,
   ResolvedAgentCommand,
+  ResolvedSessionPermissionConfiguration,
   SanitizedProcessEnv,
 } from "@dougoos/acp";
-import type { PermissionEnforcement, ProviderProcessPolicy } from "@dougoos/shared";
+import type {
+  PermissionEnforcement,
+  PermissionProfileDescriptor,
+  ProviderProcessPolicy,
+} from "@dougoos/shared";
 
 import { AgentCliDiscovery, type AgentCliDiscoveryPort } from "./cli-discovery.js";
 import { COMMON_PROCESS_ENV, pickEnvironment, prependExecutableDirectory } from "./environment.js";
+import {
+  defaultPermissionEnforcement,
+  requireDeclaredPermissionProfile,
+} from "./permission-profiles.js";
 
 export function unpackedAdapterEntry(value: string): string {
   return value.replace(/([/\\][^/\\]+\.asar)([/\\])/u, "$1.unpacked$2");
@@ -27,9 +36,10 @@ export interface BundledProviderOptions {
 }
 
 export abstract class BundledAcpProvider implements AgentProvider {
+  abstract readonly defaultPermissionProfileId: string;
   abstract readonly displayName: string;
   abstract readonly id: string;
-  readonly permissionEnforcement: PermissionEnforcement = "requests_permission";
+  abstract readonly permissionProfiles: readonly PermissionProfileDescriptor[];
   readonly processPolicy: ProviderProcessPolicy = {
     maxSessionsPerProcess: 1,
     multiSessionPerProcess: false,
@@ -70,6 +80,10 @@ export abstract class BundledAcpProvider implements AgentProvider {
       options?.electronRunAsNode ?? Object.hasOwn(process.versions, "electron");
     this.#nodeExecutable = options?.nodeExecutable ?? process.execPath;
     this.#runtimeNodeVersion = options?.runtimeNodeVersion ?? process.versions.node;
+  }
+
+  get permissionEnforcement(): PermissionEnforcement {
+    return defaultPermissionEnforcement(this.permissionProfiles, this.defaultPermissionProfileId);
   }
 
   async available(): Promise<ProviderAvailability> {
@@ -124,10 +138,26 @@ export abstract class BundledAcpProvider implements AgentProvider {
     return { ok: true, version: this.#adapterVersion };
   }
 
-  resolveCommand(context: { readonly env: SanitizedProcessEnv }): ResolvedAgentCommand {
+  protected environmentForPermissionProfile(_profileId: string): Readonly<Record<string, string>> {
+    void _profileId;
+    return {};
+  }
+
+  protected sessionConfigurationForPermissionProfile(
+    _profileId: string,
+  ): ResolvedSessionPermissionConfiguration | undefined {
+    void _profileId;
+    return undefined;
+  }
+
+  resolveCommand(context: {
+    readonly env: SanitizedProcessEnv;
+    readonly permissionProfileId: string;
+  }): ResolvedAgentCommand {
     if (this.#cliProviderId !== undefined && this.#cliExecutablePath === null) {
       throw new Error(`${this.displayName} CLI availability must be checked before invocation`);
     }
+    requireDeclaredPermissionProfile(this.permissionProfiles, context.permissionProfileId);
     const pickedEnvironment = pickEnvironment(context.env, [
       ...COMMON_PROCESS_ENV,
       ...this.providerEnvironmentNames,
@@ -140,11 +170,16 @@ export abstract class BundledAcpProvider implements AgentProvider {
         ? {}
         : { [this.#cliExecutableEnvironmentName]: this.#cliExecutablePath }),
       ...(this.#electronRunAsNode ? { ELECTRON_RUN_AS_NODE: "1" } : {}),
+      ...this.environmentForPermissionProfile(context.permissionProfileId),
     };
+    const sessionConfiguration = this.sessionConfigurationForPermissionProfile(
+      context.permissionProfileId,
+    );
     return {
       args: [this.#adapterEntry],
       command: this.#nodeExecutable,
       env,
+      ...(sessionConfiguration === undefined ? {} : { sessionConfiguration }),
     };
   }
 }

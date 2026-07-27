@@ -5,7 +5,9 @@ import { FixtureDataSource } from "./fixtures.js";
 import { HomePage } from "./HomePage.js";
 import {
   buildHomeChatCommand,
+  hasValidPermissionProfile,
   isAbsoluteWorkspacePath,
+  resolveHomeTaskAgentId,
   resolveHomeProjectCwd,
 } from "./home-task.js";
 import { HarnessPage } from "./HarnessPage.js";
@@ -267,10 +269,26 @@ export function App({ dataSource, initialRoute, runtimePresentation }: AppProps)
     const text = state.homeDraft.trim();
     if (text.length === 0) return;
     const requestedAgentId = state.homeMode === "auto" ? routeTask(text) : state.homeAgentId;
-    const agentId = loadedFixture.agents.some((agent) => agent.id === requestedAgentId)
-      ? requestedAgentId
-      : state.homeAgentId;
+    const selectableAgentIds =
+      state.chat === null
+        ? loadedFixture.agents.map((agent) => agent.id)
+        : state.chat.agentCatalog.map((item) => item.agentId);
+    const agentId = resolveHomeTaskAgentId({
+      requestedAgentId,
+      selectableAgentIds,
+      selectedAgentId: state.homeAgentId,
+    });
+    if (agentId === undefined) return;
     const provider = state.chat?.providers.find((candidate) => candidate.agentId === agentId);
+    const providerPreference = state.chat?.providerPreferences.find(
+      (preference) => preference.providerId === provider?.id,
+    );
+    if (
+      source.mode === "real" &&
+      !hasValidPermissionProfile(provider, providerPreference?.permissionProfileId)
+    ) {
+      return;
+    }
     const homeCwd = resolveHomeProjectCwd(state.homeProject, state.conversationDirectory);
     const command =
       source.mode === "real"

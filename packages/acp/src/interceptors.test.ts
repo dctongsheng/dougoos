@@ -69,6 +69,24 @@ describe("InterceptorChain", () => {
     ).resolves.toBe("reject");
   });
 
+  it("supports allow while preserving reject precedence", async () => {
+    const allow = new InterceptorChain([{ onPermissionRequest: () => Promise.resolve("allow") }]);
+    const reject = new InterceptorChain([
+      { onPermissionRequest: () => Promise.resolve("allow") },
+      { onPermissionRequest: () => Promise.resolve("reject") },
+    ]);
+    const context = {
+      ...promptContext(),
+      request: {
+        options: [{ kind: "allow_once", name: "Allow", optionId: "allow" }],
+        toolCall: { toolCallId: "tool" },
+      },
+      requestId: "permission",
+    };
+    await expect(allow.onPermissionRequest(context)).resolves.toBe("allow");
+    await expect(reject.onPermissionRequest(context)).resolves.toBe("reject");
+  });
+
   it("does not let an observer failure block publication", async () => {
     const onObserverError = vi.fn();
     const chain = new InterceptorChain(

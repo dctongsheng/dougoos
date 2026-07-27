@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { App } from "../saas/App.js";
 import type {
   AgentId,
+  ChatViewSnapshot,
   RuntimePresentation,
   SaasDataCommand,
   SaasDataSource,
@@ -20,6 +21,7 @@ export const visualScenarioIds = [
   "saas-production-core-restart",
   "saas-production-core-starting",
   "saas-production-migration-error",
+  "saas-production-permission-selector",
   "saas-production-provider-probing-unavailable",
   "saas-production-replay-gap",
   "saas-production-session-busy",
@@ -58,6 +60,7 @@ const runtimeByScenario: Readonly<Record<VisualScenarioId, RuntimePresentation>>
     kind: "migration-error",
     migrationId: "004_turn_journal",
   },
+  "saas-production-permission-selector": { kind: "normal" },
   "saas-production-provider-probing-unavailable": {
     kind: "provider-probing-unavailable",
     unavailableProviderIds: ["claude-code"],
@@ -100,6 +103,92 @@ const safeFixtureSevenTypeMessages: readonly AgentMessage[] = [
   },
 ];
 
+const visualPermissionProfiles = [
+  {
+    description: "Read files and analyze the workspace without modifying it.",
+    id: "read-only",
+    label: "Read only",
+    mechanism: "launch",
+    permissionEnforcement: "client_enforced",
+    requiresNewSession: true,
+    risk: "safe",
+    semantic: "read_only",
+  },
+  {
+    description: "Request approval for sensitive operations.",
+    id: "agent",
+    label: "Agent",
+    mechanism: "launch",
+    permissionEnforcement: "requests_permission",
+    requiresNewSession: true,
+    risk: "guarded",
+    semantic: "ask",
+  },
+  {
+    description: "Disable approval and sandbox restrictions for this Session.",
+    id: "agent-full-access",
+    label: "Agent full access",
+    mechanism: "launch",
+    permissionEnforcement: "not_guaranteed",
+    requiresNewSession: true,
+    risk: "dangerous",
+    semantic: "unrestricted",
+  },
+] as const;
+
+const realChatForFixture = (
+  fixture: SaasFixture,
+  agentIds: readonly AgentId[],
+  permissionProfileId = "agent-full-access",
+): ChatViewSnapshot => {
+  const agents = agentIds.flatMap((agentId) => {
+    const agent = fixture.agents.find((candidate) => candidate.id === agentId);
+    return agent === undefined ? [] : [agent];
+  });
+  return {
+    agentCatalog: agents.map((agent) => ({
+      agentId: agent.id,
+      cli: {
+        command: agent.id,
+        detectedAt: "2026-07-23T04:05:06.000Z",
+        displayName: agent.name,
+        executablePath: `/fixture/bin/${agent.id}`,
+        integratedProviderId: agent.id,
+        version: `${agent.id} visual-fixture`,
+      },
+      displayName: agent.name,
+      providerId: agent.id,
+      status: "available",
+    })),
+    cliInstallations: agents.map((agent) => ({
+      command: agent.id,
+      detectedAt: "2026-07-23T04:05:06.000Z",
+      displayName: agent.name,
+      executablePath: `/fixture/bin/${agent.id}`,
+      integratedProviderId: agent.id,
+      version: `${agent.id} visual-fixture`,
+    })),
+    providerPreferences: agents.map((agent) => ({
+      permissionProfileId,
+      providerId: agent.id,
+      visibleInSidebar: true,
+    })),
+    providers: agents.map((agent) => ({
+      agentId: agent.id,
+      capabilities: null,
+      defaultPermissionProfileId: "agent-full-access",
+      displayName: agent.name,
+      id: agent.id,
+      installed: true,
+      permissionProfiles: visualPermissionProfiles,
+      status: "available",
+      version: `${agent.id} visual-fixture`,
+    })),
+    selectedSessionIds: {},
+    sessions: [],
+  };
+};
+
 class VisualDataSource extends FixtureDataSource {
   constructor(private readonly scenario: VisualScenarioId) {
     super();
@@ -115,7 +204,7 @@ class VisualDataSource extends FixtureDataSource {
           };
         };
       };
-      mutable.features.agent.initialMessages.claude.push(...safeFixtureSevenTypeMessages);
+      mutable.features.agent.initialMessages.claude?.push(...safeFixtureSevenTypeMessages);
     }
     return snapshot;
   }
@@ -127,6 +216,30 @@ class VisualDataSource extends FixtureDataSource {
       __dougoosRuntimeEffects?: SaasDataCommand[];
     };
     (runtime.__dougoosRuntimeEffects ??= []).push(command);
+  }
+}
+
+class RealVisualDataSource implements SaasDataSource {
+  readonly mode = "real" as const;
+  private readonly fixtureSource: VisualDataSource;
+
+  constructor(scenario: VisualScenarioId) {
+    this.fixtureSource = new VisualDataSource(scenario);
+  }
+
+  async execute(command: SaasDataCommand, signal: AbortSignal): Promise<void> {
+    await this.fixtureSource.execute(command, signal);
+  }
+
+  async getSnapshot(signal: AbortSignal): Promise<SaasDataSnapshot> {
+    const snapshot = await this.fixtureSource.getSnapshot(signal);
+    return {
+      ...snapshot,
+      chat: realChatForFixture(
+        snapshot.fixture,
+        snapshot.fixture.agents.map((agent) => agent.id),
+      ),
+    };
   }
 }
 
@@ -148,18 +261,15 @@ class SourceSwapDataSource implements SaasDataSource {
 
   private async snapshot(revision: number, signal: AbortSignal): Promise<SaasDataSnapshot> {
     const base = await this.fixtureSource.getSnapshot(signal);
-    const fixture: SaasFixture =
-      revision === 1
-        ? { ...base.fixture, suggestions: [this.label] }
+    const agentId = this.label === "SOURCE_A" ? "codex" : "hermes";
+    const fixture: SaasFixture = {
+      ...base.fixture,
+      ...(revision === 1
+        ? {}
         : {
-            ...base.fixture,
             agents: base.fixture.agents.map((agent) =>
-              agent.id === "pi"
-                ? {
-                    ...agent,
-                    enabled: false,
-                    model: `${this.label.toLowerCase()}-r${revision}`,
-                  }
+              agent.id === agentId
+                ? { ...agent, model: `${this.label.toLowerCase()}-r${revision}` }
                 : agent,
             ),
             features: {
@@ -168,7 +278,7 @@ class SourceSwapDataSource implements SaasDataSource {
                 ...base.fixture.features.agent,
                 initialMessages: {
                   ...base.fixture.features.agent.initialMessages,
-                  pi: [
+                  [agentId]: [
                     {
                       body: `${this.label}_R${revision}_MESSAGE`,
                       id: `${this.label.toLowerCase()}-r${revision}`,
@@ -189,16 +299,14 @@ class SourceSwapDataSource implements SaasDataSource {
               },
               settings: {
                 ...base.fixture.features.settings,
-                initialAutoApprove: {
-                  ...base.fixture.features.settings.initialAutoApprove,
-                  pi: true,
-                },
                 initialNotifyDone: false,
               },
             },
-            suggestions: [`${this.label}_R${revision}`],
-          };
+          }),
+      suggestions: [revision === 1 ? this.label : `${this.label}_R${revision}`],
+    };
     return {
+      chat: realChatForFixture(fixture, [agentId], revision === 1 ? "agent" : "agent-full-access"),
       conversationDirectory: FIXTURE_CONVERSATION_DIRECTORY,
       fixture,
       revision,
@@ -235,7 +343,13 @@ export function VisualApp() {
     [secondSource],
   );
   const source = useMemo(
-    () => (scenario === null ? null : new VisualDataSource(scenario)),
+    () =>
+      scenario === null
+        ? null
+        : scenario === "saas-production-core-restart" ||
+            scenario === "saas-production-permission-selector"
+          ? new RealVisualDataSource(scenario)
+          : new VisualDataSource(scenario),
     [scenario],
   );
   useEffect(() => {
@@ -288,12 +402,14 @@ export function VisualApp() {
   document.documentElement.dataset.visualCase = scenario;
   const standalone =
     scenario === "saas-production-core-starting" || scenario === "saas-production-migration-error";
+  const initialRoute =
+    scenario === "saas-production-permission-selector"
+      ? ({ agentId: "codex", kind: "settings" } as const)
+      : ({ agentId: "claude", kind: "agent", tab: "session" } as const);
   return (
     <App
       dataSource={source}
-      {...(standalone
-        ? {}
-        : { initialRoute: { agentId: "claude", kind: "agent", tab: "session" } as const })}
+      {...(standalone ? {} : { initialRoute })}
       runtimePresentation={runtimeByScenario[scenario]}
     />
   );

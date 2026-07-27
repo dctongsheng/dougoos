@@ -18,7 +18,7 @@ DougoOS 是"多个 Agent CLI，一个控制台"的桌面 AgentOS（原型显示�
    fail-closed，不包含或启动 adapter，不能作为可执行 Provider
 3. 智能路由原型是前端正则 mock → 设计成 TaskRouter 策略接口，规则版先行、LLM 版后置
 4. Hermes 的技能/看板/MCPs 特殊 tab、Memory 图谱、Compare、定时/长程任务：本期不实现，信息架构上占位
-5. 审批体系三处（approval 消息 / PreToolUse hook / Agent 级 auto 开关）本期只实现 ACP 审批闭环；同时在 Registry 留下可阻断的 `SessionInterceptor`，避免未来 Hooks 只能旁路观察
+5. 审批体系三处（approval 消息 / PreToolUse hook / Agent 原生权限档）统一由 Provider profile 与 ACP 审批闭环承载；可控 Provider 的新 Session 默认最高权限，同时保留可阻断的 `SessionInterceptor`，具体边界见 ADR-0004
 6. 提示词"模块切分+字符统计"自动解析器后置；本期 System Prompt 数据用从原型提取的 mock fixtures
 7. 本期不提供遥测或同步设置，只允许用户重置本地 device_id，并将其明确称为可重置的伪匿名标识；未来遥测必须经独立产品与隐私设计
 

@@ -15,8 +15,10 @@ import {
   GlobalSnapshotSchema,
   HealthLiveResponseSchema,
   HealthReadyResponseSchema,
+  ListProviderPreferencesResponseSchema,
   ListProvidersResponseSchema,
   PreferencesResponseSchema,
+  ProviderPreferenceResponseSchema,
   ReplayGapErrorResponseSchema,
   ResolveApprovalRequestSchema,
   ResolveApprovalResponseSchema,
@@ -25,6 +27,7 @@ import {
   SessionSnapshotSchema,
   SnapshotQuerySchema,
   UpdatePreferencesRequestSchema,
+  UpdateProviderPreferenceRequestSchema,
   checkGlobalSnapshotCoverage,
   parseEventStreamAfterSeq,
   redactDiagnosticText,
@@ -49,6 +52,12 @@ const session = {
   createdAt: now,
   cwd: "/tmp/project",
   id: "session:one",
+  permission: {
+    effectiveProfileId: "ask",
+    mechanism: "launch",
+    permissionEnforcement: "requests_permission",
+    requestedProfileId: "ask",
+  },
   providerId: "codex",
   providerSessionId: "provider/session:opaque",
   source: "dougoos-acp",
@@ -112,6 +121,7 @@ const globalSnapshot = {
       cwd: session.cwd,
       id: session.id,
       messageCount: 1,
+      permission: session.permission,
       providerId: session.providerId,
       state: "awaiting_approval",
       title: session.title,
@@ -210,8 +220,21 @@ describe("REST request and response DTOs", () => {
     const provider = {
       capabilities: capability,
       checkedAt: now,
+      defaultPermissionProfileId: "agent-full-access",
       displayName: "Codex",
       id: "codex",
+      permissionProfiles: [
+        {
+          description: "Run with full local access",
+          id: "agent-full-access",
+          label: "Full access",
+          mechanism: "launch",
+          permissionEnforcement: "client_enforced",
+          requiresNewSession: true,
+          risk: "dangerous",
+          semantic: "unrestricted",
+        },
+      ],
       processPolicy: { maxSessionsPerProcess: 1, multiSessionPerProcess: false },
       status: "available",
       version: "2.1.0",
@@ -220,6 +243,7 @@ describe("REST request and response DTOs", () => {
     expect(
       CreateSessionRequestSchema.safeParse({
         cwd: "/tmp/project",
+        permissionProfileId: "agent-full-access",
         providerId: "codex",
       }).success,
     ).toBe(true);
@@ -240,6 +264,37 @@ describe("REST request and response DTOs", () => {
     expect(
       ListProvidersResponseSchema.safeParse({
         providers: [...providers, { ...provider, id: "provider-extra" }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("validates strict provider preferences and permission-profile ids", () => {
+    const preference = {
+      permissionProfileId: "agent-full-access",
+      providerId: "codex",
+      visibleInSidebar: true,
+    } as const;
+    expect(ListProviderPreferencesResponseSchema.parse({ preferences: [preference] })).toEqual({
+      preferences: [preference],
+    });
+    expect(ProviderPreferenceResponseSchema.parse({ preference })).toEqual({ preference });
+    expect(
+      UpdateProviderPreferenceRequestSchema.safeParse({
+        permissionProfileId: preference.permissionProfileId,
+        visibleInSidebar: false,
+      }).success,
+    ).toBe(true);
+    expect(
+      UpdateProviderPreferenceRequestSchema.safeParse({
+        permissionProfileId: "../danger",
+        visibleInSidebar: false,
+      }).success,
+    ).toBe(false);
+    expect(
+      UpdateProviderPreferenceRequestSchema.safeParse({
+        permissionProfileId: preference.permissionProfileId,
+        providerId: preference.providerId,
+        visibleInSidebar: false,
       }).success,
     ).toBe(false);
   });

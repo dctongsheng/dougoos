@@ -1,5 +1,7 @@
 import type {
   AgentCliInstallation,
+  PermissionProfileDescriptor,
+  ProviderPreference,
   ProviderCapabilitySnapshot,
   ProviderStatus,
   SessionState,
@@ -8,27 +10,14 @@ import type {
 import type { FeatureFixtures } from "./feature-fixtures.js";
 import type { AgentMessage, QueueStatus } from "./feature-fixtures.js";
 
-export const AGENT_IDS = [
-  "claude",
-  "codex",
-  "cursor",
-  "grok",
-  "hermes",
-  "openclaw",
-  "opencode",
-  "pi",
-] as const;
+/**
+ * Fixture mode uses this finite prototype set. Real mode keys Agents by
+ * Provider ID so newly integrated CLIs never need a hard-coded UI slot.
+ */
+export const PROTOTYPE_AGENT_IDS = ["codex", "claude", "grok", "cursor", "pi", "hermes"] as const;
 
-export type AgentId = (typeof AGENT_IDS)[number];
-
-export const PROTOTYPE_AGENT_IDS = [
-  "codex",
-  "claude",
-  "grok",
-  "cursor",
-  "pi",
-  "hermes",
-] as const satisfies readonly AgentId[];
+export type PrototypeAgentId = (typeof PROTOTYPE_AGENT_IDS)[number];
+export type AgentId = string;
 
 export type AgentStatus = "executing" | "idle" | "thinking" | "waiting";
 
@@ -117,12 +106,23 @@ export type DataMode = "fixture" | "real";
 export interface ChatProviderView {
   readonly agentId: AgentId;
   readonly capabilities: ProviderCapabilitySnapshot | null;
+  readonly defaultPermissionProfileId: string;
   readonly displayName: string;
   readonly id: string;
+  readonly installed: boolean;
+  readonly permissionProfiles: readonly PermissionProfileDescriptor[];
   readonly reason?: string;
   readonly remediation?: string;
   readonly status: ProviderStatus;
   readonly version?: string;
+}
+
+export interface AgentCatalogItem {
+  readonly agentId: AgentId;
+  readonly cli: AgentCliInstallation;
+  readonly displayName: string;
+  readonly providerId: string;
+  readonly status: ProviderStatus;
 }
 
 export interface ChatSessionView {
@@ -138,7 +138,9 @@ export interface ChatSessionView {
 }
 
 export interface ChatViewSnapshot {
+  readonly agentCatalog: readonly AgentCatalogItem[];
   readonly cliInstallations: readonly AgentCliInstallation[];
+  readonly providerPreferences: readonly ProviderPreference[];
   readonly providers: readonly ChatProviderView[];
   readonly selectedSessionIds: Readonly<Partial<Record<AgentId, string>>>;
   readonly sessions: readonly ChatSessionView[];
@@ -166,6 +168,12 @@ export type SaasDataCommand =
       readonly text: string;
     }
   | { readonly name: "clis.refresh" }
+  | {
+      readonly name: "provider.preference.update";
+      readonly permissionProfileId: string;
+      readonly providerId: string;
+      readonly visibleInSidebar: boolean;
+    }
   | {
       readonly conversationDirectory: string;
       readonly name: "preferences.conversation-directory.update";
@@ -303,7 +311,6 @@ export interface SaasFeatureState {
   readonly sessionSyncEnabled: boolean;
   readonly sessionSyncState: "idle" | "pending" | "ready";
   readonly settingsAgentEnabled: Readonly<Record<AgentId, boolean>>;
-  readonly settingsAutoApprove: Readonly<Record<AgentId, boolean>>;
   readonly settingsModels: Readonly<Record<AgentId, string>>;
   readonly settingsNotifyDone: boolean;
   readonly settingsNotifyWait: boolean;
@@ -379,7 +386,6 @@ export type SaasAction =
       readonly type: "sessions.sync-state";
     }
   | { readonly agentId: AgentId; readonly type: "settings.agent-enabled" }
-  | { readonly agentId: AgentId; readonly type: "settings.auto-approve" }
   | { readonly agentId: AgentId; readonly model: string; readonly type: "settings.model" }
   | { readonly type: "settings.notify-done" }
   | { readonly type: "settings.notify-wait" }

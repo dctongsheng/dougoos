@@ -59,7 +59,7 @@ test("runs a real Provider through the visible Desktop UI and restores the conve
       "utf8",
     );
     const page = await application.firstWindow();
-    await expect(page).toHaveTitle("AgentOS", { timeout: 45_000 });
+    await expect(page).toHaveTitle("DougoOS", { timeout: 45_000 });
 
     const providersResponse = await coreRequest(page, "/api/providers");
     expect(providersResponse.status).toBe(200);

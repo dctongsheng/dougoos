@@ -12,9 +12,11 @@ import {
   type ClientRequestContext,
   type InitializeResponse,
   type JsonRpcId,
+  type NewSessionResponse,
   type PromptResponse,
   type RequestPermissionRequest,
   type RequestPermissionResponse,
+  type SessionConfigOption,
   type SessionNotification,
 } from "@agentclientprotocol/sdk";
 import {
@@ -25,12 +27,15 @@ import {
   PromptSchema,
   ProviderCapabilitySnapshotSchema,
   ProviderIdSchema,
+  SessionPermissionSnapshotSchema,
   SessionIdSchema,
   TurnIdSchema,
   type ActiveTurnStatus,
   type AgentRuntimeEvent,
   type AgentUiEvent,
+  type PermissionProfileDescriptor,
   type ProviderCapabilitySnapshot,
+  type SessionPermissionSnapshot,
   type SessionState,
   type StopReason,
 } from "@dougoos/shared";
@@ -42,11 +47,14 @@ import { normalizeSessionUpdate } from "./normalizer.js";
 import { DEFAULT_AGENT_STDERR_BYTE_LIMIT, observeAgentStderr } from "./stderr.js";
 import type {
   AgentProvider,
+  AgentPermissionAuditEntry,
   AgentSessionHandle,
   AgentSessionRegistry,
   AgentSessionRegistryOptions,
   AgentTurnHandle,
   AgentTurnResult,
+  ResolvedAgentCommand,
+  ResolvedSessionConfigOption,
   SanitizedProcessEnv,
   StartAgentTurnInput,
 } from "./types.js";
@@ -169,6 +177,96 @@ function capabilitiesFromInitialize(
       prompt: true,
     },
   });
+}
+
+function permissionProfile(
+  provider: AgentProvider,
+  profileId: string,
+): PermissionProfileDescriptor {
+  const profile = provider.permissionProfiles.find((candidate) => candidate.id === profileId);
+  if (profile === undefined) {
+    throw runtimeError("PROVIDER_CAPABILITY_UNSUPPORTED", false, {
+      operation: "create_session",
+      phase: "session",
+      providerId: provider.id,
+    });
+  }
+  return profile;
+}
+
+function supportsAutomaticApproval(profile: PermissionProfileDescriptor): boolean {
+  return profile.semantic === "auto_limited" || profile.semantic === "unrestricted";
+}
+
+function selectOptions(option: SessionConfigOption): readonly string[] {
+  if (option.type !== "select") return [];
+  return option.options.flatMap((entry) =>
+    "options" in entry ? entry.options.map((nested) => nested.value) : [entry.value],
+  );
+}
+
+function validatesConfigOption(
+  available: readonly SessionConfigOption[],
+  requested: ResolvedSessionConfigOption,
+): boolean {
+  const option = available.find((candidate) => candidate.id === requested.configId);
+  if (option === undefined) return false;
+  if (option.type === "boolean") {
+    return typeof requested.value === "boolean";
+  }
+  return typeof requested.value === "string" && selectOptions(option).includes(requested.value);
+}
+
+function unsupportedPermissionConfiguration(providerId: string): AcpRuntimeError {
+  return runtimeError("PROVIDER_CAPABILITY_UNSUPPORTED", false, {
+    operation: "create_session",
+    phase: "session",
+    providerId,
+  });
+}
+
+async function applyPermissionConfiguration(options: {
+  readonly command: ResolvedAgentCommand;
+  readonly connection: ClientConnection;
+  readonly created: NewSessionResponse;
+  readonly profile: PermissionProfileDescriptor;
+  readonly providerId: string;
+}): Promise<void> {
+  const configuration = options.command.sessionConfiguration;
+  if (configuration === undefined) return;
+  if (
+    configuration.autoApprovePermissions === true &&
+    !supportsAutomaticApproval(options.profile)
+  ) {
+    throw unsupportedPermissionConfiguration(options.providerId);
+  }
+
+  if (configuration.modeId !== undefined) {
+    const modes = options.created.modes;
+    if (modes == null || !modes.availableModes.some((mode) => mode.id === configuration.modeId)) {
+      throw unsupportedPermissionConfiguration(options.providerId);
+    }
+    if (modes.currentModeId !== configuration.modeId) {
+      await options.connection.agent.request(methods.agent.session.setMode, {
+        modeId: configuration.modeId,
+        sessionId: options.created.sessionId,
+      });
+    }
+  }
+
+  const requestedOptions = configuration.configOptions ?? [];
+  const availableOptions = options.created.configOptions ?? [];
+  for (const requested of requestedOptions) {
+    if (!validatesConfigOption(availableOptions, requested)) {
+      throw unsupportedPermissionConfiguration(options.providerId);
+    }
+    await options.connection.agent.request(methods.agent.session.setConfigOption, {
+      configId: requested.configId,
+      sessionId: options.created.sessionId,
+      value: requested.value,
+      ...(typeof requested.value === "boolean" ? { type: "boolean" as const } : {}),
+    });
+  }
 }
 
 function stopReason(reason: PromptResponse["stopReason"]): StopReason {
@@ -294,12 +392,15 @@ class SessionTurnHandle implements AgentTurnHandle {
 class AcpSession implements AgentSessionHandle {
   readonly capabilities: ProviderCapabilitySnapshot;
   readonly cwd: string;
+  readonly permission: SessionPermissionSnapshot;
   readonly providerId: string;
   readonly providerSessionId: string;
   readonly sessionId: string;
 
   readonly #approvalTimeoutMs: number;
   readonly #acpSessionId: string;
+  readonly #allowsAutomaticApproval: boolean;
+  readonly #autoApprovePermissions: boolean;
   readonly #child: ChildProcessWithoutNullStreams;
   readonly #clock: () => string;
   readonly #connection: ClientConnection;
@@ -307,9 +408,12 @@ class AcpSession implements AgentSessionHandle {
   readonly #interceptors: InterceptorChain;
   readonly #listeners = new Set<(event: AgentRuntimeEvent) => void>();
   readonly #onClosed: () => void;
+  readonly #onPermissionAudit:
+    ((entry: AgentPermissionAuditEntry) => Promise<void> | void) | undefined;
   readonly #provider: AgentProvider;
   readonly #resolvedApprovalIds = new Set<string>();
 
+  #approvalResolutionLock: Promise<void> | undefined;
   #currentTurn: ActiveTurn | undefined;
   #disposed = false;
   #pendingApproval: PendingApproval | undefined;
@@ -317,6 +421,8 @@ class AcpSession implements AgentSessionHandle {
 
   constructor(options: {
     readonly approvalTimeoutMs: number;
+    readonly allowsAutomaticApproval: boolean;
+    readonly autoApprovePermissions: boolean;
     readonly capabilities: ProviderCapabilitySnapshot;
     readonly child: ChildProcessWithoutNullStreams;
     readonly clock: () => string;
@@ -325,11 +431,15 @@ class AcpSession implements AgentSessionHandle {
     readonly deltaWindowMs: number;
     readonly interceptors: InterceptorChain;
     readonly onClosed: () => void;
+    readonly onPermissionAudit?: (entry: AgentPermissionAuditEntry) => Promise<void> | void;
+    readonly permission: SessionPermissionSnapshot;
     readonly provider: AgentProvider;
     readonly providerSessionId: string;
     readonly sessionId: string;
   }) {
     this.#approvalTimeoutMs = options.approvalTimeoutMs;
+    this.#allowsAutomaticApproval = options.allowsAutomaticApproval;
+    this.#autoApprovePermissions = options.autoApprovePermissions;
     this.capabilities = options.capabilities;
     this.#child = options.child;
     this.#clock = options.clock;
@@ -337,6 +447,8 @@ class AcpSession implements AgentSessionHandle {
     this.cwd = options.cwd;
     this.#interceptors = options.interceptors;
     this.#onClosed = options.onClosed;
+    this.#onPermissionAudit = options.onPermissionAudit;
+    this.permission = options.permission;
     this.#provider = options.provider;
     this.providerId = options.provider.id;
     this.#acpSessionId = options.providerSessionId;
@@ -596,6 +708,84 @@ class AcpSession implements AgentSessionHandle {
         { type: "reject" },
         rejectOption?.rawOptionId ?? null,
       );
+    } else if (
+      this.#allowsAutomaticApproval &&
+      (this.#autoApprovePermissions || verdict === "allow")
+    ) {
+      const allowOption = normalizedOptions.find((option) => option.kind === "allow");
+      const rawAllow =
+        allowOption === undefined ? undefined : options.get(allowOption.optionId)?.rawOptionId;
+      if (allowOption !== undefined && rawAllow != null) {
+        const pending = this.#pendingApproval;
+        if (pending !== undefined) {
+          // Treat durable audit + automatic resolution as one critical section.
+          // Timeout, cancellation, and prompt cleanup wait for it, so an
+          // "allowed" audit record can never outlive an expired/cancelled
+          // permission outcome.
+          clearTimeout(pending.timer);
+          const auditAndResolve = (async () => {
+            try {
+              if (this.#onPermissionAudit === undefined) {
+                throw new Error("Automatic approval requires a durable permission audit sink");
+              }
+              await this.#onPermissionAudit({
+                cwd: this.cwd,
+                effectiveProfileId: this.permission.effectiveProfileId,
+                occurredAt: this.#now(),
+                optionId: allowOption.optionId,
+                providerId: this.providerId,
+                requestId,
+                result: "allowed",
+                sessionId: this.sessionId,
+                source: "permission_profile",
+                ...(typeof context.params.toolCall.kind !== "string"
+                  ? {}
+                  : { toolKind: context.params.toolCall.kind.slice(0, 64) }),
+                turnId: turn.turnId,
+              });
+              await this.#resolvePendingApproval(
+                "allowed",
+                { optionId: allowOption.optionId, type: "option" },
+                rawAllow,
+                true,
+              );
+            } catch {
+              this.#emit(turn.turnId, {
+                level: "warn",
+                messageId: MessageIdSchema.parse(randomUUID()),
+                text: "Automatic approval was blocked because its audit record could not be persisted.",
+                type: "note",
+              });
+              const rejectOption = [...options.values()].find(
+                (option) => option.kind === "reject" && option.rawOptionId !== null,
+              );
+              await this.#resolvePendingApproval(
+                "rejected",
+                { type: "reject" },
+                rejectOption?.rawOptionId ?? null,
+                true,
+              );
+            }
+          })();
+          this.#approvalResolutionLock = auditAndResolve;
+          try {
+            await auditAndResolve;
+          } finally {
+            if (this.#approvalResolutionLock === auditAndResolve) {
+              this.#approvalResolutionLock = undefined;
+            }
+          }
+        }
+      } else {
+        const rejectOption = [...options.values()].find(
+          (option) => option.kind === "reject" && option.rawOptionId !== null,
+        );
+        await this.#resolvePendingApproval(
+          "rejected",
+          { type: "reject" },
+          rejectOption?.rawOptionId ?? null,
+        );
+      }
     }
     return response.promise;
   }
@@ -746,7 +936,11 @@ class AcpSession implements AgentSessionHandle {
     decision:
       { readonly optionId: string; readonly type: "option" } | { readonly type: "reject" } | null,
     rawOptionId: string | null,
+    bypassResolutionLock = false,
   ): Promise<void> {
+    if (!bypassResolutionLock && this.#approvalResolutionLock !== undefined) {
+      await this.#approvalResolutionLock;
+    }
     const pending = this.#pendingApproval;
     const turn = this.#currentTurn;
     if (pending === undefined || turn === undefined) return;
@@ -798,6 +992,7 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
   readonly #interceptors: InterceptorChain;
   readonly #maxActiveSessions: number;
   readonly #onAgentStderr: AgentSessionRegistryOptions["onAgentStderr"];
+  readonly #onPermissionAudit: AgentSessionRegistryOptions["onPermissionAudit"];
   readonly #providers: ReadonlyMap<string, AgentProvider>;
   readonly #sessions = new Map<string, AcpSession>();
   readonly #stderrByteLimit: number;
@@ -810,6 +1005,7 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
     this.#handshakeTimeoutMs = options.handshakeTimeoutMs ?? DEFAULT_HANDSHAKE_TIMEOUT_MS;
     this.#maxActiveSessions = options.maxActiveSessions ?? DEFAULT_MAX_ACTIVE_SESSIONS;
     this.#onAgentStderr = options.onAgentStderr;
+    this.#onPermissionAudit = options.onPermissionAudit;
     this.#stderrByteLimit = options.stderrByteLimit ?? DEFAULT_AGENT_STDERR_BYTE_LIMIT;
     this.#providers = new Map(options.providers.map((provider) => [provider.id, provider]));
     this.#interceptors = new InterceptorChain(options.interceptors, {
@@ -826,6 +1022,19 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
     if (this.#providers.size !== options.providers.length) {
       throw new Error("Provider IDs must be unique");
     }
+    for (const provider of options.providers) {
+      const profileIds = new Set(provider.permissionProfiles.map((profile) => profile.id));
+      if (
+        profileIds.size !== provider.permissionProfiles.length ||
+        !profileIds.has(provider.defaultPermissionProfileId)
+      ) {
+        throw new Error(`Provider ${provider.id} has invalid permission profiles`);
+      }
+      const defaultProfile = permissionProfile(provider, provider.defaultPermissionProfileId);
+      if (defaultProfile.permissionEnforcement !== provider.permissionEnforcement) {
+        throw new Error(`Provider ${provider.id} default permission enforcement is inconsistent`);
+      }
+    }
     if (!Number.isSafeInteger(this.#stderrByteLimit) || this.#stderrByteLimit < 1) {
       throw new TypeError("stderrByteLimit must be a positive safe integer");
     }
@@ -833,6 +1042,7 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
 
   async create(options: {
     readonly cwd: string;
+    readonly permissionProfileId?: string;
     readonly providerId: string;
     readonly sessionId?: string;
   }): Promise<AgentSessionHandle> {
@@ -859,6 +1069,8 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
         providerId,
       });
     }
+    const requestedProfileId = options.permissionProfileId ?? provider.defaultPermissionProfileId;
+    const profile = permissionProfile(provider, requestedProfileId);
     const availability = await provider.available();
     if (!availability.ok) {
       throw runtimeError("PROVIDER_UNAVAILABLE", true, {
@@ -868,7 +1080,10 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
       });
     }
 
-    const command = provider.resolveCommand({ env: this.#environment });
+    const command = provider.resolveCommand({
+      env: this.#environment,
+      permissionProfileId: profile.id,
+    });
     const child = spawn(command.command, [...command.args], {
       cwd,
       detached: process.platform !== "win32",
@@ -958,13 +1173,35 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
           signalProcessTree(child, "SIGTERM");
         },
       );
+      await withDeadline(
+        applyPermissionConfiguration({
+          command,
+          connection,
+          created,
+          profile,
+          providerId,
+        }),
+        this.#handshakeTimeoutMs,
+        () => {
+          connection.close();
+          signalProcessTree(child, "SIGTERM");
+        },
+      );
+      const permission = SessionPermissionSnapshotSchema.parse({
+        effectiveProfileId: profile.id,
+        mechanism: profile.mechanism,
+        permissionEnforcement: profile.permissionEnforcement,
+        requestedProfileId: profile.id,
+      });
       const capabilities = capabilitiesFromInitialize(
         initialize,
         this.#now(),
-        provider.permissionEnforcement,
+        permission.permissionEnforcement,
       );
       session = new AcpSession({
         approvalTimeoutMs: this.#approvalTimeoutMs,
+        allowsAutomaticApproval: supportsAutomaticApproval(profile),
+        autoApprovePermissions: command.sessionConfiguration?.autoApprovePermissions === true,
         capabilities,
         child,
         clock: this.#clock,
@@ -973,6 +1210,10 @@ export class DefaultAgentSessionRegistry implements AgentSessionRegistry {
         deltaWindowMs: this.#deltaWindowMs,
         interceptors: this.#interceptors,
         onClosed: () => this.#sessions.delete(sessionId),
+        ...(this.#onPermissionAudit === undefined
+          ? {}
+          : { onPermissionAudit: this.#onPermissionAudit }),
+        permission,
         provider,
         providerSessionId: created.sessionId,
         sessionId,

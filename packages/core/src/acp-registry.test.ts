@@ -14,9 +14,22 @@ const fixtureAgent = join(import.meta.dirname, "../../acp/test/fixtures/fake-age
 const directories: string[] = [];
 
 class FixtureProvider implements AgentProvider {
+  readonly defaultPermissionProfileId = "ask";
   readonly displayName = "Fixture ACP";
   readonly id = "fixture";
   readonly permissionEnforcement = "requests_permission" as const;
+  readonly permissionProfiles = [
+    {
+      description: "Ask before privileged fixture operations",
+      id: "ask",
+      label: "Ask",
+      mechanism: "launch",
+      permissionEnforcement: "requests_permission",
+      requiresNewSession: true,
+      risk: "guarded",
+      semantic: "ask",
+    },
+  ] as const;
   readonly processPolicy = { maxSessionsPerProcess: 1, multiSessionPerProcess: false } as const;
 
   available() {
@@ -77,6 +90,7 @@ describe("AcpCoreRegistry", () => {
     const sessionId = crypto.randomUUID();
     const session = await registry.createSession({
       cwd: directory,
+      permissionProfileId: "ask",
       providerId: "fixture",
       sessionId,
     });
@@ -197,11 +211,13 @@ describe("AcpCoreRegistry", () => {
       const secondSessionId = crypto.randomUUID();
       await queuedRegistry.createSession({
         cwd: directory,
+        permissionProfileId: "ask",
         providerId: "fixture",
         sessionId: firstSessionId,
       });
       await queuedRegistry.createSession({
         cwd: directory,
+        permissionProfileId: "ask",
         providerId: "fixture",
         sessionId: secondSessionId,
       });
@@ -278,6 +294,7 @@ describe("AcpCoreRegistry", () => {
         const sessionId = crypto.randomUUID();
         await guardedRegistry.createSession({
           cwd: directory,
+          permissionProfileId: "ask",
           providerId: "fixture",
           sessionId,
         });
@@ -308,6 +325,7 @@ describe("AcpCoreRegistry", () => {
       await expect(
         guardedRegistry.createSession({
           cwd: directory,
+          permissionProfileId: "ask",
           providerId: "fixture",
           sessionId: crypto.randomUUID(),
         }),

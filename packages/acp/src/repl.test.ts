@@ -14,9 +14,22 @@ const fixtureAgent = join(import.meta.dirname, "../test/fixtures/fake-agent.mjs"
 const temporaryDirectories: string[] = [];
 
 class ReplFixtureProvider implements AgentProvider {
+  readonly defaultPermissionProfileId = "ask";
   readonly displayName = "REPL Fixture";
   readonly id = "repl-fixture";
   readonly permissionEnforcement = "requests_permission" as const;
+  readonly permissionProfiles: AgentProvider["permissionProfiles"] = [
+    {
+      description: "Ask before fixture operations.",
+      id: "ask",
+      label: "Ask",
+      mechanism: "launch",
+      permissionEnforcement: "requests_permission",
+      requiresNewSession: true,
+      risk: "guarded",
+      semantic: "ask",
+    },
+  ];
   readonly processPolicy = { maxSessionsPerProcess: 1, multiSessionPerProcess: false } as const;
 
   available(): Promise<{ readonly ok: true; readonly version: string }> {

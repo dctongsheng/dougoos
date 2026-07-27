@@ -16,6 +16,16 @@ import {
 } from "@dougoos/shared";
 
 const PROVIDER_ID = "test-fake";
+const PERMISSION_PROFILE = {
+  description: "Ask before sensitive fixture operations.",
+  id: "ask",
+  label: "Ask",
+  mechanism: "launch",
+  permissionEnforcement: "requests_permission",
+  requiresNewSession: true,
+  risk: "guarded",
+  semantic: "ask",
+} as const;
 const DEFAULT_STEP_DELAY_MS = 12;
 const DELAYED_STEP_DELAY_MS = 200;
 const TOOL_OVERFLOW_INPUT = `PI_CODING_AGENT=true
@@ -106,9 +116,18 @@ export class FakeRegistry implements CoreRegistry {
 
   createSession(input: CreateRegistrySessionInput) {
     if (input.providerId !== PROVIDER_ID) throw new Error("Test Fake Provider is unavailable");
+    if (input.permissionProfileId !== PERMISSION_PROFILE.id) {
+      throw new Error("Test Fake Provider permission profile is unavailable");
+    }
     this.#sessions.add(input.sessionId);
     return {
       capabilities: capabilitySnapshot(this.#now()),
+      permission: {
+        effectiveProfileId: PERMISSION_PROFILE.id,
+        mechanism: PERMISSION_PROFILE.mechanism,
+        permissionEnforcement: PERMISSION_PROFILE.permissionEnforcement,
+        requestedProfileId: input.permissionProfileId,
+      },
       providerSessionId: `fixture-${input.sessionId}`,
       title: "Fake Agent fixture",
     };
@@ -144,8 +163,10 @@ export class FakeRegistry implements CoreRegistry {
       ProviderSchema.parse({
         capabilities: capabilitySnapshot(checkedAt),
         checkedAt,
+        defaultPermissionProfileId: PERMISSION_PROFILE.id,
         displayName: "Test Fake Provider",
         id: PROVIDER_ID,
+        permissionProfiles: [PERMISSION_PROFILE],
         processPolicy: { maxSessionsPerProcess: 64, multiSessionPerProcess: true },
         status: "available",
         version: "fixture-1",
@@ -163,7 +184,7 @@ export class FakeRegistry implements CoreRegistry {
           detectedAt,
           displayName: "Codex",
           executablePath: "/fixture/bin/codex",
-          integratedProviderId: "codex",
+          integratedProviderId: PROVIDER_ID,
           version: "fixture-codex",
         }),
       ],

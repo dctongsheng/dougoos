@@ -16,6 +16,8 @@ import {
   IsoTimestampSchema,
   MessageIdSchema,
   OpaqueIdSchema,
+  ProviderIdSchema,
+  ProviderPreferenceSchema,
   ProviderSchema,
   SessionIdSchema,
   SessionSchema,
@@ -28,6 +30,7 @@ import {
   type CreateTurnRequest,
   type DeviceIdentityResponse,
   type Provider,
+  type ProviderPreference,
   type Session,
   type TokenUsage,
   type Turn,
@@ -444,6 +447,14 @@ export class DougoStorage {
           session.createdAt,
           session.updatedAt,
         );
+      if (session.permission !== null) {
+        this.#db
+          .prepare(
+            `INSERT INTO session_permission_snapshots(session_id, permission_json)
+             VALUES (?, ?)`,
+          )
+          .run(session.id, canonicalJson(session.permission));
+      }
       return this.#appendWithinTransaction({ eventId, runtimeEvent });
     });
     try {
@@ -899,6 +910,86 @@ export class DougoStorage {
            ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
         )
         .run(CONVERSATION_DIRECTORY_SETTING_KEY, canonicalJson(parsed));
+      return parsed;
+    } catch (error) {
+      throw asStorageWriteError(error);
+    }
+  }
+
+  getProviderPreference(providerId: string): ProviderPreference | null {
+    this.#assertOpen();
+    const parsedProviderId = parseInput(() => ProviderIdSchema.parse(providerId));
+    const row = this.#db
+      .prepare(
+        `SELECT
+           provider_id AS providerId,
+           permission_profile_id AS permissionProfileId,
+           visible_in_sidebar AS visibleInSidebar
+         FROM provider_preferences
+         WHERE provider_id = ?`,
+      )
+      .get(parsedProviderId) as
+      | {
+          readonly permissionProfileId: string;
+          readonly providerId: string;
+          readonly visibleInSidebar: number;
+        }
+      | undefined;
+    if (row === undefined) return null;
+    try {
+      return ProviderPreferenceSchema.parse({
+        permissionProfileId: row.permissionProfileId,
+        providerId: row.providerId,
+        visibleInSidebar: row.visibleInSidebar === 1,
+      });
+    } catch (error) {
+      throw new StorageError("CORRUPT_READ_MODEL", { cause: error });
+    }
+  }
+
+  listProviderPreferences(): readonly ProviderPreference[] {
+    this.#assertOpen();
+    const rows = this.#db
+      .prepare(
+        `SELECT
+           provider_id AS providerId,
+           permission_profile_id AS permissionProfileId,
+           visible_in_sidebar AS visibleInSidebar
+         FROM provider_preferences
+         ORDER BY provider_id`,
+      )
+      .all() as readonly {
+      readonly permissionProfileId: string;
+      readonly providerId: string;
+      readonly visibleInSidebar: number;
+    }[];
+    try {
+      return rows.map((row) =>
+        ProviderPreferenceSchema.parse({
+          permissionProfileId: row.permissionProfileId,
+          providerId: row.providerId,
+          visibleInSidebar: row.visibleInSidebar === 1,
+        }),
+      );
+    } catch (error) {
+      throw new StorageError("CORRUPT_READ_MODEL", { cause: error });
+    }
+  }
+
+  upsertProviderPreference(preference: ProviderPreference): ProviderPreference {
+    this.#assertOpen();
+    const parsed = parseInput(() => ProviderPreferenceSchema.parse(preference));
+    try {
+      this.#db
+        .prepare(
+          `INSERT INTO provider_preferences(
+             provider_id, permission_profile_id, visible_in_sidebar
+           ) VALUES (?, ?, ?)
+           ON CONFLICT(provider_id) DO UPDATE SET
+             permission_profile_id = excluded.permission_profile_id,
+             visible_in_sidebar = excluded.visible_in_sidebar`,
+        )
+        .run(parsed.providerId, parsed.permissionProfileId, parsed.visibleInSidebar ? 1 : 0);
       return parsed;
     } catch (error) {
       throw asStorageWriteError(error);

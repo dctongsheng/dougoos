@@ -1,4 +1,6 @@
+import { readFile } from "node:fs/promises";
 import { delimiter } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type { AgentProvider } from "@dougoos/acp";
 import { describe, expect, it, vi } from "vitest";
@@ -117,7 +119,9 @@ describe("Agent providers", () => {
       { ANTHROPIC_AUTH_TOKEN: "gateway-token" },
       { CLAUDE_CODE_EXECUTABLE: "/unsafe/local/claude" },
     ]) {
-      expect(() => provider.resolveCommand({ env })).toThrow(CLAUDE_AGENT_DISABLED_REASON);
+      expect(() => provider.resolveCommand({ env, permissionProfileId: "external" })).toThrow(
+        CLAUDE_AGENT_DISABLED_REASON,
+      );
     }
     expect(
       providerProcessEnvironment({
@@ -164,9 +168,12 @@ describe("Agent providers", () => {
       ok: false,
       reason: expect.stringContaining("not installed"),
     });
-    expect(() => provider.resolveCommand({ env: {} })).toThrow(
-      "availability must be checked before invocation",
-    );
+    expect(() =>
+      provider.resolveCommand({
+        env: {},
+        permissionProfileId: provider.defaultPermissionProfileId,
+      }),
+    ).toThrow("availability must be checked before invocation");
   });
 
   it("selects only an auth method the Codex initialize response advertised", () => {
@@ -197,14 +204,18 @@ describe("Agent providers", () => {
 
   it("launches native ACP CLIs by exact path, fixed argv, and an env allowlist", async () => {
     const providers = [
-      [new CursorAgentProvider({ cliDiscovery: installedClis }), ["acp"]],
-      [new GrokProvider({ cliDiscovery: installedClis }), ["--no-auto-update", "agent", "stdio"]],
-      [new HermesProvider({ cliDiscovery: installedClis }), ["acp"]],
-      [new OpenClawProvider({ cliDiscovery: installedClis }), ["acp"]],
-      [new OpenCodeProvider({ cliDiscovery: installedClis }), ["acp"]],
+      [new CursorAgentProvider({ cliDiscovery: installedClis }), "agent", ["acp"]],
+      [
+        new GrokProvider({ cliDiscovery: installedClis }),
+        "default",
+        ["--no-auto-update", "--permission-mode", "default", "agent", "stdio"],
+      ],
+      [new HermesProvider({ cliDiscovery: installedClis }), "default", ["acp"]],
+      [new OpenClawProvider({ cliDiscovery: installedClis }), "external", ["acp"]],
+      [new OpenCodeProvider({ cliDiscovery: installedClis }), "default", ["acp"]],
     ] as const;
 
-    for (const [provider, args] of providers) {
+    for (const [provider, permissionProfileId, args] of providers) {
       await expect(provider.available()).resolves.toEqual({
         ok: true,
         version: "1.0.0-test",
@@ -217,6 +228,7 @@ describe("Agent providers", () => {
           PATH: "/usr/bin",
           XAI_API_KEY: "xai-secret",
         },
+        permissionProfileId,
       });
       expect(command.command).toBe(
         `/safe/bin/${commandsByProvider[provider.id as keyof typeof commandsByProvider]}`,
@@ -264,6 +276,7 @@ describe("Agent providers", () => {
         no_proxy: "metadata.internal",
         PATH: "/usr/bin",
       },
+      permissionProfileId: "default",
     });
     expect(command.env?.NO_PROXY).toBe(
       "internal.example,metadata.internal,127.0.0.1,localhost,::1",
@@ -280,16 +293,28 @@ describe("Agent providers", () => {
       nodeExecutable: "/safe/node",
     });
     await expect(provider.available()).resolves.toEqual({ ok: true, version: "0.0.31" });
-    expect(provider.resolveCommand({ env: { HOME: "/safe/home", PATH: "/usr/bin" } })).toEqual({
+    expect(
+      provider.resolveCommand({
+        env: { HOME: "/safe/home", PATH: "/usr/bin" },
+        permissionProfileId: "unrestricted",
+      }),
+    ).toEqual({
       args: ["/safe/pi-acp.js"],
       command: "/safe/node",
       env: {
         ELECTRON_RUN_AS_NODE: "1",
         HOME: "/safe/home",
         PATH: ["/safe/bin", "/usr/bin"].join(delimiter),
+        PI_ACP_PI_ARGS: "[]",
         PI_ACP_PI_COMMAND: "/safe/bin/pi",
       },
+      sessionConfiguration: { autoApprovePermissions: true },
     });
+  });
+
+  it("keeps the locked Pi ACP adapter patched to consume Provider-owned Pi argv", async () => {
+    const entry = fileURLToPath(import.meta.resolve("pi-acp"));
+    await expect(readFile(entry, "utf8")).resolves.toContain("PI_ACP_PI_ARGS");
   });
 
   it("keeps static process policy independent from negotiated capabilities", () => {
@@ -299,8 +324,80 @@ describe("Agent providers", () => {
       multiSessionPerProcess: false,
     });
     expect(provider).not.toHaveProperty("capabilities");
-    expect(provider.permissionEnforcement).toBe("requests_permission");
+    expect(provider.permissionEnforcement).toBe(
+      provider.permissionProfiles.find(
+        (profile) => profile.id === provider.defaultPermissionProfileId,
+      )?.permissionEnforcement,
+    );
     expect(new PiProvider().permissionEnforcement).toBe("not_guaranteed");
+  });
+
+  it("maps declared native permission profiles to fixed launch and ACP configuration", async () => {
+    const codex = new CodexProvider({
+      access: readable,
+      adapterEntry: "/safe/codex-adapter.js",
+      cliDiscovery: installedClis,
+      nodeExecutable: "/safe/node",
+    });
+    const cursor = new CursorAgentProvider({ cliDiscovery: installedClis });
+    const grok = new GrokProvider({ cliDiscovery: installedClis });
+    const hermes = new HermesProvider({ cliDiscovery: installedClis });
+    const opencode = new OpenCodeProvider({ cliDiscovery: installedClis });
+    const pi = new PiProvider({
+      access: readable,
+      adapterEntry: "/safe/pi-acp.js",
+      cliDiscovery: installedClis,
+      nodeExecutable: "/safe/node",
+    });
+    const openclaw = new OpenClawProvider({ cliDiscovery: installedClis });
+    await Promise.all(
+      [codex, cursor, grok, hermes, opencode, pi, openclaw].map((provider) => provider.available()),
+    );
+
+    expect(
+      codex.resolveCommand({ env: {}, permissionProfileId: "agent-full-access" }),
+    ).toMatchObject({
+      env: { INITIAL_AGENT_MODE: "agent-full-access" },
+      sessionConfiguration: { autoApprovePermissions: true },
+    });
+    expect(cursor.resolveCommand({ env: {}, permissionProfileId: "yolo" }).args).toEqual([
+      "--force",
+      "--sandbox",
+      "disabled",
+      "acp",
+    ]);
+    expect(
+      grok.resolveCommand({ env: {}, permissionProfileId: "bypass-permissions" }),
+    ).toMatchObject({
+      args: ["--no-auto-update", "--permission-mode", "bypassPermissions", "agent", "stdio"],
+      sessionConfiguration: { autoApprovePermissions: true },
+    });
+    expect(hermes.resolveCommand({ env: {}, permissionProfileId: "accept-edits" })).toMatchObject({
+      args: ["acp"],
+      sessionConfiguration: { modeId: "accept_edits" },
+    });
+    expect(hermes.resolveCommand({ env: {}, permissionProfileId: "yolo" })).toMatchObject({
+      args: ["--yolo", "acp"],
+      sessionConfiguration: { autoApprovePermissions: true },
+    });
+    expect(opencode.resolveCommand({ env: {}, permissionProfileId: "plan" })).toMatchObject({
+      args: ["acp"],
+      sessionConfiguration: { modeId: "plan" },
+    });
+    expect(opencode.resolveCommand({ env: {}, permissionProfileId: "auto" })).toMatchObject({
+      args: ["--auto", "acp"],
+      sessionConfiguration: { autoApprovePermissions: true },
+    });
+    expect(pi.resolveCommand({ env: {}, permissionProfileId: "read-only" })).toMatchObject({
+      env: { PI_ACP_PI_ARGS: '["--tools","read,grep,find,ls"]' },
+      sessionConfiguration: { autoApprovePermissions: false },
+    });
+    expect(openclaw.resolveCommand({ env: {}, permissionProfileId: "external" })).toMatchObject({
+      args: ["acp"],
+    });
+    expect(() =>
+      cursor.resolveCommand({ env: {}, permissionProfileId: "renderer-injected-yolo" }),
+    ).toThrow("Permission profile is not declared");
   });
 
   it("registers all eight built-in Providers without duplicating protocol code", () => {

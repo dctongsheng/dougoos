@@ -1438,16 +1438,6 @@ export const settingsFeatureFixtures = {
     readonly time: string;
     readonly tokens: string;
   }[],
-  initialAutoApprove: {
-    claude: false,
-    codex: true,
-    cursor: true,
-    grok: false,
-    hermes: false,
-    openclaw: false,
-    opencode: false,
-    pi: false,
-  } as Readonly<Record<AgentId, boolean>>,
   initialNotifyDone: true as boolean,
   initialNotifyWait: true as boolean,
   projects: [

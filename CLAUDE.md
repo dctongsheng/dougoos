@@ -42,7 +42,7 @@ mock/真实数据切换一律走 DataSource 接口 + settings 配置，禁止代
 
 ## 红线（不可协商）
 
-上报 payload 永不包含：prompt/消息/提示词文本、文件路径/cwd、密钥 token、用户名、可关联账号的标识。`localOnly=true` 时上报调度器不得启动。审批默认策略永远是"询问"。
+上报 payload 永不包含：prompt/消息/提示词文本、文件路径/cwd、密钥 token、用户名、可关联账号的标识。`localOnly=true` 时上报调度器不得启动。Agent 权限按 Provider 原生档位配置；可控 Provider 的新 Session 默认最高权限，边界与审计以 ADR-0004 为准。
 
 禁止：运行时插件加载、外部消息队列、账号体系、任务 Agent ACP 化、WebSocket（用 REST+SSE）、渲染层碰 Node/SQLite、轮询判静默类时序 hack。
 

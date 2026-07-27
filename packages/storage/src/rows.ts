@@ -20,6 +20,7 @@ export interface SessionRow {
   readonly cwd: string;
   readonly id: string;
   readonly lastErrorJson: string | null;
+  readonly permissionSnapshotJson: string | null;
   readonly providerId: string;
   readonly providerSessionId: string | null;
   readonly source: string;
@@ -83,6 +84,11 @@ const SESSION_COLUMNS = `
   title,
   provider_session_id AS providerSessionId,
   capability_snapshot_json AS capabilitySnapshotJson,
+  (
+    SELECT permission_json
+    FROM session_permission_snapshots
+    WHERE session_id = sessions.id
+  ) AS permissionSnapshotJson,
   state,
   last_error_json AS lastErrorJson,
   created_at AS createdAt,
@@ -164,6 +170,8 @@ export function mapSession(row: SessionRow): Session {
       createdAt: row.createdAt,
       cwd: row.cwd,
       id: row.id,
+      permission:
+        row.permissionSnapshotJson === null ? null : parseStoredJson(row.permissionSnapshotJson),
       providerId: row.providerId,
       providerSessionId: row.providerSessionId,
       source: row.source,

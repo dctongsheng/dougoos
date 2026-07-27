@@ -34,3 +34,5 @@ minimumReleaseAgeExclude:
   - "@aws-sdk/signature-v4-multi-region@3.996.42"
   - "@aws-sdk/token-providers@3.1095.0"
   - "@aws-sdk/xml-builder@3.972.37"
+patchedDependencies:
+  pi-acp@0.0.31: patches/pi-acp@0.0.31.patch

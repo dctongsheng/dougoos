@@ -77,12 +77,12 @@ test("SaaS and Landing production scenarios emit complete actual/diff/metadata e
 }) => {
   test.setTimeout(20 * 60_000);
   expect(browserName).toBe("chromium");
-  expect(saasProductionReferenceCases).toHaveLength(140);
-  expect(saasProductionOnlyCases).toHaveLength(15);
+  expect(saasProductionReferenceCases).toHaveLength(138);
+  expect(saasProductionOnlyCases).toHaveLength(16);
   expect(landingProductionReferenceCases).toHaveLength(15);
   expect(landingProductionOnlyCases).toHaveLength(1);
-  expect(allProductionReferenceCases).toHaveLength(155);
-  expect(allProductionOnlyCases).toHaveLength(16);
+  expect(allProductionReferenceCases).toHaveLength(153);
+  expect(allProductionOnlyCases).toHaveLength(17);
 
   const result = await captureProductionSet(browser);
   expect(result.errors, result.errors.slice(0, 80).join("\n")).toEqual([]);
@@ -102,20 +102,36 @@ test("subscribed snapshots atomically rerender and old sources cannot publish af
     await page.locator("[data-source-emit-current=true]").click();
     await expect(page.getByRole("button", { exact: true, name: "SOURCE_A_R2" })).toBeVisible();
 
-    await page.locator(".agent-nav-primary").filter({ hasText: "Pi" }).click();
+    const sourceAAgentName = await page
+      .locator(".picker-button")
+      .first()
+      .locator("strong")
+      .textContent();
+    expect(sourceAAgentName).not.toBeNull();
+    await page
+      .locator(".agent-nav-primary")
+      .filter({ hasText: sourceAAgentName ?? "" })
+      .click();
     await expect(page.locator(".message-list")).toContainText("SOURCE_A_R2_MESSAGE");
 
     await page.locator('[data-nav-label="长程任务"]').click();
     await expect(page.locator(".queue-card").first()).toContainText("完成");
 
     await page.getByLabel("设置").click();
-    await page.locator(".agent-config-tabs button").filter({ hasText: "Pi" }).click();
-    await expect(page.locator(".agent-config-panel .enabled-label")).toHaveText("已停用");
+    await expect(page.locator(".agent-config-tabs button")).toHaveCount(1);
+    await expect(page.locator(".permission-profile-field select")).toHaveValue("agent-full-access");
 
     await page.locator('[data-nav-label="新建任务"]').click();
     await page.locator("[data-source-swap=true]").click();
     await expect(page.getByRole("button", { exact: true, name: "SOURCE_B" })).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("data-source-unsubscribed", "SOURCE_A");
+    const sourceBAgentName = await page
+      .locator(".picker-button")
+      .first()
+      .locator("strong")
+      .textContent();
+    expect(sourceBAgentName).not.toBeNull();
+    expect(sourceBAgentName).not.toBe(sourceAAgentName);
 
     await page.locator("[data-source-emit-old=true]").click();
     await page.waitForTimeout(50);
@@ -170,7 +186,7 @@ test("recovery mode disables every reachable demo write without mutating state",
 
     await page.getByLabel("设置").click();
     await expect(page.locator(".visibility-grid button").first()).toBeDisabled();
-    await expect(page.locator(".agent-config-panel .switch").first()).toBeDisabled();
+    await expect(page.locator(".permission-profile-field select").first()).toBeDisabled();
   } finally {
     await server.close();
   }

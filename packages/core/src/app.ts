@@ -17,22 +17,29 @@ import {
   HealthLiveResponseSchema,
   HealthReadyResponseSchema,
   ListAgentCliInstallationsResponseSchema,
+  ListProviderPreferencesResponseSchema,
   ListProvidersResponseSchema,
   MessageIdSchema,
   ProviderDoctorResponseSchema,
   ProviderIdSchema,
+  ProviderPreferenceResponseSchema,
+  ProviderPreferenceRouteParamsSchema,
   ResolveApprovalRequestSchema,
   ResolveApprovalResponseSchema,
   PreferencesResponseSchema,
   SessionRouteParamsSchema,
   SessionIdSchema,
+  SessionPermissionSnapshotSchema,
   SessionSchema,
   SnapshotQuerySchema,
   TurnIdSchema,
   TurnRouteParamsSchema,
+  UpdateProviderPreferenceRequestSchema,
   UpdatePreferencesRequestSchema,
   isTerminalTurnStatus,
   parseEventStreamAfterSeq,
+  type Provider,
+  type ProviderPreference,
   type Session,
 } from "@dougoos/shared";
 import { isStorageError } from "@dougoos/storage";
@@ -48,7 +55,7 @@ const JSON_HEADERS = {
   "cache-control": "no-store",
   "content-type": "application/json; charset=utf-8",
 } as const;
-const CORS_METHODS = new Set(["GET", "POST"]);
+const CORS_METHODS = new Set(["GET", "POST", "PUT"]);
 const CORS_REQUEST_HEADERS = new Set(["authorization", "content-type"]);
 
 type CoreBindings = { Bindings: HttpBindings };
@@ -345,6 +352,66 @@ export class CoreRuntime {
     });
   }
 
+  async #providers(): Promise<readonly Provider[]> {
+    return ListProvidersResponseSchema.parse({
+      providers: await this.#deps.registry.listProviders(),
+    }).providers;
+  }
+
+  async #providerPreferences(): Promise<readonly ProviderPreference[]> {
+    const providers = await this.#providers();
+    const storedByProviderId = new Map(
+      this.#deps.storage
+        .listProviderPreferences()
+        .map((preference) => [preference.providerId, preference]),
+    );
+    return ListProviderPreferencesResponseSchema.parse({
+      preferences: providers
+        .map(
+          (provider): ProviderPreference =>
+            storedByProviderId.get(provider.id) ?? {
+              permissionProfileId: provider.defaultPermissionProfileId,
+              providerId: provider.id,
+              visibleInSidebar: true,
+            },
+        )
+        .sort((left, right) => left.providerId.localeCompare(right.providerId)),
+    }).preferences;
+  }
+
+  #unsupportedPermissionProfile(providerId: string): CoreError {
+    return new CoreError("PROVIDER_CAPABILITY_UNSUPPORTED", {
+      details: {
+        capability: "permission.profile",
+        operation: "create_session",
+        providerId,
+      },
+      httpStatus: 409,
+      retryable: false,
+    });
+  }
+
+  async #resolvePermissionProfile(
+    providerId: string,
+    requestedProfileId: string | undefined,
+  ): Promise<{ readonly profileId: string; readonly provider: Provider }> {
+    const provider = (await this.#providers()).find((candidate) => candidate.id === providerId);
+    if (provider === undefined) {
+      throw new CoreError("PROVIDER_UNAVAILABLE", {
+        details: { operation: "create_session", providerId },
+        httpStatus: 503,
+        retryable: true,
+      });
+    }
+    const stored = this.#deps.storage.getProviderPreference(providerId);
+    const profileId =
+      requestedProfileId ?? stored?.permissionProfileId ?? provider.defaultPermissionProfileId;
+    if (!provider.permissionProfiles.some((profile) => profile.id === profileId)) {
+      throw this.#unsupportedPermissionProfile(providerId);
+    }
+    return { profileId, provider };
+  }
+
   async #prepareConversationDirectoryForSession(cwd: string): Promise<void> {
     const configured = this.#deps.storage.getConversationDirectory();
     const effective = configured ?? this.#defaultConversationDirectory;
@@ -398,7 +465,7 @@ export class CoreRuntime {
           new Response(null, {
             headers: {
               "access-control-allow-headers": "authorization, content-type",
-              "access-control-allow-methods": "GET, POST",
+              "access-control-allow-methods": "GET, POST, PUT",
               "access-control-max-age": "600",
             },
             status: 204,
@@ -462,8 +529,40 @@ export class CoreRuntime {
     });
 
     app.get("/api/providers", async () => {
-      const providers = await this.#deps.registry.listProviders();
+      const providers = await this.#providers();
       return jsonResponse(ListProvidersResponseSchema.parse({ providers }));
+    });
+
+    app.get("/api/provider-preferences", async () =>
+      jsonResponse(
+        ListProviderPreferencesResponseSchema.parse({
+          preferences: await this.#providerPreferences(),
+        }),
+      ),
+    );
+
+    app.put("/api/provider-preferences/:providerId", async (c) => {
+      const params = parseWith(ProviderPreferenceRouteParamsSchema, {
+        providerId: c.req.param("providerId"),
+      });
+      const request = parseWith(UpdateProviderPreferenceRequestSchema, await parseJson(c));
+      const provider = (await this.#providers()).find(
+        (candidate) => candidate.id === params.providerId,
+      );
+      if (provider === undefined) {
+        return jsonResponse(notFound("provider", params.providerId), 404);
+      }
+      if (
+        !provider.permissionProfiles.some((profile) => profile.id === request.permissionProfileId)
+      ) {
+        throw this.#unsupportedPermissionProfile(provider.id);
+      }
+      const preference = this.#deps.storage.upsertProviderPreference({
+        permissionProfileId: request.permissionProfileId,
+        providerId: provider.id,
+        visibleInSidebar: request.visibleInSidebar,
+      });
+      return jsonResponse(ProviderPreferenceResponseSchema.parse({ preference }));
     });
 
     app.get("/api/preferences", () => jsonResponse(this.#preferences()));
@@ -510,18 +609,40 @@ export class CoreRuntime {
 
     app.post("/api/sessions", async (c) => {
       const request = parseWith(CreateSessionRequestSchema, await parseJson(c));
+      const permissionResolution = await this.#resolvePermissionProfile(
+        request.providerId,
+        request.permissionProfileId,
+      );
       const sessionId = this.#newSessionId();
       let createdRegistrySession = false;
       try {
         await this.#prepareConversationDirectoryForSession(request.cwd);
-        const runtime = await this.#deps.registry.createSession({ ...request, sessionId });
+        const runtime = await this.#deps.registry.createSession({
+          cwd: request.cwd,
+          permissionProfileId: permissionResolution.profileId,
+          providerId: request.providerId,
+          sessionId,
+        });
         createdRegistrySession = true;
+        const permission = SessionPermissionSnapshotSchema.parse(runtime.permission);
+        const effectiveProfile = permissionResolution.provider.permissionProfiles.find(
+          (profile) => profile.id === permission.effectiveProfileId,
+        );
+        if (
+          permission.requestedProfileId !== permissionResolution.profileId ||
+          effectiveProfile === undefined ||
+          permission.mechanism !== effectiveProfile.mechanism ||
+          permission.permissionEnforcement !== effectiveProfile.permissionEnforcement
+        ) {
+          throw this.#unsupportedPermissionProfile(request.providerId);
+        }
         const now = this.#now();
         const session: Session = SessionSchema.parse({
           capabilities: runtime.capabilities,
           createdAt: now,
           cwd: request.cwd,
           id: sessionId,
+          permission,
           providerId: request.providerId,
           providerSessionId: runtime.providerSessionId,
           source: "dougoos",

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { saasFixture } from "./fixtures.js";
 import { Shell } from "./Shell.js";
 import { initialSaasState, saasReducer } from "./state.js";
-import type { SaasFixture, SaasState } from "./types.js";
+import type { ChatViewSnapshot, SaasFixture, SaasState } from "./types.js";
 
 const conversationDirectory = "/Users/tester/Documents/Dogoos";
 const conversationSessionId = "session:conversation:one";
@@ -99,5 +99,38 @@ describe("Shell PROJECTS projection", () => {
     expect(
       markup.match(new RegExp(`data-session-id="${conversationSessionId}"`, "gu")),
     ).toHaveLength(1);
+  });
+
+  it("does not expose the prototype Claude pinned route in real mode", () => {
+    const chat: ChatViewSnapshot = {
+      agentCatalog: [],
+      cliInstallations: [],
+      providerPreferences: [],
+      providers: [],
+      selectedSessionIds: {},
+      sessions: [],
+    };
+    const fixtureState = shellState();
+    const state: SaasState = {
+      ...fixtureState,
+      chat,
+      sidebarVisibility: {
+        ...fixtureState.sidebarVisibility,
+        "project-pinned": true,
+      },
+    };
+    const markup = renderToStaticMarkup(
+      <Shell
+        dispatch={() => undefined}
+        onSessionSelect={() => undefined}
+        state={state}
+        writesDisabled={false}
+      >
+        <main>content</main>
+      </Shell>,
+    );
+
+    expect(markup).not.toContain("users 表 schema 迁移");
+    expect(markup).not.toContain("限流方案对比 · 3 agents");
   });
 });

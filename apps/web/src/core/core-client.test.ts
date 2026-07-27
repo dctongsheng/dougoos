@@ -1,8 +1,11 @@
 import {
   AgentEventEnvelopeSchema,
   GlobalSnapshotSchema,
+  ListProviderPreferencesResponseSchema,
   PreferencesResponseSchema,
+  ProviderPreferenceResponseSchema,
   UpdatePreferencesRequestSchema,
+  UpdateProviderPreferenceRequestSchema,
   type AgentEventEnvelope,
 } from "@dougoos/shared";
 import { describe, expect, it } from "vitest";
@@ -94,6 +97,36 @@ describe("CoreApiClient", () => {
     expect(requests[0]?.init?.body).toBe(
       JSON.stringify({ conversationDirectory: "/Users/example/Workspace/Chats" }),
     );
+  });
+
+  it("loads and updates provider preferences with authenticated strict requests", async () => {
+    const update = UpdateProviderPreferenceRequestSchema.parse({
+      permissionProfileId: "agent-full-access",
+      visibleInSidebar: false,
+    });
+    const list = ListProviderPreferencesResponseSchema.parse({
+      preferences: [{ ...update, providerId: "cursor-agent" }],
+    });
+    const updated = ProviderPreferenceResponseSchema.parse({
+      preference: { ...update, providerId: "cursor-agent" },
+    });
+    const requests: Array<{ readonly init: RequestInit | undefined; readonly url: string }> = [];
+    const fakeFetch: CoreFetch = async (input, init) => {
+      requests.push({ init, url: String(input) });
+      return Response.json((init?.method ?? "GET") === "PUT" ? updated : list);
+    };
+    const client = new CoreApiClient(connection, fakeFetch);
+
+    await expect(client.listProviderPreferences()).resolves.toEqual(list);
+    await expect(client.updateProviderPreference("cursor-agent", update)).resolves.toEqual(updated);
+
+    expect(requests.map((request) => request.url)).toEqual([
+      "http://127.0.0.1:41337/api/provider-preferences",
+      "http://127.0.0.1:41337/api/provider-preferences/cursor-agent",
+    ]);
+    expect(requests[1]?.init?.method).toBe("PUT");
+    expect(requests[1]?.init?.body).toBe(JSON.stringify(update));
+    expect(new Headers(requests[1]?.init?.headers).get("authorization")).toBe(`Bearer ${TOKEN}`);
   });
 
   it("returns a safe structured error without leaking credentials", async () => {

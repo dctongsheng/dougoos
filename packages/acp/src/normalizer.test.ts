@@ -7,9 +7,22 @@ import type { AgentProvider } from "./types.js";
 const provider: AgentProvider = {
   available: () => Promise.resolve({ ok: true, version: "fixture" }),
   chooseAuthMethod: () => null,
+  defaultPermissionProfileId: "ask",
   displayName: "Fixture",
   id: "fixture",
   permissionEnforcement: "requests_permission",
+  permissionProfiles: [
+    {
+      description: "Ask before fixture operations.",
+      id: "ask",
+      label: "Ask",
+      mechanism: "launch",
+      permissionEnforcement: "requests_permission",
+      requiresNewSession: true,
+      risk: "guarded",
+      semantic: "ask",
+    },
+  ],
   processPolicy: { maxSessionsPerProcess: 1, multiSessionPerProcess: false },
   resolveCommand: () => ({ args: [], command: process.execPath }),
 };

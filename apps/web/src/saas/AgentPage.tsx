@@ -7,7 +7,11 @@ import type {
   ProductionStateNoticeFixture,
 } from "./feature-fixtures.js";
 import { agentById } from "./fixtures.js";
-import { isAbsoluteWorkspacePath, resolveInitialAgentCwd } from "./home-task.js";
+import {
+  hasValidPermissionProfile,
+  isAbsoluteWorkspacePath,
+  resolveInitialAgentCwd,
+} from "./home-task.js";
 import { MarkdownMessage } from "./MarkdownMessage.js";
 import type {
   AgentId,
@@ -95,14 +99,21 @@ export function AgentPage({
   const agent = agentById(fixture, agentId);
   const agentFixtures = fixture.features.agent;
   const messagesByAgent = featureState.agentMessages;
-  const draft = featureState.agentDrafts[agentId];
+  const draft = featureState.agentDrafts[agentId] ?? "";
   const composing = useRef(false);
   const timers = useRef<readonly number[]>([]);
   const timerGeneration = useRef(0);
-  const messages = messagesByAgent[agentId];
+  const messages = messagesByAgent[agentId] ?? [];
+  const histories = agentFixtures.histories[agentId] ?? [];
   const displayedMessages: readonly AgentMessage[] =
     dataMode === "real" ? messages.filter((message) => message.type !== "think") : messages;
   const provider = chat?.providers.find((candidate) => candidate.agentId === agentId);
+  const providerPreference = chat?.providerPreferences.find(
+    (preference) => preference.providerId === provider?.id,
+  );
+  const permissionProfileIsValid =
+    dataMode !== "real" ||
+    hasValidPermissionProfile(provider, providerPreference?.permissionProfileId);
   const selectedSessionId = chat?.selectedSessionIds[agentId];
   const selectedSession = chat?.sessions.find((candidate) => candidate.id === selectedSessionId);
   const [cwd, setCwd] = useState(
@@ -131,10 +142,21 @@ export function AgentPage({
     selectedSession?.state === "awaiting_approval" ||
     selectedSession?.state === "cancelling";
   const validCwd = isAbsoluteWorkspacePath(cwd);
+  const canReuseSelectedSession =
+    selectedSession !== undefined &&
+    selectedSession.providerId === provider?.id &&
+    selectedSession.cwd === cwd &&
+    selectedSession.state !== "closed" &&
+    selectedSession.state !== "crashed";
+  const permissionBlocksNextSend = !permissionProfileIsValid && !canReuseSelectedSession;
   const composerDisabled =
     writesDisabled ||
     sessionBusy ||
-    (dataMode === "real" && (provider?.status !== "available" || !validCwd));
+    (dataMode === "real" &&
+      (!provider?.installed ||
+        provider.status !== "available" ||
+        !validCwd ||
+        permissionBlocksNextSend));
 
   useEffect(
     () => () => {
@@ -281,7 +303,15 @@ export function AgentPage({
   };
 
   const createSession = () => {
-    if (writesDisabled || provider?.status !== "available" || !validCwd) return;
+    if (
+      writesDisabled ||
+      !provider?.installed ||
+      provider.status !== "available" ||
+      !validCwd ||
+      !permissionProfileIsValid
+    ) {
+      return;
+    }
     void execute({
       agentId,
       cwd,
@@ -342,8 +372,9 @@ export function AgentPage({
             </span>
           </div>
           <small>
-            ⌂ {agentProject(activeCwd)} · {agent.model} · {activeCwd} · ⏱ {agentRuntime[agent.id]} ·{" "}
-            {compactAgentTokens(agent.tokenCount)} tok · <span>${agent.cost.toFixed(2)}</span>
+            ⌂ {agentProject(activeCwd)} · {agent.model} · {activeCwd} · ⏱{" "}
+            {agentRuntime[agent.id] ?? "0m00s"} · {compactAgentTokens(agent.tokenCount)} tok ·{" "}
+            <span>${agent.cost.toFixed(2)}</span>
           </small>
         </div>
         {agentId === "hermes" ? null : (
@@ -385,11 +416,13 @@ export function AgentPage({
               }}
               value={provider?.id ?? ""}
             >
-              {chat?.providers.map((candidate) => (
-                <option key={candidate.id} value={candidate.id}>
-                  {candidate.displayName} · {candidate.status}
-                </option>
-              ))}
+              {chat?.providers
+                .filter((candidate) => candidate.installed)
+                .map((candidate) => (
+                  <option key={candidate.id} value={candidate.id}>
+                    {candidate.displayName} · {candidate.status}
+                  </option>
+                ))}
             </select>
           </label>
           <label className="real-chat-cwd">
@@ -405,7 +438,13 @@ export function AgentPage({
             选择目录
           </button>
           <button
-            disabled={writesDisabled || provider?.status !== "available" || !validCwd}
+            disabled={
+              writesDisabled ||
+              !provider?.installed ||
+              provider.status !== "available" ||
+              !validCwd ||
+              !permissionProfileIsValid
+            }
             onClick={createSession}
             type="button"
           >
@@ -416,6 +455,14 @@ export function AgentPage({
               ? "尚未选择 Session；首次发送会显式创建"
               : `${selectedSession.title} · ${selectedSession.state} · ${selectedSession.id}`}
           </small>
+          {!permissionProfileIsValid ? (
+            <small className="permission-profile-stale">
+              权限档位已失效；
+              {canReuseSelectedSession
+                ? "当前 Session 可继续使用，新建前请到配置中重新选择。"
+                : "新建 Session 已被阻止，请到配置中重新选择。"}
+            </small>
+          ) : null}
         </section>
       ) : null}
 
@@ -492,10 +539,10 @@ export function AgentPage({
         </section>
       ) : tab === "history" ? (
         <section className="agent-module page-stack-inner">
-          {agentFixtures.histories[agentId].length === 0 ? (
+          {histories.length === 0 ? (
             <div className="module-empty">暂无历史会话</div>
           ) : (
-            agentFixtures.histories[agentId].map((history) => (
+            histories.map((history) => (
               <article className="panel history-card" key={history.sessionId}>
                 <div>
                   <strong>{history.summary}</strong>

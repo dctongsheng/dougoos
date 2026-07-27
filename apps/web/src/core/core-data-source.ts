@@ -1,11 +1,16 @@
-import type { AgentCliInstallation, Provider, SessionSummary } from "@dougoos/shared";
+import type {
+  AgentCliInstallation,
+  Provider,
+  ProviderPreference,
+  SessionSummary,
+} from "@dougoos/shared";
 
 import { cloneSaasFixture } from "../saas/fixtures.js";
 import type { AgentHistoryItem, AgentMessage } from "../saas/feature-fixtures.js";
 import {
-  AGENT_IDS,
   type AgentFixture,
   type AgentId,
+  type AgentCatalogItem,
   type ChatViewSnapshot,
   type RuntimePresentation,
   type SaasDataCommand,
@@ -56,32 +61,32 @@ function defaultWait(delayMs: number, signal: AbortSignal): Promise<void> {
   });
 }
 
-function knownAgentId(providerId: string): AgentId | null {
-  const normalized = providerId.toLowerCase();
-  for (const agentId of AGENT_IDS) {
-    if (normalized.includes(agentId)) return agentId;
-  }
-  return null;
+export function assignProviders(providers: readonly Provider[]): ReadonlyMap<string, AgentId> {
+  return new Map(providers.map((provider) => [provider.id, provider.id]));
 }
 
-export function assignProviders(providers: readonly Provider[]): ReadonlyMap<string, AgentId> {
-  const assignments = new Map<string, AgentId>();
-  const used = new Set<AgentId>();
-  for (const provider of providers) {
-    const known = knownAgentId(provider.id);
-    if (known !== null && !used.has(known)) {
-      assignments.set(provider.id, known);
-      used.add(known);
-    }
-  }
-  for (const provider of providers) {
-    if (assignments.has(provider.id)) continue;
-    const fallback = AGENT_IDS.find((agentId) => !used.has(agentId));
-    if (fallback === undefined) break;
-    assignments.set(provider.id, fallback);
-    used.add(fallback);
-  }
-  return assignments;
+export function agentCatalogFrom(
+  providers: readonly Provider[],
+  cliInstallations: readonly AgentCliInstallation[],
+): readonly AgentCatalogItem[] {
+  const providerById = new Map(providers.map((provider) => [provider.id, provider]));
+  const seen = new Set<string>();
+  return cliInstallations.flatMap((cli) => {
+    const providerId = cli.integratedProviderId;
+    if (providerId === undefined || seen.has(providerId)) return [];
+    const provider = providerById.get(providerId);
+    if (provider === undefined) return [];
+    seen.add(providerId);
+    return [
+      {
+        agentId: provider.id,
+        cli,
+        displayName: provider.displayName,
+        providerId: provider.id,
+        status: provider.status,
+      },
+    ];
+  });
 }
 
 function statusForSession(
@@ -101,31 +106,40 @@ function statusForSession(
 }
 
 const realOnlyAgentPresentation: Readonly<
-  Partial<Record<AgentId, Pick<AgentFixture, "glyph" | "model" | "tone">>>
+  Record<string, Pick<AgentFixture, "glyph" | "model" | "tone">>
 > = {
   openclaw: { glyph: "⌁", model: "default", tone: "#ff6b6b" },
   opencode: { glyph: "◈", model: "auto", tone: "#d6e4ff" },
 };
 
+const fixtureAgentAlias: Readonly<Record<string, string>> = {
+  "claude-code": "claude",
+  "cursor-agent": "cursor",
+};
+
 function realProviderAgent(
   agentId: AgentId,
-  provider: Provider,
+  provider: Provider | undefined,
   summary: SessionSummary | undefined,
+  installed: boolean,
+  baseAgents: readonly AgentFixture[],
 ): AgentFixture {
+  const alias = fixtureAgentAlias[agentId] ?? agentId;
+  const base = baseAgents.find((agent) => agent.id === alias);
   const presentation = realOnlyAgentPresentation[agentId];
   return {
     cost: 0,
     cwd: summary?.cwd ?? "~",
-    enabled: provider.status === "available",
-    glyph: presentation?.glyph ?? "◇",
+    enabled: installed && provider?.status === "available",
+    glyph: base?.glyph ?? presentation?.glyph ?? "◇",
     id: agentId,
     last: summary?.lastMessagePreview ?? "—",
-    model: provider.version ?? presentation?.model ?? provider.id,
-    name: provider.displayName,
+    model: provider?.version ?? base?.model ?? presentation?.model ?? agentId,
+    name: provider?.displayName ?? agentId,
     status: statusForSession(summary?.state),
     task: summary === undefined ? "待命" : sessionDisplayTitle(summary),
     tokenCount: 0,
-    tone: presentation?.tone ?? "#8a968e",
+    tone: base?.tone ?? presentation?.tone ?? "#8a968e",
   };
 }
 
@@ -193,54 +207,45 @@ export function fixtureFromCoreState(
   providers: readonly Provider[],
   selectedSessionIds: ReadonlyMap<AgentId, string> = new Map(),
   conversationDirectory = "",
+  cliInstallations: readonly AgentCliInstallation[] = [],
 ): SaasFixture {
   const base = cloneSaasFixture();
-  const assignments = assignProviders(providers);
+  const catalog = agentCatalogFrom(providers, cliInstallations);
+  const installedProviderIds = new Set(catalog.map((item) => item.providerId));
+  const providerById = new Map(providers.map((provider) => [provider.id, provider]));
   const latestByAgent = new Map<AgentId, SessionSummary>();
   for (const summary of Object.values(state.summaries).sort((left, right) =>
     right.updatedAt.localeCompare(left.updatedAt),
   )) {
-    const agentId = assignments.get(summary.providerId);
-    if (agentId !== undefined && !latestByAgent.has(agentId)) {
-      latestByAgent.set(agentId, summary);
+    if (!latestByAgent.has(summary.providerId)) {
+      latestByAgent.set(summary.providerId, summary);
     }
   }
   for (const [agentId, sessionId] of selectedSessionIds) {
     const selected = state.summaries[sessionId];
-    if (selected !== undefined && assignments.get(selected.providerId) === agentId) {
+    if (selected !== undefined && selected.providerId === agentId) {
       latestByAgent.set(agentId, selected);
     }
   }
-  const providerByAgent = new Map<AgentId, Provider>();
-  for (const provider of providers) {
-    const agentId = assignments.get(provider.id);
-    if (agentId !== undefined) providerByAgent.set(agentId, provider);
-  }
-  const fixtureAgents = base.agents.map((agent) => {
-    const provider = providerByAgent.get(agent.id);
-    const summary = latestByAgent.get(agent.id);
-    return {
-      ...agent,
-      cost: 0,
-      cwd: summary?.cwd ?? "~",
-      enabled: provider?.status === "available",
-      last: summary?.lastMessagePreview ?? "—",
-      model: provider?.version ?? provider?.id ?? agent.model,
-      name: provider?.displayName ?? agent.name,
-      status: statusForSession(summary?.state),
-      task: summary === undefined ? "待命" : sessionDisplayTitle(summary),
-      tokenCount: 0,
-    };
-  });
-  const prototypeAgentIds = new Set(fixtureAgents.map((agent) => agent.id));
-  const realOnlyAgents = providers.flatMap((provider) => {
-    const agentId = assignments.get(provider.id);
-    if (agentId === undefined || prototypeAgentIds.has(agentId)) return [];
-    return [realProviderAgent(agentId, provider, latestByAgent.get(agentId))];
-  });
-  const agents: readonly AgentFixture[] = [...fixtureAgents, ...realOnlyAgents];
+  const archivedProviderIds = Object.values(state.summaries)
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+    .map((summary) => summary.providerId)
+    .filter(
+      (providerId, index, all) =>
+        !installedProviderIds.has(providerId) && all.indexOf(providerId) === index,
+    );
+  const agentIds = [...catalog.map((item) => item.providerId), ...archivedProviderIds];
+  const agents: readonly AgentFixture[] = agentIds.map((agentId) =>
+    realProviderAgent(
+      agentId,
+      providerById.get(agentId),
+      latestByAgent.get(agentId),
+      installedProviderIds.has(agentId),
+      base.agents,
+    ),
+  );
   const initialMessages = Object.fromEntries(
-    AGENT_IDS.map((agentId) => {
+    agentIds.map((agentId) => {
       const summary = latestByAgent.get(agentId);
       const session = summary === undefined ? undefined : state.sessions[summary.id];
       return [
@@ -258,12 +263,11 @@ export function fixtureFromCoreState(
   const sessionsForPath = (path: string) =>
     summaries
       .filter((summary) => summary.cwd === path)
-      .flatMap((summary) => {
-        const agentId = assignments.get(summary.providerId);
-        return agentId === undefined
-          ? []
-          : [{ agentId, sessionId: summary.id, title: sessionDisplayTitle(summary) }];
-      });
+      .map((summary) => ({
+        agentId: summary.providerId,
+        sessionId: summary.id,
+        title: sessionDisplayTitle(summary),
+      }));
   const paths = [
     ...new Set(
       summaries.map((summary) => summary.cwd).filter((path) => path !== conversationDirectory),
@@ -290,7 +294,7 @@ export function fixtureFromCoreState(
   const notifications = Object.values(state.pendingApprovals).map((approval) => {
     const summary = state.summaries[approval.sessionId];
     return {
-      agentId: summary === undefined ? null : (assignments.get(summary.providerId) ?? null),
+      agentId: summary?.providerId ?? null,
       id: approval.id,
       read: false,
       text: approval.description || approval.title,
@@ -299,10 +303,10 @@ export function fixtureFromCoreState(
     };
   });
   const histories = Object.fromEntries(
-    AGENT_IDS.map((agentId) => [
+    agentIds.map((agentId) => [
       agentId,
       summaries.flatMap((summary): readonly AgentHistoryItem[] => {
-        if (assignments.get(summary.providerId) !== agentId) return [];
+        if (summary.providerId !== agentId) return [];
         return [
           {
             date: summary.updatedAt.slice(5, 16).replace("T", " "),
@@ -337,46 +341,41 @@ function chatFromCoreState(
   providers: readonly Provider[],
   selectedSessionIds: ReadonlyMap<AgentId, string>,
   cliInstallations: readonly AgentCliInstallation[] = [],
+  providerPreferences: readonly ProviderPreference[] = [],
 ): ChatViewSnapshot {
-  const assignments = assignProviders(providers);
+  const agentCatalog = agentCatalogFrom(providers, cliInstallations);
+  const installedProviderIds = new Set(agentCatalog.map((item) => item.providerId));
   return {
+    agentCatalog,
     cliInstallations,
-    providers: providers.flatMap((provider) => {
-      const agentId = assignments.get(provider.id);
-      if (agentId === undefined) return [];
-      return [
-        {
-          agentId,
-          capabilities: provider.capabilities,
-          displayName: provider.displayName,
-          id: provider.id,
-          ...(provider.reason === undefined ? {} : { reason: provider.reason }),
-          ...(provider.remediation === undefined ? {} : { remediation: provider.remediation }),
-          status: provider.status,
-          ...(provider.version === undefined ? {} : { version: provider.version }),
-        },
-      ];
-    }),
+    providerPreferences,
+    providers: providers.map((provider) => ({
+      agentId: provider.id,
+      capabilities: provider.capabilities,
+      defaultPermissionProfileId: provider.defaultPermissionProfileId,
+      displayName: provider.displayName,
+      id: provider.id,
+      installed: installedProviderIds.has(provider.id),
+      permissionProfiles: provider.permissionProfiles,
+      ...(provider.reason === undefined ? {} : { reason: provider.reason }),
+      ...(provider.remediation === undefined ? {} : { remediation: provider.remediation }),
+      status: provider.status,
+      ...(provider.version === undefined ? {} : { version: provider.version }),
+    })),
     selectedSessionIds: Object.fromEntries(selectedSessionIds),
     sessions: Object.values(state.summaries)
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
-      .flatMap((summary) => {
-        const agentId = assignments.get(summary.providerId);
-        if (agentId === undefined) return [];
-        return [
-          {
-            activeTurnId: summary.activeTurnId,
-            agentId,
-            cwd: summary.cwd,
-            id: summary.id,
-            messageCount: summary.messageCount,
-            providerId: summary.providerId,
-            state: summary.state,
-            title: sessionDisplayTitle(summary),
-            updatedAt: summary.updatedAt,
-          },
-        ];
-      }),
+      .map((summary) => ({
+        activeTurnId: summary.activeTurnId,
+        agentId: summary.providerId,
+        cwd: summary.cwd,
+        id: summary.id,
+        messageCount: summary.messageCount,
+        providerId: summary.providerId,
+        state: summary.state,
+        title: sessionDisplayTitle(summary),
+        updatedAt: summary.updatedAt,
+      })),
   };
 }
 
@@ -396,6 +395,7 @@ export class CoreDataSource implements SaasDataSource {
   #generation = 0;
   #lifecycle: AbortController | null = null;
   #openedSessionIds = new Set<string>();
+  #providerPreferences: readonly ProviderPreference[] = [];
   #providers: readonly Provider[] = [];
   #revision = 0;
   #selectedSessionIds = new Map<AgentId, string>();
@@ -453,6 +453,28 @@ export class CoreDataSource implements SaasDataSource {
             signal,
           );
           this.#conversationDirectory = preferences.conversationDirectory;
+          this.#publish();
+          return;
+        }
+        case "provider.preference.update": {
+          const result = await client.updateProviderPreference(
+            command.providerId,
+            {
+              permissionProfileId: command.permissionProfileId,
+              visibleInSidebar: command.visibleInSidebar,
+            },
+            signal,
+          );
+          this.#providerPreferences = this.#providerPreferences.map((preference) =>
+            preference.providerId === result.preference.providerId ? result.preference : preference,
+          );
+          if (
+            !this.#providerPreferences.some(
+              (preference) => preference.providerId === result.preference.providerId,
+            )
+          ) {
+            this.#providerPreferences = [...this.#providerPreferences, result.preference];
+          }
           this.#publish();
           return;
         }
@@ -555,13 +577,15 @@ export class CoreDataSource implements SaasDataSource {
     const connection = await this.#connectionProvider.getCoreConnection();
     signal.throwIfAborted();
     const client = new CoreApiClient(connection, this.#fetch);
-    const [ready, preferences, providers, cliInstallations, snapshot] = await Promise.all([
-      client.getReady(signal),
-      client.getPreferences(signal),
-      client.listProviders(signal),
-      client.listAgentCliInstallations(signal),
-      client.getGlobalSnapshot([...this.#openedSessionIds], signal),
-    ]);
+    const [ready, preferences, providerPreferences, providers, cliInstallations, snapshot] =
+      await Promise.all([
+        client.getReady(signal),
+        client.getPreferences(signal),
+        client.listProviderPreferences(signal),
+        client.listProviders(signal),
+        client.listAgentCliInstallations(signal),
+        client.getGlobalSnapshot([...this.#openedSessionIds], signal),
+      ]);
     if (ready.status !== "ready" || ready.instanceId !== connection.instanceId) {
       throw new CoreClientError("CORE_INSTANCE_MISMATCH", {
         message: "Core readiness identity changed during connection",
@@ -575,6 +599,7 @@ export class CoreDataSource implements SaasDataSource {
     }
     this.#client = client;
     this.#conversationDirectory = preferences.conversationDirectory;
+    this.#providerPreferences = providerPreferences.preferences;
     this.#providers = providers.providers;
     this.#cliInstallations = cliInstallations.clis;
     this.#state = stateFromGlobalSnapshot(snapshot);
@@ -630,6 +655,7 @@ export class CoreDataSource implements SaasDataSource {
         this.#providers,
         this.#selectedSessionIds,
         this.#cliInstallations,
+        this.#providerPreferences,
       ),
       conversationDirectory: this.#conversationDirectory,
       fixture: fixtureFromCoreState(
@@ -637,6 +663,7 @@ export class CoreDataSource implements SaasDataSource {
         this.#providers,
         this.#selectedSessionIds,
         this.#conversationDirectory,
+        this.#cliInstallations,
       ),
       revision: ++this.#revision,
     };
@@ -670,10 +697,12 @@ export class CoreDataSource implements SaasDataSource {
     cwd: string,
     signal: AbortSignal,
   ): Promise<string> {
-    const assignedAgent = assignProviders(this.#providers).get(providerId);
-    if (assignedAgent !== agentId) {
+    const installed = agentCatalogFrom(this.#providers, this.#cliInstallations).some(
+      (item) => item.providerId === providerId,
+    );
+    if (providerId !== agentId || !installed) {
       throw new CoreClientError("INVALID_REQUEST", {
-        message: "Provider is not assigned to the selected Agent slot",
+        message: "Provider is not installed and integrated for the selected Agent",
         retryable: false,
         status: 400,
       });
@@ -708,19 +737,17 @@ export class CoreDataSource implements SaasDataSource {
 
   #refreshSelections(): void {
     const state = this.#requireState();
-    const assignments = assignProviders(this.#providers);
     for (const [agentId, sessionId] of this.#selectedSessionIds) {
       const summary = state.summaries[sessionId];
-      if (summary === undefined || assignments.get(summary.providerId) !== agentId) {
+      if (summary === undefined || summary.providerId !== agentId) {
         this.#selectedSessionIds.delete(agentId);
       }
     }
     for (const summary of Object.values(state.summaries).sort((left, right) =>
       right.updatedAt.localeCompare(left.updatedAt),
     )) {
-      const agentId = assignments.get(summary.providerId);
-      if (agentId !== undefined && !this.#selectedSessionIds.has(agentId)) {
-        this.#selectedSessionIds.set(agentId, summary.id);
+      if (!this.#selectedSessionIds.has(summary.providerId)) {
+        this.#selectedSessionIds.set(summary.providerId, summary.id);
       }
     }
     for (const sessionId of this.#selectedSessionIds.values()) {
@@ -730,9 +757,7 @@ export class CoreDataSource implements SaasDataSource {
 
   async #selectSession(agentId: AgentId, sessionId: string, signal: AbortSignal): Promise<void> {
     const summary = this.#requireState().summaries[sessionId];
-    const assignedAgent =
-      summary === undefined ? undefined : assignProviders(this.#providers).get(summary.providerId);
-    if (summary === undefined || assignedAgent !== agentId) {
+    if (summary === undefined || summary.providerId !== agentId) {
       throw new CoreClientError("NOT_FOUND", {
         message: "Session is not available for the selected Agent",
         retryable: false,
@@ -851,18 +876,21 @@ export class CoreDataSource implements SaasDataSource {
       const connection = await this.#connectionProvider.getCoreConnection();
       if (lifecycle.signal.aborted || generation !== this.#generation) return;
       const client = new CoreApiClient(connection, this.#fetch);
-      const [ready, preferences, providers, cliInstallations, snapshot] = await Promise.all([
-        client.getReady(lifecycle.signal),
-        client.getPreferences(lifecycle.signal),
-        client.listProviders(lifecycle.signal),
-        client.listAgentCliInstallations(lifecycle.signal),
-        client.getGlobalSnapshot([...this.#openedSessionIds], lifecycle.signal),
-      ]);
+      const [ready, preferences, providerPreferences, providers, cliInstallations, snapshot] =
+        await Promise.all([
+          client.getReady(lifecycle.signal),
+          client.getPreferences(lifecycle.signal),
+          client.listProviderPreferences(lifecycle.signal),
+          client.listProviders(lifecycle.signal),
+          client.listAgentCliInstallations(lifecycle.signal),
+          client.getGlobalSnapshot([...this.#openedSessionIds], lifecycle.signal),
+        ]);
       if (ready.status !== "ready" || ready.instanceId !== connection.instanceId) {
         throw new Error("Core restart identity mismatch");
       }
       this.#client = client;
       this.#conversationDirectory = preferences.conversationDirectory;
+      this.#providerPreferences = providerPreferences.preferences;
       this.#providers = providers.providers;
       this.#cliInstallations = cliInstallations.clis;
       this.#state = stateFromGlobalSnapshot(snapshot);

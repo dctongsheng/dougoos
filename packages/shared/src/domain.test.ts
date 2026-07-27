@@ -42,6 +42,12 @@ const session = {
   createdAt: now,
   cwd: "/tmp/project",
   id: "session:one",
+  permission: {
+    effectiveProfileId: "ask",
+    mechanism: "launch",
+    permissionEnforcement: "requests_permission",
+    requestedProfileId: "ask",
+  },
   providerId: "codex",
   providerSessionId: "opaque/provider:id?yes",
   source: "dougoos-acp",
@@ -96,6 +102,15 @@ describe("domain read models", () => {
       }).success,
     ).toBe(true);
     expect(SessionSchema.safeParse({ ...session, state: "starting" }).success).toBe(false);
+    expect(
+      SessionSchema.safeParse({
+        ...session,
+        permission: {
+          ...session.permission,
+          permissionEnforcement: "client_enforced",
+        },
+      }).success,
+    ).toBe(false);
   });
 
   it("keeps static Provider policy separate from observed doctor capabilities", () => {
@@ -111,8 +126,21 @@ describe("domain read models", () => {
         ProviderSchema.safeParse({
           capabilities: status === "available" ? capability : null,
           checkedAt: now,
+          defaultPermissionProfileId: "agent-full-access",
           displayName: "Codex",
           id: "codex",
+          permissionProfiles: [
+            {
+              description: "Run with full local access",
+              id: "agent-full-access",
+              label: "Full access",
+              mechanism: "launch",
+              permissionEnforcement: "client_enforced",
+              requiresNewSession: true,
+              risk: "dangerous",
+              semantic: "unrestricted",
+            },
+          ],
           processPolicy: { maxSessionsPerProcess: 1, multiSessionPerProcess: false },
           ...(status !== "available" && status !== "probing"
             ? {
@@ -129,8 +157,45 @@ describe("domain read models", () => {
       ProviderSchema.safeParse({
         capabilities: null,
         checkedAt: now,
+        defaultPermissionProfileId: "agent-full-access",
         displayName: "Codex",
         id: "codex",
+        permissionProfiles: [
+          {
+            description: "Run with full local access",
+            id: "agent-full-access",
+            label: "Full access",
+            mechanism: "launch",
+            permissionEnforcement: "client_enforced",
+            requiresNewSession: true,
+            risk: "dangerous",
+            semantic: "unrestricted",
+          },
+        ],
+        processPolicy: { maxSessionsPerProcess: 1, multiSessionPerProcess: false },
+        status: "available",
+        version: "2.1.0",
+      }).success,
+    ).toBe(false);
+    expect(
+      ProviderSchema.safeParse({
+        capabilities: capability,
+        checkedAt: now,
+        defaultPermissionProfileId: "missing",
+        displayName: "Codex",
+        id: "codex",
+        permissionProfiles: [
+          {
+            description: "Run with full local access",
+            id: "agent-full-access",
+            label: "Full access",
+            mechanism: "launch",
+            permissionEnforcement: "client_enforced",
+            requiresNewSession: true,
+            risk: "dangerous",
+            semantic: "unrestricted",
+          },
+        ],
         processPolicy: { maxSessionsPerProcess: 1, multiSessionPerProcess: false },
         status: "available",
         version: "2.1.0",

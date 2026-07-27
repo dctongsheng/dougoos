@@ -6,6 +6,7 @@ import type {
   Provider,
   ProviderCapabilitySnapshot,
   ProviderDoctorResult,
+  SessionPermissionSnapshot,
 } from "@dougoos/shared";
 import type { DougoStorage } from "@dougoos/storage";
 
@@ -14,11 +15,16 @@ export type RegistryEventListener = (event: AgentRuntimeEvent) => void;
 
 export interface RegistrySession {
   readonly capabilities: ProviderCapabilitySnapshot;
+  readonly permission: SessionPermissionSnapshot;
   readonly providerSessionId: string;
   readonly title: string;
 }
 
-export interface CreateRegistrySessionInput extends CreateSessionRequest {
+export interface CreateRegistrySessionInput extends Omit<
+  CreateSessionRequest,
+  "permissionProfileId"
+> {
+  readonly permissionProfileId: string;
   readonly sessionId: string;
 }
 

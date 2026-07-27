@@ -17,12 +17,9 @@ const featureStateFrom = (fixture: SaasFixture): SaasFeatureState => ({
   agentMessages: Object.fromEntries(
     fixture.agents.map((agent) => [
       agent.id,
-      [...fixture.features.agent.initialMessages[agent.id]],
+      [...(fixture.features.agent.initialMessages[agent.id] ?? [])],
     ]),
-  ) as unknown as Record<
-    AgentId,
-    readonly (typeof fixture.features.agent.initialMessages)[AgentId][number][]
-  >,
+  ) as SaasFeatureState["agentMessages"],
   cronEnabled: { ...fixture.features.operations.cron.enabled },
   harnessHookOn: { ...fixture.features.harness.initialHooks },
   harnessMcpOn: { ...fixture.features.harness.initialMcps },
@@ -39,7 +36,6 @@ const featureStateFrom = (fixture: SaasFixture): SaasFeatureState => ({
   settingsAgentEnabled: Object.fromEntries(
     fixture.agents.map((agent) => [agent.id, agent.enabled]),
   ) as Record<AgentId, boolean>,
-  settingsAutoApprove: { ...fixture.features.settings.initialAutoApprove },
   settingsModels: Object.fromEntries(
     fixture.agents.map((agent) => [agent.id, agent.model]),
   ) as Record<AgentId, string>,
@@ -64,6 +60,29 @@ const withFeatures = (
  */
 const replaceSourceSnapshot = (state: SaasState, snapshot: SaasDataSnapshot): SaasState => {
   const nextFeatures = featureStateFrom(snapshot.fixture);
+  const agentIds = new Set(snapshot.fixture.agents.map((agent) => agent.id));
+  const selectableAgentIds = new Set(
+    snapshot.chat?.agentCatalog.map((agent) => agent.agentId) ??
+      snapshot.fixture.agents.map((agent) => agent.id),
+  );
+  const fallbackAgentId = snapshot.chat?.agentCatalog[0]?.agentId ?? snapshot.fixture.agents[0]?.id;
+  const homeAgentId = selectableAgentIds.has(state.homeAgentId)
+    ? state.homeAgentId
+    : (fallbackAgentId ?? state.homeAgentId);
+  const route =
+    (state.route.kind === "agent" || state.route.kind === "settings") &&
+    !agentIds.has(state.route.agentId)
+      ? { kind: "home" as const }
+      : state.route;
+  const dynamicVisibility = Object.fromEntries(
+    snapshot.fixture.agents.map((agent) => [
+      agent.id,
+      snapshot.chat?.providerPreferences.find((preference) => preference.providerId === agent.id)
+        ?.visibleInSidebar ??
+        state.sidebarVisibility[agent.id] ??
+        true,
+    ]),
+  );
   return {
     ...state,
     chat: snapshot.chat ?? null,
@@ -74,9 +93,18 @@ const replaceSourceSnapshot = (state: SaasState, snapshot: SaasDataSnapshot): Sa
         ? nextFeatures
         : {
             ...nextFeatures,
-            agentDrafts: state.features.agentDrafts,
+            agentDrafts: {
+              ...nextFeatures.agentDrafts,
+              ...state.features.agentDrafts,
+            },
           },
     fixture: snapshot.fixture,
+    homeAgentId,
+    route,
+    sidebarVisibility: {
+      ...state.sidebarVisibility,
+      ...dynamicVisibility,
+    },
   };
 };
 
@@ -141,7 +169,7 @@ export const saasReducer = (state: SaasState, action: SaasAction): SaasState => 
         ...features,
         agentMessages: {
           ...features.agentMessages,
-          [action.agentId]: features.agentMessages[action.agentId].map((message) =>
+          [action.agentId]: (features.agentMessages[action.agentId] ?? []).map((message) =>
             message.id === action.messageId && message.type === "approval"
               ? { ...message, approved: action.approved }
               : message,
@@ -158,7 +186,7 @@ export const saasReducer = (state: SaasState, action: SaasAction): SaasState => 
         ...features,
         agentMessages: {
           ...features.agentMessages,
-          [action.agentId]: [...features.agentMessages[action.agentId], action.message],
+          [action.agentId]: [...(features.agentMessages[action.agentId] ?? []), action.message],
         },
       }));
     case "agent.runtime":
@@ -362,14 +390,6 @@ export const saasReducer = (state: SaasState, action: SaasAction): SaasState => 
         settingsAgentEnabled: {
           ...features.settingsAgentEnabled,
           [action.agentId]: !features.settingsAgentEnabled[action.agentId],
-        },
-      }));
-    case "settings.auto-approve":
-      return withFeatures(state, (features) => ({
-        ...features,
-        settingsAutoApprove: {
-          ...features.settingsAutoApprove,
-          [action.agentId]: !features.settingsAutoApprove[action.agentId],
         },
       }));
     case "sidebar.toggle":

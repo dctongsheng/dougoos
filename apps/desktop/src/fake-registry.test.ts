@@ -37,6 +37,7 @@ describe("test-only Fake Registry", () => {
     registry.onEvent((event) => events.push(AgentRuntimeEventSchema.parse(event)));
     registry.createSession({
       cwd: "/tmp/fake-workspace",
+      permissionProfileId: "ask",
       providerId: "test-fake",
       sessionId,
     } as Parameters<FakeRegistry["createSession"]>[0]);
@@ -44,7 +45,11 @@ describe("test-only Fake Registry", () => {
 
   it("exposes deterministic local CLI discovery data for desktop acceptance", () => {
     expect(registry.listAgentCliInstallations().clis).toMatchObject([
-      { command: "codex", executablePath: "/fixture/bin/codex" },
+      {
+        command: "codex",
+        executablePath: "/fixture/bin/codex",
+        integratedProviderId: "test-fake",
+      },
     ]);
   });
 

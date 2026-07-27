@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
-import { agentById } from "./fixtures.js";
 import type { HarnessSection, SaasAction, SaasFeatureState, SaasFixture } from "./types.js";
 
 export function HarnessPage({
@@ -18,6 +17,15 @@ export function HarnessPage({
   readonly writesDisabled: boolean;
 }) {
   const harness = fixture.features.harness;
+  const agentsById = new Map(fixture.agents.map((agent) => [agent.id, agent]));
+  const visiblePromptGenomes = harness.promptGenomes.flatMap((genome) => {
+    const agent = agentsById.get(genome.agentId);
+    return agent === undefined ? [] : [{ agent, genome }];
+  });
+  const visibleSubagents = harness.subagents.flatMap((subagent) => {
+    const agent = agentsById.get(subagent.agentId);
+    return agent === undefined ? [] : [{ agent, subagent }];
+  });
   const [openSegments, setOpenSegments] = useState<Record<string, string | undefined>>({});
   const mcpOn = featureState.harnessMcpOn;
   const hookOn = featureState.harnessHookOn;
@@ -68,8 +76,7 @@ export function HarnessPage({
             ))}
           </div>
           <section className="hz-genome-list">
-            {harness.promptGenomes.map((genome) => {
-              const agent = agentById(fixture, genome.agentId);
+            {visiblePromptGenomes.map(({ agent, genome }) => {
               const openId = openSegments[genome.agentId];
               const openSegment = genome.segments.find((segment) => segment.category === openId);
               const openCategory =
@@ -138,6 +145,9 @@ export function HarnessPage({
                 </article>
               );
             })}
+            {visiblePromptGenomes.length === 0 ? (
+              <div className="module-empty">当前 Agent 没有可用的系统提示词数据</div>
+            ) : null}
           </section>
         </>
       ) : section === "skills" ? (
@@ -153,18 +163,20 @@ export function HarnessPage({
                 </header>
                 <p>{skill.description}</p>
                 <footer>
-                  {skill.users.map((agentId) => {
-                    const agent = agentById(fixture, agentId);
-                    return (
-                      <span
-                        className="hz-mini-agent"
-                        key={agentId}
-                        style={{ "--agent-tone": agent.tone } as CSSProperties}
-                        title={agent.name}
-                      >
-                        {agent.glyph}
-                      </span>
-                    );
+                  {skill.users.flatMap((agentId) => {
+                    const agent = agentsById.get(agentId);
+                    return agent === undefined
+                      ? []
+                      : [
+                          <span
+                            className="hz-mini-agent"
+                            key={agentId}
+                            style={{ "--agent-tone": agent.tone } as CSSProperties}
+                            title={agent.name}
+                          >
+                            {agent.glyph}
+                          </span>,
+                        ];
                   })}
                   <i />
                   <small>{skill.calls} 次调用</small>
@@ -188,18 +200,20 @@ export function HarnessPage({
                   <small>{mcp.description}</small>
                 </div>
                 <div className="hz-agent-stack">
-                  {mcp.users.map((agentId) => {
-                    const agent = agentById(fixture, agentId);
-                    return (
-                      <span
-                        className="hz-mini-agent"
-                        key={agentId}
-                        style={{ "--agent-tone": agent.tone } as CSSProperties}
-                        title={agent.name}
-                      >
-                        {agent.glyph}
-                      </span>
-                    );
+                  {mcp.users.flatMap((agentId) => {
+                    const agent = agentsById.get(agentId);
+                    return agent === undefined
+                      ? []
+                      : [
+                          <span
+                            className="hz-mini-agent"
+                            key={agentId}
+                            style={{ "--agent-tone": agent.tone } as CSSProperties}
+                            title={agent.name}
+                          >
+                            {agent.glyph}
+                          </span>,
+                        ];
                   })}
                 </div>
                 <code className="hz-tool-count">{mcp.tools} tools</code>
@@ -253,8 +267,7 @@ export function HarnessPage({
             子代理编队 · 主 Agent 可派生的专职分身,各带独立提示词与工具白名单
           </p>
           <section className="hz-card-grid hz-subagent-grid">
-            {harness.subagents.map((subagent) => {
-              const agent = agentById(fixture, subagent.agentId);
+            {visibleSubagents.map(({ agent, subagent }) => {
               return (
                 <article className="hz-subagent-card" key={subagent.name}>
                   <header>
@@ -281,6 +294,9 @@ export function HarnessPage({
                 </article>
               );
             })}
+            {visibleSubagents.length === 0 ? (
+              <div className="module-empty">当前 Agent 没有可用的子代理数据</div>
+            ) : null}
           </section>
         </>
       ) : section === "goal" ? (
@@ -304,18 +320,20 @@ export function HarnessPage({
                   <code>{goal.percent}%</code>
                 </div>
                 <footer>
-                  {goal.owners.map((agentId) => {
-                    const agent = agentById(fixture, agentId);
-                    return (
-                      <span
-                        className="hz-mini-agent"
-                        key={agentId}
-                        style={{ "--agent-tone": agent.tone } as CSSProperties}
-                        title={agent.name}
-                      >
-                        {agent.glyph}
-                      </span>
-                    );
+                  {goal.owners.flatMap((agentId) => {
+                    const agent = agentsById.get(agentId);
+                    return agent === undefined
+                      ? []
+                      : [
+                          <span
+                            className="hz-mini-agent"
+                            key={agentId}
+                            style={{ "--agent-tone": agent.tone } as CSSProperties}
+                            title={agent.name}
+                          >
+                            {agent.glyph}
+                          </span>,
+                        ];
                   })}
                   <span>
                     {goal.done}/{goal.total} 子任务
@@ -335,6 +353,10 @@ export function HarnessPage({
           <section className="hz-workflow-list">
             {harness.workflows.map((workflow) => {
               const running = runningWorkflow === workflow.id;
+              const visibleSteps = workflow.steps.flatMap((step) => {
+                const agent = agentsById.get(step.agentId);
+                return agent === undefined ? [] : [{ agent, step }];
+              });
               return (
                 <article className="hz-workflow-card" key={workflow.id}>
                   <header>
@@ -353,8 +375,7 @@ export function HarnessPage({
                     </button>
                   </header>
                   <div className="hz-workflow-steps">
-                    {workflow.steps.map((step, index) => {
-                      const agent = agentById(fixture, step.agentId);
+                    {visibleSteps.map(({ agent, step }, index) => {
                       const status = running ? "▸ 运行中" : step.status;
                       return (
                         <div className="hz-workflow-node-wrap" key={`${workflow.id}-${step.name}`}>
@@ -384,10 +405,13 @@ export function HarnessPage({
                               </small>
                             </div>
                           </div>
-                          {index < workflow.steps.length - 1 ? <i>→</i> : null}
+                          {index < visibleSteps.length - 1 ? <i>→</i> : null}
                         </div>
                       );
                     })}
+                    {visibleSteps.length === 0 ? (
+                      <div className="module-empty">当前 Agent 无法运行此工作流</div>
+                    ) : null}
                   </div>
                 </article>
               );

@@ -389,6 +389,21 @@ const SETTINGS_SCHEMA_SQL = `
   ) STRICT;
 `;
 
+const PROVIDER_PREFERENCES_SCHEMA_SQL = `
+  CREATE TABLE provider_preferences (
+    provider_id TEXT PRIMARY KEY,
+    permission_profile_id TEXT NOT NULL,
+    visible_in_sidebar INTEGER NOT NULL DEFAULT 1 CHECK (visible_in_sidebar IN (0, 1))
+  ) STRICT;
+`;
+
+const SESSION_PERMISSION_SNAPSHOTS_SCHEMA_SQL = `
+  CREATE TABLE session_permission_snapshots (
+    session_id TEXT PRIMARY KEY REFERENCES sessions(id) ON DELETE CASCADE,
+    permission_json TEXT NOT NULL CHECK (json_valid(permission_json))
+  ) STRICT;
+`;
+
 const STORAGE_BASE_MIGRATIONS: readonly Migration[] = Object.freeze([
   Object.freeze({
     expectedCoreSchemaSha256: STORAGE_BASE_CORE_SCHEMA_SHA256,
@@ -402,6 +417,14 @@ export const DEFAULT_MIGRATIONS: readonly Migration[] = Object.freeze([
   Object.freeze({
     id: "settings:0001",
     sql: SETTINGS_SCHEMA_SQL,
+  }),
+  Object.freeze({
+    id: "provider-preferences:0001",
+    sql: PROVIDER_PREFERENCES_SCHEMA_SQL,
+  }),
+  Object.freeze({
+    id: "session-permissions:0001",
+    sql: SESSION_PERMISSION_SNAPSHOTS_SCHEMA_SQL,
   }),
 ]);
 

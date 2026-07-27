@@ -104,7 +104,7 @@ describe("append-only migration runner and SQLite policy", () => {
     }
   });
 
-  it("upgrades a storage:0001 database with the additive settings module", () => {
+  it("upgrades a storage:0001 database with every additive settings module", () => {
     const { directory, filePath } = temporaryPath();
     const base = DEFAULT_MIGRATIONS[0];
     if (base === undefined) throw new Error("storage base migration is missing");
@@ -114,6 +114,8 @@ describe("append-only migration runner and SQLite policy", () => {
       expect(upgraded.appliedMigrations.map((migration) => migration.id)).toEqual([
         "storage:0001",
         "settings:0001",
+        "provider-preferences:0001",
+        "session-permissions:0001",
       ]);
       upgraded.close();
 
@@ -122,6 +124,14 @@ describe("append-only migration runner and SQLite policy", () => {
         expect(raw.prepare(`SELECT type FROM sqlite_schema WHERE name = 'settings'`).get()).toEqual(
           { type: "table" },
         );
+        expect(
+          raw.prepare(`SELECT type FROM sqlite_schema WHERE name = 'provider_preferences'`).get(),
+        ).toEqual({ type: "table" });
+        expect(
+          raw
+            .prepare(`SELECT type FROM sqlite_schema WHERE name = 'session_permission_snapshots'`)
+            .get(),
+        ).toEqual({ type: "table" });
         expect(Number(raw.pragma("user_version", { simple: true }))).toBe(
           DEFAULT_MIGRATIONS.length,
         );

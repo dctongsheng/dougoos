@@ -22,7 +22,7 @@ import {
   boundedMultilineString,
   utf8ByteLength,
 } from "./primitives.js";
-import { ProviderCapabilitySnapshotSchema } from "./providers.js";
+import { ProviderCapabilitySnapshotSchema, SessionPermissionSnapshotSchema } from "./providers.js";
 
 export const TurnStatusSchema = z.enum([
   "queued",
@@ -120,6 +120,7 @@ export const SessionSchema = z
     createdAt: IsoTimestampSchema,
     cwd: CwdSchema,
     id: SessionIdSchema,
+    permission: SessionPermissionSnapshotSchema.nullable().default(null),
     providerId: ProviderIdSchema,
     providerSessionId: OpaqueIdSchema.nullable(),
     source: boundedString(128, { label: "session source" }),
@@ -150,6 +151,17 @@ export const SessionSchema = z
         path: ["providerSessionId"],
       });
     }
+    if (
+      value.permission !== null &&
+      value.capabilities !== null &&
+      value.permission.permissionEnforcement !== value.capabilities.permissionEnforcement
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Session permission enforcement must match negotiated capabilities",
+        path: ["permission", "permissionEnforcement"],
+      });
+    }
   });
 export type Session = z.infer<typeof SessionSchema>;
 
@@ -166,6 +178,7 @@ export const SessionSummarySchema = z
       label: "message preview",
     }).optional(),
     messageCount: z.number().int().safe().nonnegative(),
+    permission: SessionPermissionSnapshotSchema.nullable().default(null),
     providerId: ProviderIdSchema,
     state: SessionStateSchema,
     title: TitleSchema,

@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import type { ChatProviderView } from "./types.js";
 import {
   buildHomeChatCommand,
+  hasValidPermissionProfile,
   isAbsoluteWorkspacePath,
+  resolveHomeTaskAgentId,
   resolveHomeProjectCwd,
   resolveInitialAgentCwd,
 } from "./home-task.js";
@@ -11,8 +13,22 @@ import {
 const provider: ChatProviderView = {
   agentId: "grok",
   capabilities: null,
+  defaultPermissionProfileId: "bypass",
   displayName: "Grok",
   id: "grok",
+  installed: true,
+  permissionProfiles: [
+    {
+      description: "Full access",
+      id: "bypass",
+      label: "Bypass",
+      mechanism: "launch",
+      permissionEnforcement: "client_enforced",
+      requiresNewSession: true,
+      risk: "dangerous",
+      semantic: "unrestricted",
+    },
+  ],
   status: "available",
 };
 
@@ -69,6 +85,18 @@ describe("Home task handoff", () => {
         text: "不会发送",
       }),
     ).toBeNull();
+  });
+
+  it("rejects removed permission profiles and resolves routing against the live catalog", () => {
+    expect(hasValidPermissionProfile(provider, "removed-after-upgrade")).toBe(false);
+    expect(hasValidPermissionProfile(provider, undefined)).toBe(true);
+    expect(
+      resolveHomeTaskAgentId({
+        requestedAgentId: "claude",
+        selectableAgentIds: ["codex", "grok"],
+        selectedAgentId: "grok",
+      }),
+    ).toBe("grok");
   });
 
   it("shows the Home launch project before an older selected Session", () => {

@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import type { CoreConnection, CoreFetch } from "./core-client.js";
 import {
+  agentCatalogFrom,
   assignProviders,
   CoreDataSource,
   type CoreConnectionProvider,
@@ -27,19 +28,32 @@ const CAPABILITIES = {
 const PROVIDER = ProviderSchema.parse({
   capabilities: CAPABILITIES,
   checkedAt: NOW,
+  defaultPermissionProfileId: "full-access",
   displayName: "Fake Agent",
   id: "fake",
+  permissionProfiles: [
+    {
+      description: "Run without approval prompts",
+      id: "full-access",
+      label: "Full access",
+      mechanism: "launch",
+      permissionEnforcement: "requests_permission",
+      requiresNewSession: true,
+      risk: "dangerous",
+      semantic: "unrestricted",
+    },
+  ],
   processPolicy: { maxSessionsPerProcess: 1, multiSessionPerProcess: false },
   status: "available",
   version: "1.0.0",
 });
 const CLI = AgentCliInstallationSchema.parse({
-  command: "codex",
+  command: "fake",
   detectedAt: NOW,
-  displayName: "Codex",
-  executablePath: "/safe/bin/codex",
-  integratedProviderId: "codex",
-  version: "codex-cli 0.145.0",
+  displayName: "Fake CLI",
+  executablePath: "/safe/bin/fake",
+  integratedProviderId: "fake",
+  version: "fake-cli 1.0.0",
 });
 const SESSION = {
   capabilities: CAPABILITIES,
@@ -195,6 +209,7 @@ function routeResponse(
   instanceId: string,
   snapshot = emptySnapshot(),
   providers = [PROVIDER],
+  clis = [CLI],
 ): Response {
   const path = new URL(String(input)).pathname;
   if (path === "/api/health/ready") {
@@ -203,15 +218,24 @@ function routeResponse(
   if (path === "/api/preferences") {
     return Response.json({ conversationDirectory: SESSION.cwd });
   }
+  if (path === "/api/provider-preferences") {
+    return Response.json({
+      preferences: providers.map((provider) => ({
+        permissionProfileId: provider.defaultPermissionProfileId,
+        providerId: provider.id,
+        visibleInSidebar: true,
+      })),
+    });
+  }
   if (path === "/api/providers") return Response.json({ providers });
-  if (path === "/api/clis") return Response.json({ checkedAt: NOW, clis: [CLI] });
+  if (path === "/api/clis") return Response.json({ checkedAt: NOW, clis });
   if (path === "/api/snapshot") return Response.json(snapshot);
   if (path === "/api/events") return openEventStream(init?.signal);
   throw new Error(`Unexpected test Core route: ${path}`);
 }
 
 describe("CoreDataSource", () => {
-  it("assigns every built-in Provider to a stable Agent slot without dropping the eighth", () => {
+  it("keys every Provider by its stable Provider ID without fixed UI slots", () => {
     const providers = [
       "claude-code",
       "codex",
@@ -230,9 +254,9 @@ describe("CoreDataSource", () => {
     );
 
     expect(Object.fromEntries(assignProviders(providers))).toEqual({
-      "claude-code": "claude",
+      "claude-code": "claude-code",
       codex: "codex",
-      "cursor-agent": "cursor",
+      "cursor-agent": "cursor-agent",
       grok: "grok",
       hermes: "hermes",
       openclaw: "openclaw",
@@ -241,7 +265,64 @@ describe("CoreDataSource", () => {
     });
   });
 
-  it("adds OpenClaw and OpenCode from the real provider snapshot without expanding fixtures", async () => {
+  it("catalogs every detected integrated Provider, deduplicates, and ignores inventory-only CLIs", () => {
+    const providers = Array.from({ length: 10 }, (_, index) =>
+      ProviderSchema.parse({
+        ...PROVIDER,
+        displayName: `Agent ${String(index)}`,
+        id: `agent-${String(index)}`,
+      }),
+    );
+    const integrated = providers.map((provider) =>
+      AgentCliInstallationSchema.parse({
+        command: provider.id,
+        detectedAt: NOW,
+        displayName: provider.displayName,
+        executablePath: `/safe/bin/${provider.id}`,
+        integratedProviderId: provider.id,
+        version: "1.0.0",
+      }),
+    );
+    const duplicate = AgentCliInstallationSchema.parse({
+      ...integrated[0],
+      command: "agent-0-alt",
+      executablePath: "/safe/bin/agent-0-alt",
+    });
+    const inventoryOnly = AgentCliInstallationSchema.parse({
+      command: "aider",
+      detectedAt: NOW,
+      displayName: "Aider",
+      executablePath: "/safe/bin/aider",
+      version: "1.0.0",
+    });
+
+    expect(
+      agentCatalogFrom(providers, [...integrated, duplicate, inventoryOnly]).map(
+        (item) => item.providerId,
+      ),
+    ).toEqual(providers.map((provider) => provider.id));
+  });
+
+  it("projects the seven locally integrated CLIs without the unavailable Claude placeholder", () => {
+    const detectedIds = ["codex", "cursor-agent", "grok", "hermes", "openclaw", "opencode", "pi"];
+    const providers = ["claude-code", ...detectedIds].map((id) =>
+      ProviderSchema.parse({ ...PROVIDER, displayName: id, id }),
+    );
+    const clis = detectedIds.map((id) =>
+      AgentCliInstallationSchema.parse({
+        command: id,
+        detectedAt: NOW,
+        displayName: id,
+        executablePath: `/safe/bin/${id}`,
+        integratedProviderId: id,
+        version: "1.0.0",
+      }),
+    );
+
+    expect(agentCatalogFrom(providers, clis).map((item) => item.providerId)).toEqual(detectedIds);
+  });
+
+  it("builds real Agents only from detected and integrated CLIs", async () => {
     const provider = new FakeConnectionProvider();
     const providers = ["openclaw", "opencode"].map((id) =>
       ProviderSchema.parse({
@@ -252,28 +333,93 @@ describe("CoreDataSource", () => {
     );
     const source = new CoreDataSource(provider, {
       fetch: (input, init) =>
-        Promise.resolve(routeResponse(input, init, "instance:a", emptySnapshot(), providers)),
+        Promise.resolve(
+          routeResponse(
+            input,
+            init,
+            "instance:a",
+            emptySnapshot(),
+            providers,
+            providers.map((candidate) =>
+              AgentCliInstallationSchema.parse({
+                command: candidate.id,
+                detectedAt: NOW,
+                displayName: candidate.displayName,
+                executablePath: `/safe/bin/${candidate.id}`,
+                integratedProviderId: candidate.id,
+                version: "1.0.0",
+              }),
+            ),
+          ),
+        ),
     });
     try {
       const snapshot = await source.getSnapshot(new AbortController().signal);
-      expect(snapshot.fixture.agents.map((agent) => agent.id)).toEqual([
-        "codex",
-        "claude",
-        "grok",
-        "cursor",
-        "pi",
-        "hermes",
-        "openclaw",
-        "opencode",
-      ]);
-      expect(snapshot.fixture.agents.slice(-2)).toEqual([
+      expect(snapshot.fixture.agents.map((agent) => agent.id)).toEqual(["openclaw", "opencode"]);
+      expect(snapshot.fixture.agents).toEqual([
         expect.objectContaining({ enabled: true, id: "openclaw", name: "OpenClaw" }),
         expect.objectContaining({ enabled: true, id: "opencode", name: "OpenCode" }),
+      ]);
+      expect(snapshot.chat?.agentCatalog.map((agent) => agent.providerId)).toEqual([
+        "openclaw",
+        "opencode",
       ]);
       expect(snapshot.chat?.providers.map((candidate) => candidate.id)).toEqual([
         "openclaw",
         "opencode",
       ]);
+    } finally {
+      source.close();
+    }
+  });
+
+  it("rebuilds the Agent catalog immediately after CLI refresh", async () => {
+    const provider = new FakeConnectionProvider();
+    const refreshedClis: readonly ReturnType<typeof AgentCliInstallationSchema.parse>[] = [];
+    const source = new CoreDataSource(provider, {
+      fetch: (input, init) => {
+        const path = new URL(String(input)).pathname;
+        if (path === "/api/clis/refresh") {
+          return Promise.resolve(Response.json({ checkedAt: NOW, clis: refreshedClis }));
+        }
+        return Promise.resolve(
+          routeResponse(input, init, "instance:a", emptySnapshot(), [PROVIDER], [CLI]),
+        );
+      },
+    });
+    const signal = new AbortController().signal;
+    try {
+      expect((await source.getSnapshot(signal)).chat?.agentCatalog).toHaveLength(1);
+      const snapshots: Array<
+        ReturnType<CoreDataSource["getSnapshot"]> extends Promise<infer T> ? T : never
+      > = [];
+      source.subscribe((snapshot) => snapshots.push(snapshot));
+
+      await source.execute({ name: "clis.refresh" }, signal);
+
+      expect(snapshots.at(-1)?.chat?.agentCatalog).toEqual([]);
+      expect(snapshots.at(-1)?.fixture.agents).toEqual([]);
+    } finally {
+      source.close();
+    }
+  });
+
+  it("keeps uninstalled Agent history visible but excludes it from new Session catalog", async () => {
+    const provider = new FakeConnectionProvider();
+    const source = new CoreDataSource(provider, {
+      fetch: (input, init) =>
+        Promise.resolve(
+          routeResponse(input, init, "instance:a", populatedSnapshot(), [PROVIDER], []),
+        ),
+    });
+    try {
+      const snapshot = await source.getSnapshot(new AbortController().signal);
+
+      expect(snapshot.chat?.agentCatalog).toEqual([]);
+      expect(snapshot.fixture.agents).toEqual([
+        expect.objectContaining({ enabled: false, id: "fake", task: "first user task" }),
+      ]);
+      expect(snapshot.fixture.features.agent.histories.fake).toHaveLength(1);
     } finally {
       source.close();
     }
@@ -306,7 +452,7 @@ describe("CoreDataSource", () => {
     });
     try {
       const snapshot = await source.getSnapshot(new AbortController().signal);
-      expect(snapshot.fixture.features.agent.initialMessages.claude).toEqual([]);
+      expect(snapshot.fixture.features.agent.initialMessages.fake).toEqual([]);
       expect(JSON.stringify(snapshot)).not.toContain(sensitiveReasoning);
     } finally {
       source.close();
@@ -359,7 +505,7 @@ describe("CoreDataSource", () => {
     });
     try {
       const snapshot = await source.getSnapshot(new AbortController().signal);
-      expect(snapshot.fixture.features.agent.histories.claude[0]).toMatchObject({
+      expect(snapshot.fixture.features.agent.histories.fake?.[0]).toMatchObject({
         sessionId: SESSION.id,
         summary: "fix flaky login",
       });
@@ -374,7 +520,7 @@ describe("CoreDataSource", () => {
         ),
       ).toEqual([
         {
-          agentId: "claude",
+          agentId: "fake",
           sessionId: SESSION.id,
           title: "fix flaky login",
         },
@@ -604,6 +750,28 @@ describe("CoreDataSource", () => {
       if (path === "/api/preferences") {
         return Response.json({ conversationDirectory: SESSION.cwd });
       }
+      if (path === "/api/provider-preferences") {
+        return Response.json({
+          preferences: [
+            {
+              permissionProfileId: PROVIDER.defaultPermissionProfileId,
+              providerId: PROVIDER.id,
+              visibleInSidebar: true,
+            },
+          ],
+        });
+      }
+      if (path === "/api/provider-preferences/fake" && method === "PUT") {
+        return Response.json({
+          preference: {
+            ...(body as {
+              readonly permissionProfileId: string;
+              readonly visibleInSidebar: boolean;
+            }),
+            providerId: "fake",
+          },
+        });
+      }
       if (path === "/api/providers") return Response.json({ providers: [PROVIDER] });
       if (path === "/api/clis") return Response.json({ checkedAt: NOW, clis: [CLI] });
       if (path === "/api/snapshot") return Response.json(populatedSnapshot());
@@ -631,7 +799,16 @@ describe("CoreDataSource", () => {
       await source.getSnapshot(signal);
       await source.execute(
         {
-          agentId: "claude",
+          name: "provider.preference.update",
+          permissionProfileId: "full-access",
+          providerId: "fake",
+          visibleInSidebar: false,
+        },
+        signal,
+      );
+      await source.execute(
+        {
+          agentId: "fake",
           cwd: SESSION.cwd,
           name: "chat.send",
           providerId: PROVIDER.id,
@@ -661,6 +838,14 @@ describe("CoreDataSource", () => {
           path: "/api/sessions",
         },
       ]);
+      expect(
+        observed.find(
+          (request) =>
+            request.path === "/api/provider-preferences/fake" && request.method === "PUT",
+        ),
+      ).toMatchObject({
+        body: { permissionProfileId: "full-access", visibleInSidebar: false },
+      });
       expect(
         observed.find((request) => request.path === "/api/sessions/session%3Achat/turns"),
       ).toMatchObject({

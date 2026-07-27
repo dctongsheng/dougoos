@@ -406,6 +406,9 @@ export const applyAction = async (page: Page, action: VisualAction): Promise<voi
     case "scroll-into-view":
       await resolveLocator(page, action.locator).scrollIntoViewIfNeeded();
       return;
+    case "select-option":
+      await resolveLocator(page, action.locator).selectOption(action.value);
+      return;
     case "wait-for-visible":
       await resolveLocator(page, action.locator).waitFor({ state: "visible" });
       return;

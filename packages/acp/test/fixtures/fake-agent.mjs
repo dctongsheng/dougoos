@@ -58,9 +58,62 @@ const application = agent({ name: "dougoos-test-agent" })
     }
     if (!authenticated) throw new Error("fixture is not authenticated");
     const sessionId = `fixture-session-${String(++nextSession)}`;
-    sessions.set(sessionId, { cancel: undefined, cancelRequested: false });
+    sessions.set(sessionId, {
+      cancel: undefined,
+      cancelRequested: false,
+      modeId: "default",
+      safeToggle: false,
+    });
     await trace("new_session");
-    return { sessionId };
+    return {
+      configOptions: [
+        {
+          currentValue: false,
+          description: "Fixture boolean permission option",
+          id: "safe_toggle",
+          name: "Safe toggle",
+          type: "boolean",
+        },
+      ],
+      modes: {
+        availableModes: [
+          { description: "Fixture default", id: "default", name: "Default" },
+          { description: "Fixture automatic", id: "auto", name: "Auto" },
+        ],
+        currentModeId: "default",
+      },
+      sessionId,
+    };
+  })
+  .onRequest(methods.agent.session.setMode, async ({ params }) => {
+    const session = sessions.get(params.sessionId);
+    if (session === undefined) throw new Error("fixture session not found");
+    if (!["default", "auto"].includes(params.modeId)) {
+      throw new Error("unsupported fixture mode");
+    }
+    session.modeId = params.modeId;
+    await trace(`set_mode:${params.modeId}`);
+    return {};
+  })
+  .onRequest(methods.agent.session.setConfigOption, async ({ params }) => {
+    const session = sessions.get(params.sessionId);
+    if (session === undefined) throw new Error("fixture session not found");
+    if (params.configId !== "safe_toggle" || typeof params.value !== "boolean") {
+      throw new Error("unsupported fixture config option");
+    }
+    session.safeToggle = params.value;
+    await trace(`set_config:safe_toggle:${String(params.value)}`);
+    return {
+      configOptions: [
+        {
+          currentValue: session.safeToggle,
+          description: "Fixture boolean permission option",
+          id: "safe_toggle",
+          name: "Safe toggle",
+          type: "boolean",
+        },
+      ],
+    };
   })
   .onRequest(methods.agent.session.close, ({ params }) => {
     sessions.delete(params.sessionId);
@@ -146,10 +199,12 @@ const application = agent({ name: "dougoos-test-agent" })
 
     if (text.includes("[approval]")) {
       const permission = await client.request(methods.client.session.requestPermission, {
-        options: [
-          { kind: "allow_once", name: "Allow once", optionId: "allow" },
-          { kind: "reject_once", name: "Reject", optionId: "reject" },
-        ],
+        options: text.includes("[approval-no-allow]")
+          ? [{ kind: "reject_once", name: "Reject", optionId: "reject" }]
+          : [
+              { kind: "allow_once", name: "Allow once", optionId: "allow" },
+              { kind: "reject_once", name: "Reject", optionId: "reject" },
+            ],
         sessionId: params.sessionId,
         toolCall: {
           kind: "execute",

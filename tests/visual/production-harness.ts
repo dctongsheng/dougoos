@@ -137,7 +137,7 @@ export interface ProductionMetadata {
   readonly landmarks: readonly LandmarkBaseline[];
   readonly locale: "zh-CN";
   readonly productionSha256: string;
-  readonly runtimeEffects: readonly Readonly<Record<string, string>>[];
+  readonly runtimeEffects: readonly Readonly<Record<string, unknown>>[];
   readonly safetyEffects: readonly Readonly<Record<string, string>>[];
   readonly screenshot: ProductionScreenshotMetadata;
   readonly semanticChecks: readonly {
@@ -1182,7 +1182,7 @@ const captureProductionOnlyCase = async (
     drainPageSafetyEffects(page),
     page.evaluate(() => {
       const runtime = globalThis as typeof globalThis & {
-        __dougoosRuntimeEffects?: readonly Readonly<Record<string, string>>[];
+        __dougoosRuntimeEffects?: readonly Readonly<Record<string, unknown>>[];
       };
       return [...(runtime.__dougoosRuntimeEffects ?? [])];
     }),

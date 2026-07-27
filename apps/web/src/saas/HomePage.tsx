@@ -1,8 +1,13 @@
 import { useRef } from "react";
 import type { CSSProperties } from "react";
 
-import { agentById } from "./fixtures.js";
-import { isAbsoluteWorkspacePath, resolveHomeProjectCwd } from "./home-task.js";
+import {
+  hasValidPermissionProfile,
+  isAbsoluteWorkspacePath,
+  resolveHomeProjectCwd,
+  resolveHomeTaskAgentId,
+} from "./home-task.js";
+import { routeTask } from "./home-routing.js";
 import type { SaasAction, SaasState } from "./types.js";
 
 interface HomePageProps {
@@ -32,7 +37,30 @@ export function HomePage({
   const composing = useRef(false);
   const fixture = state.fixture;
   if (fixture === null) throw new Error("HomePage requires loaded fixture data");
-  const selectedAgent = agentById(fixture, state.homeAgentId);
+  const selectableAgents =
+    state.chat === null
+      ? fixture.agents
+      : state.chat.agentCatalog.flatMap((item) => {
+          const agent = fixture.agents.find((candidate) => candidate.id === item.agentId);
+          return agent === undefined ? [] : [agent];
+        });
+  const selectedAgent =
+    selectableAgents.find((agent) => agent.id === state.homeAgentId) ?? selectableAgents[0];
+  const launchAgentId = resolveHomeTaskAgentId({
+    requestedAgentId:
+      state.homeMode === "auto" ? routeTask(state.homeDraft.trim()) : state.homeAgentId,
+    selectableAgentIds: selectableAgents.map((agent) => agent.id),
+    selectedAgentId: state.homeAgentId,
+  });
+  const launchProvider = state.chat?.providers.find(
+    (provider) => provider.agentId === launchAgentId,
+  );
+  const launchPreference = state.chat?.providerPreferences.find(
+    (preference) => preference.providerId === launchProvider?.id,
+  );
+  const permissionProfileIsReady =
+    state.chat === null ||
+    hasValidPermissionProfile(launchProvider, launchPreference?.permissionProfileId);
   const selectedPath = resolveHomeProjectCwd(state.homeProject, state.conversationDirectory);
   const directoryPaths = [
     ...new Set([
@@ -43,7 +71,11 @@ export function HomePage({
     ]),
   ].filter((path) => !requiresAbsolutePath || isAbsoluteWorkspacePath(path));
   const pathIsReady = !requiresAbsolutePath || isAbsoluteWorkspacePath(selectedPath);
-  const sendIsReady = state.homeDraft.trim().length > 0 && pathIsReady;
+  const sendIsReady =
+    state.homeDraft.trim().length > 0 &&
+    pathIsReady &&
+    selectedAgent !== undefined &&
+    permissionProfileIsReady;
 
   const pickSuggestion = (suggestion: string) => {
     if (!writesDisabled) dispatch({ draft: suggestion, type: "home.draft" });
@@ -127,22 +159,28 @@ export function HomePage({
                 <button
                   aria-expanded={state.homeMenu === "agent"}
                   className="picker-button"
-                  disabled={writesDisabled}
+                  disabled={writesDisabled || selectedAgent === undefined}
                   onClick={() => dispatch({ menu: "agent", type: "home.menu" })}
                   type="button"
                 >
-                  <span
-                    className="agent-glyph"
-                    style={{ "--agent-tone": selectedAgent.tone } as CSSProperties}
-                  >
-                    {selectedAgent.glyph}
-                  </span>
-                  <strong>{selectedAgent.name}</strong>
+                  {selectedAgent === undefined ? (
+                    <strong>未检测到可用 Agent</strong>
+                  ) : (
+                    <>
+                      <span
+                        className="agent-glyph"
+                        style={{ "--agent-tone": selectedAgent.tone } as CSSProperties}
+                      >
+                        {selectedAgent.glyph}
+                      </span>
+                      <strong>{selectedAgent.name}</strong>
+                    </>
+                  )}
                   <span aria-hidden="true">▼</span>
                 </button>
                 {state.homeMenu === "agent" ? (
                   <div className="picker-menu agent-menu" role="menu">
-                    {fixture.agents.map((agent) => (
+                    {selectableAgents.map((agent) => (
                       <button
                         className={agent.id === state.homeAgentId ? "is-selected" : ""}
                         disabled={writesDisabled}
@@ -234,7 +272,11 @@ export function HomePage({
             </div>
 
             <span className="model-note">
-              {pathIsReady ? "模型由 Agent 管理" : "请先选择项目目录"}
+              {!pathIsReady
+                ? "请先选择项目目录"
+                : !permissionProfileIsReady
+                  ? "请先在设置中重新选择权限档位"
+                  : "模型由 Agent 管理"}
             </span>
             <button
               aria-disabled={writesDisabled || !sendIsReady}

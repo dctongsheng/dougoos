@@ -5177,6 +5177,68 @@ input:focus-visible,
   font-size: 11px;
 }
 
+.settings-page .agent-config-empty {
+  color: var(--mut);
+  font-size: 12px;
+  padding: 20px;
+}
+
+.settings-page .permission-profile-field {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.settings-page .permission-profile-field select {
+  background: var(--input);
+  border: 1px solid var(--bd2);
+  border-radius: 8px;
+  color: var(--body);
+  font:
+    11.5px "JetBrains Mono",
+    monospace;
+  min-width: 210px;
+  padding: 7px 30px 7px 11px;
+}
+
+.settings-page .permission-profile-note {
+  border: 1px solid var(--bd2);
+  border-radius: 8px;
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 3px;
+  margin-left: 88px;
+  padding: 9px 11px;
+}
+
+.settings-page .permission-profile-note strong {
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.settings-page .permission-profile-note small {
+  color: var(--mut);
+  font-size: 10.5px;
+}
+
+.settings-page .permission-profile-note.risk-dangerous {
+  background: color-mix(in srgb, #ff695f 7%, transparent);
+  border-color: color-mix(in srgb, #ff695f 45%, var(--bd2));
+}
+
+.settings-page .permission-profile-note.risk-dangerous strong {
+  color: #ff8b84;
+}
+
+.settings-page .permission-profile-note.risk-stale {
+  background: color-mix(in srgb, #ffb43d 8%, transparent);
+  border-color: color-mix(in srgb, #ffb43d 48%, var(--bd2));
+}
+
+.settings-page .permission-profile-note.risk-stale strong {
+  color: #ffc267;
+}
+
 .usage-settings-section {
   gap: 13px !important;
 }

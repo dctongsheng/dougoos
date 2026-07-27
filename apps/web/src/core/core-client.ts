@@ -6,9 +6,11 @@ import {
   GlobalSnapshotSchema,
   HealthReadyResponseSchema,
   ListAgentCliInstallationsResponseSchema,
+  ListProviderPreferencesResponseSchema,
   ListProvidersResponseSchema,
   PreferencesResponseSchema,
   ProviderDoctorResponseSchema,
+  ProviderPreferenceResponseSchema,
   ResolveApprovalResponseSchema,
   RestErrorResponseSchema,
   SessionSnapshotSchema,
@@ -21,13 +23,16 @@ import {
   type GlobalSnapshot,
   type HealthReadyResponse,
   type ListAgentCliInstallationsResponse,
+  type ListProviderPreferencesResponse,
   type ListProvidersResponse,
   type PreferencesResponse,
   type ProviderDoctorResponse,
+  type ProviderPreferenceResponse,
   type ResolveApprovalResponse,
   type RestErrorResponse,
   type SessionSnapshot,
   type UpdatePreferencesRequest,
+  type UpdateProviderPreferenceRequest,
 } from "@dougoos/shared";
 
 const MAX_SSE_BUFFER_BYTES = 4 * 1_048_576;
@@ -238,6 +243,14 @@ export class CoreApiClient {
     return this.#request("/api/providers", ListProvidersResponseSchema, requestSignal(signal));
   }
 
+  listProviderPreferences(signal?: AbortSignal): Promise<ListProviderPreferencesResponse> {
+    return this.#request(
+      "/api/provider-preferences",
+      ListProviderPreferencesResponseSchema,
+      requestSignal(signal),
+    );
+  }
+
   listAgentCliInstallations(signal?: AbortSignal): Promise<ListAgentCliInstallationsResponse> {
     return this.#request(
       "/api/clis",
@@ -262,6 +275,22 @@ export class CoreApiClient {
       method: "POST",
       ...requestSignal(signal),
     });
+  }
+
+  updateProviderPreference(
+    providerId: string,
+    request: UpdateProviderPreferenceRequest,
+    signal?: AbortSignal,
+  ): Promise<ProviderPreferenceResponse> {
+    return this.#request(
+      `/api/provider-preferences/${encodeURIComponent(providerId)}`,
+      ProviderPreferenceResponseSchema,
+      {
+        ...jsonBody(request),
+        method: "PUT",
+        ...requestSignal(signal),
+      },
+    );
   }
 
   doctor(providerId: string, signal?: AbortSignal): Promise<ProviderDoctorResponse> {

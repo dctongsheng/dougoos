@@ -11,7 +11,11 @@ export {
 } from "./app.js";
 export { CoreError } from "./errors.js";
 export { CoreEventHub, type CoreEventListener } from "./event-hub.js";
-export { RotatingAgentLog, type RotatingAgentLogOptions } from "./local-agent-log.js";
+export {
+  RotatingAgentLog,
+  RotatingPermissionAuditLog,
+  type RotatingAgentLogOptions,
+} from "./local-agent-log.js";
 export { startCore, type CoreServer, type StartCoreOptions } from "./server.js";
 export {
   createCoreEventStreamResponse,

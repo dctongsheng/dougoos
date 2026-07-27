@@ -1,0 +1,25 @@
+diff --git a/dist/index.js b/dist/index.js
+index 4b7f8b2..9a0cc8d 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -131,8 +131,19 @@ var PiRpcProcess = class {
+     });
+   }
+   static async spawn(params) {
++    const configuredArgs = (() => {
++      const raw = process.env.PI_ACP_PI_ARGS;
++      if (raw === void 0 || raw === "") return [];
++      const parsed = JSON.parse(raw);
++      if (!Array.isArray(parsed) || parsed.length > 16 || parsed.some(
++        (value) => typeof value !== "string" || value.length > 256 || value.includes("\0")
++      )) {
++        throw new Error("PI_ACP_PI_ARGS must be a bounded JSON string array");
++      }
++      return parsed;
++    })();
+     const cmd = getPiCommand(params.piCommand);
+-    const args = ["--mode", "rpc", "--no-themes"];
++    const args = [...configuredArgs, "--mode", "rpc", "--no-themes"];
+     if (params.sessionPath) args.push("--session", params.sessionPath);
+     const child = spawn(cmd, args, {
+       cwd: params.cwd,

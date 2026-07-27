@@ -18,11 +18,23 @@ const CAPABILITIES = {
   session: { close: false, delete: false, list: false, load: false, resume: false },
   turn: { cancel: true, images: false, prompt: true },
 } as const;
+const PERMISSION_PROFILE = {
+  description: "Run with the highest available permissions",
+  id: "full-access",
+  label: "Full access",
+  mechanism: "launch",
+  permissionEnforcement: "requests_permission",
+  requiresNewSession: true,
+  risk: "dangerous",
+  semantic: "unrestricted",
+} as const;
 const PROVIDER = ProviderSchema.parse({
   capabilities: CAPABILITIES,
   checkedAt: NOW,
+  defaultPermissionProfileId: PERMISSION_PROFILE.id,
   displayName: "TCP Fake",
   id: "tcp-fake",
+  permissionProfiles: [PERMISSION_PROFILE],
   processPolicy: { maxSessionsPerProcess: 1, multiSessionPerProcess: false },
   status: "available",
   version: "1.0.0",
@@ -43,6 +55,12 @@ class TcpRegistry implements CoreRegistry {
   createSession(input: CreateRegistrySessionInput) {
     return {
       capabilities: CAPABILITIES,
+      permission: {
+        effectiveProfileId: PERMISSION_PROFILE.id,
+        mechanism: PERMISSION_PROFILE.mechanism,
+        permissionEnforcement: PERMISSION_PROFILE.permissionEnforcement,
+        requestedProfileId: input.permissionProfileId,
+      },
       providerSessionId: `provider-${input.sessionId}`,
       title: "TCP session",
     };

@@ -34,13 +34,14 @@ test("runs Core out of process and recovers after a crash", async () => {
     env: {
       ...process.env,
       DOUGOOS_DATABASE_PATH: databasePath,
+      DOUGOOS_TEST_FAKE_PROVIDER: "1",
     },
   });
   const corePids: number[] = [];
 
   try {
     const page = await electronApplication.firstWindow();
-    await expect(page).toHaveTitle("AgentOS", { timeout: 30_000 });
+    await expect(page).toHaveTitle("DougoOS", { timeout: 30_000 });
 
     await page.evaluate(() => {
       const browser = globalThis as typeof globalThis & {

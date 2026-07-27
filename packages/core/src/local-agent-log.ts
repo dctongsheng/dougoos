@@ -1,7 +1,11 @@
 import { appendFile, mkdir, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
-import { redactAgentStderrText, type AgentStderrLogEntry } from "@dougoos/acp";
+import {
+  redactAgentStderrText,
+  type AgentPermissionAuditEntry,
+  type AgentStderrLogEntry,
+} from "@dougoos/acp";
 
 const DEFAULT_MAX_BYTES = 20 * 1_024 * 1_024;
 const DEFAULT_MAX_FILES = 5;
@@ -13,7 +17,11 @@ export interface RotatingAgentLogOptions {
   readonly onError?: (error: unknown) => void;
 }
 
-export class RotatingAgentLog {
+interface RotatingJsonLineLogOptions extends RotatingAgentLogOptions {
+  readonly fileName: string;
+}
+
+class RotatingJsonLineLog {
   readonly #directory: string;
   readonly #filePath: string;
   readonly #maxBytes: number;
@@ -21,9 +29,9 @@ export class RotatingAgentLog {
   readonly #onError: ((error: unknown) => void) | undefined;
   #queue: Promise<void> = Promise.resolve();
 
-  constructor(options: RotatingAgentLogOptions) {
+  constructor(options: RotatingJsonLineLogOptions) {
     this.#directory = options.directory;
-    this.#filePath = join(options.directory, "agent-stderr.log");
+    this.#filePath = join(options.directory, options.fileName);
     this.#maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
     this.#maxFiles = options.maxFiles ?? DEFAULT_MAX_FILES;
     this.#onError = options.onError;
@@ -39,19 +47,24 @@ export class RotatingAgentLog {
     return this.#queue;
   }
 
-  write(entry: AgentStderrLogEntry): void {
-    const text = redactAgentStderrText(entry.text);
-    if (text.length === 0) return;
-    const line = `${JSON.stringify({ ...entry, text })}\n`;
-    this.#queue = this.#queue
-      .then(() => this.#append(line))
-      .catch((error: unknown) => {
-        try {
-          this.#onError?.(error);
-        } catch {
-          // A diagnostics observer must never destabilize the Core process.
-        }
-      });
+  write(line: string): void {
+    void this.#enqueue(line);
+  }
+
+  writeDurably(line: string): Promise<void> {
+    return this.#enqueue(line);
+  }
+
+  #enqueue(line: string): Promise<void> {
+    const operation = this.#queue.then(() => this.#append(line));
+    this.#queue = operation.catch((error: unknown) => {
+      try {
+        this.#onError?.(error);
+      } catch {
+        // A diagnostics observer must never destabilize the Core process.
+      }
+    });
+    return operation;
   }
 
   async #append(line: string): Promise<void> {
@@ -83,5 +96,39 @@ export class RotatingAgentLog {
         if (error.code !== "ENOENT") throw error;
       });
     }
+  }
+}
+
+export class RotatingAgentLog {
+  readonly #log: RotatingJsonLineLog;
+
+  constructor(options: RotatingAgentLogOptions) {
+    this.#log = new RotatingJsonLineLog({ ...options, fileName: "agent-stderr.log" });
+  }
+
+  close(): Promise<void> {
+    return this.#log.close();
+  }
+
+  write(entry: AgentStderrLogEntry): void {
+    const text = redactAgentStderrText(entry.text);
+    if (text.length === 0) return;
+    this.#log.write(`${JSON.stringify({ ...entry, text })}\n`);
+  }
+}
+
+export class RotatingPermissionAuditLog {
+  readonly #log: RotatingJsonLineLog;
+
+  constructor(options: RotatingAgentLogOptions) {
+    this.#log = new RotatingJsonLineLog({ ...options, fileName: "permission-audit.log" });
+  }
+
+  close(): Promise<void> {
+    return this.#log.close();
+  }
+
+  write(entry: AgentPermissionAuditEntry): Promise<void> {
+    return this.#log.writeDurably(`${JSON.stringify(entry)}\n`);
   }
 }

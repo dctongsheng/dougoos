@@ -8,6 +8,8 @@ import { spawnSync } from "node:child_process";
 import BetterSqlite3 from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 
+import { ProviderSchema } from "@dougoos/shared";
+
 import { StorageError } from "./errors.js";
 import { inspectDatabase } from "./inspect.js";
 import { DEFAULT_MIGRATIONS, type Migration } from "./migrations.js";
@@ -150,11 +152,24 @@ describe("pseudonymous device and provider storage", () => {
   it("round-trips only shared-schema Provider status values", () => {
     const context = createTestContext();
     try {
-      const provider = {
+      const provider = ProviderSchema.parse({
         capabilities: null,
         checkedAt: time(20),
+        defaultPermissionProfileId: "agent-full-access",
         displayName: "Codex",
         id: "codex",
+        permissionProfiles: [
+          {
+            description: "Run with full local access",
+            id: "agent-full-access",
+            label: "Full access",
+            mechanism: "launch",
+            permissionEnforcement: "client_enforced",
+            requiresNewSession: true,
+            risk: "dangerous",
+            semantic: "unrestricted",
+          },
+        ],
         processPolicy: {
           maxSessionsPerProcess: 1,
           multiSessionPerProcess: false,
@@ -163,7 +178,7 @@ describe("pseudonymous device and provider storage", () => {
         remediation: "sign in locally",
         status: "unauthenticated",
         version: "1.2.3",
-      } as const;
+      });
       expect(context.store.upsertProviderStatus(provider)).toEqual(provider);
       expect(context.store.listProviderStatuses()).toEqual([provider]);
       expectCode(

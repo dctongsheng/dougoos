@@ -116,7 +116,7 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
     return Object.fromEntries(
       (fixture?.agents ?? []).map((agent) => [
         agent.id,
-        agent.enabled && (fixture?.features.agent.initialMessages[agent.id].length ?? 0) > 0,
+        agent.enabled && (fixture?.features.agent.initialMessages[agent.id]?.length ?? 0) > 0,
       ]),
     ) as Record<AgentId, boolean>;
   });
@@ -137,7 +137,9 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
       : routeMetadata;
   const unread = fixture.notifications.filter((notification) => !notification.read);
   const navigate = (route: Route) => dispatch({ route, type: "navigate" });
-  const visibleAgents = fixture.agents.filter((agent) => state.sidebarVisibility[agent.id]);
+  const isRealMode = state.chat !== null;
+  const visibleAgents = fixture.agents.filter((agent) => state.sidebarVisibility[agent.id] ?? true);
+  const linkedAgentCount = state.chat?.agentCatalog.length ?? fixture.agents.length;
   const visibleHarnessItems = harnessItems.filter(
     (item) => state.sidebarVisibility[`harness-${item.section}`],
   );
@@ -248,7 +250,7 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
               </button>
               {sections.projects ? (
                 <>
-                  {state.sidebarVisibility["project-pinned"] ? (
+                  {state.sidebarVisibility["project-pinned"] && !isRealMode ? (
                     <details className="pinned-tree">
                       <summary>置顶</summary>
                       <button onClick={() => navigate({ kind: "compare" })} type="button">
@@ -292,34 +294,38 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
                           </span>
                           <span className="project-name">{project.name}</span>
                         </summary>
-                        {project.sessions.map((session) => {
-                          const sessionAgent = agentById(fixture, session.agentId);
-                          return (
-                            <button
-                              data-session-id={session.sessionId}
-                              key={`${project.id}-${session.sessionId ?? session.title}`}
-                              onClick={() => {
-                                if (state.chat !== null && session.sessionId !== undefined) {
-                                  onSessionSelect(session.agentId, session.sessionId);
-                                  return;
-                                }
-                                navigate({
-                                  agentId: session.agentId,
-                                  kind: "agent",
-                                  tab: "session",
-                                });
-                              }}
-                              type="button"
-                            >
-                              <span>{session.title}</span>
-                              <span
-                                className="agent-glyph tree-agent"
-                                style={{ "--agent-tone": sessionAgent.tone } as CSSProperties}
-                              >
-                                {sessionAgent.glyph}
-                              </span>
-                            </button>
+                        {project.sessions.flatMap((session) => {
+                          const sessionAgent = fixture.agents.find(
+                            (agent) => agent.id === session.agentId,
                           );
+                          return sessionAgent === undefined
+                            ? []
+                            : [
+                                <button
+                                  data-session-id={session.sessionId}
+                                  key={`${project.id}-${session.sessionId ?? session.title}`}
+                                  onClick={() => {
+                                    if (state.chat !== null && session.sessionId !== undefined) {
+                                      onSessionSelect(session.agentId, session.sessionId);
+                                      return;
+                                    }
+                                    navigate({
+                                      agentId: session.agentId,
+                                      kind: "agent",
+                                      tab: "session",
+                                    });
+                                  }}
+                                  type="button"
+                                >
+                                  <span>{session.title}</span>
+                                  <span
+                                    className="agent-glyph tree-agent"
+                                    style={{ "--agent-tone": sessionAgent.tone } as CSSProperties}
+                                  >
+                                    {sessionAgent.glyph}
+                                  </span>
+                                </button>,
+                              ];
                         })}
                       </details>
                     ))}
@@ -343,11 +349,14 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
             ? visibleAgents.map((agent) => {
                 const selected = state.route.kind === "agent" && state.route.agentId === agent.id;
                 const open = openAgents[agent.id] === true;
-                const histories = fixture.features.agent.histories[agent.id];
+                const histories = fixture.features.agent.histories[agent.id] ?? [];
+                const installed =
+                  state.chat === null ||
+                  state.chat.agentCatalog.some((item) => item.agentId === agent.id);
                 const hasFixtureLive =
                   state.chat === null &&
                   agent.enabled &&
-                  fixture.features.agent.initialMessages[agent.id].length > 0;
+                  (fixture.features.agent.initialMessages[agent.id]?.length ?? 0) > 0;
                 const selectedSessionId = state.chat?.selectedSessionIds[agent.id];
                 return (
                   <div className="agent-tree" data-agent-id={agent.id} key={agent.id}>
@@ -384,6 +393,7 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
                           {agent.glyph}
                         </span>
                         <strong>{agent.name}</strong>
+                        {!installed ? <small>CLI 未安装</small> : null}
                         {agent.status === "waiting" && agent.enabled ? <small>!</small> : null}
                         <span
                           aria-hidden="true"
@@ -517,13 +527,16 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
             <span className="avatar">R</span>
             <div>
               <strong>Ryo</strong>
-              <small>Pro · {fixture.agents.length} agents linked</small>
+              <small>Pro · {linkedAgentCount} agents linked</small>
             </div>
             <button
               aria-label="设置"
               onClick={() =>
                 navigate({
-                  agentId: state.route.kind === "agent" ? state.route.agentId : "codex",
+                  agentId:
+                    state.route.kind === "agent"
+                      ? state.route.agentId
+                      : (state.chat?.agentCatalog[0]?.agentId ?? fixture.agents[0]?.id ?? "codex"),
                   kind: "settings",
                 })
               }
@@ -552,7 +565,7 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
             <span>
               活跃{" "}
               <strong>
-                {stats.active}/{fixture.agents.length}
+                {stats.active}/{linkedAgentCount}
               </strong>
             </span>
             <span>
@@ -593,7 +606,9 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
             </header>
             {fixture.notifications.map((notification) => {
               const agent =
-                notification.agentId === null ? null : agentById(fixture, notification.agentId);
+                notification.agentId === null
+                  ? undefined
+                  : fixture.agents.find((candidate) => candidate.id === notification.agentId);
               return (
                 <button
                   className={notification.read ? "is-read" : ""}
@@ -601,7 +616,7 @@ export function Shell({ children, dispatch, onSessionSelect, state, writesDisabl
                   key={notification.id}
                   onClick={() => {
                     dispatch({ id: notification.id, type: "notifications.read" });
-                    if (notification.agentId !== null) {
+                    if (notification.agentId !== null && agent !== undefined) {
                       navigate({
                         agentId: notification.agentId,
                         kind: "agent",

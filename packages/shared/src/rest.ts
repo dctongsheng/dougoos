@@ -27,7 +27,12 @@ import {
   jsonUtf8ByteLength,
   utf8ByteLength,
 } from "./primitives.js";
-import { ProviderDoctorResultSchema as DoctorResultSchema, ProviderSchema } from "./providers.js";
+import {
+  PermissionProfileIdSchema,
+  ProviderDoctorResultSchema as DoctorResultSchema,
+  ProviderPreferenceSchema,
+  ProviderSchema,
+} from "./providers.js";
 
 function addBodyLimitIssue(
   value: unknown,
@@ -138,6 +143,36 @@ export const ListProvidersResponseSchema = z
   .strict();
 export type ListProvidersResponse = z.infer<typeof ListProvidersResponseSchema>;
 
+export const ListProviderPreferencesResponseSchema = z
+  .object({
+    preferences: z.array(ProviderPreferenceSchema).max(CONTRACT_LIMITS.providers),
+  })
+  .strict();
+export type ListProviderPreferencesResponse = z.infer<typeof ListProviderPreferencesResponseSchema>;
+
+export const ProviderPreferenceRouteParamsSchema = z
+  .object({
+    providerId: ProviderIdSchema,
+  })
+  .strict();
+export type ProviderPreferenceRouteParams = z.infer<typeof ProviderPreferenceRouteParamsSchema>;
+
+export const UpdateProviderPreferenceRequestSchema = z
+  .object({
+    permissionProfileId: PermissionProfileIdSchema,
+    visibleInSidebar: z.boolean(),
+  })
+  .strict()
+  .superRefine((value, context) => addBodyLimitIssue(value, context));
+export type UpdateProviderPreferenceRequest = z.infer<typeof UpdateProviderPreferenceRequestSchema>;
+
+export const ProviderPreferenceResponseSchema = z
+  .object({
+    preference: ProviderPreferenceSchema,
+  })
+  .strict();
+export type ProviderPreferenceResponse = z.infer<typeof ProviderPreferenceResponseSchema>;
+
 export const ListAgentCliInstallationsResponseSchema = z
   .object({
     checkedAt: IsoTimestampSchema,
@@ -158,6 +193,7 @@ export type ProviderDoctorResponse = z.infer<typeof ProviderDoctorResponseSchema
 export const CreateSessionRequestSchema = z
   .object({
     cwd: CwdSchema,
+    permissionProfileId: PermissionProfileIdSchema.optional(),
     providerId: ProviderIdSchema,
   })
   .strict()
@@ -645,6 +681,8 @@ export const RestSuccessResponseSchema = z.union([
   HealthLiveResponseSchema,
   HealthReadyResponseSchema,
   PreferencesResponseSchema,
+  ListProviderPreferencesResponseSchema,
+  ProviderPreferenceResponseSchema,
   ListAgentCliInstallationsResponseSchema,
   ListProvidersResponseSchema,
   ProviderDoctorResponseSchema,

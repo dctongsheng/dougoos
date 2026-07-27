@@ -105,9 +105,22 @@ function parseArguments(argv: readonly string[]): CliArguments {
 }
 
 class ReplCommandProvider implements AgentProvider {
+  readonly defaultPermissionProfileId = "external";
   readonly displayName: string;
   readonly id: string;
   readonly permissionEnforcement = "not_guaranteed" as const;
+  readonly permissionProfiles: AgentProvider["permissionProfiles"] = [
+    {
+      description: "Permissions are controlled by the explicitly supplied ACP command.",
+      id: "external",
+      label: "External command policy",
+      mechanism: "external",
+      permissionEnforcement: "not_guaranteed",
+      requiresNewSession: true,
+      risk: "dangerous",
+      semantic: "external",
+    },
+  ];
   readonly processPolicy = { maxSessionsPerProcess: 1, multiSessionPerProcess: false } as const;
   readonly #args: readonly string[];
   readonly #command: string;

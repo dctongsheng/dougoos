@@ -211,6 +211,7 @@ const DiagnosticCapabilitySchema = z.enum([
   "client.config",
   "client.file_system",
   "client.terminal",
+  "permission.profile",
   "session.close",
   "session.delete",
   "session.list",

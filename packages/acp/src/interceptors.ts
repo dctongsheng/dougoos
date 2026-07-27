@@ -70,6 +70,7 @@ export class InterceptorChain {
   }
 
   async onPermissionRequest(context: PermissionContext): Promise<PermissionVerdict> {
+    let result: PermissionVerdict = "ask";
     for (const interceptor of this.#interceptors) {
       if (interceptor.onPermissionRequest === undefined) continue;
       try {
@@ -78,11 +79,12 @@ export class InterceptorChain {
           this.#timeoutMs,
         );
         if (verdict === "reject") return "reject";
+        if (verdict === "allow") result = "allow";
       } catch {
         return "reject";
       }
     }
-    return "ask";
+    return result;
   }
 
   observe(event: AgentRuntimeEvent): void {
